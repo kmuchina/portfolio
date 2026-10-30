@@ -1083,19 +1083,17 @@ milestone entry is quieter (dashed 36px tile, italic title).
 > into one fresh root commit so the phone number from the Phase 0–1 commits
 > never reached GitHub (the old local history is on branch
 > `backup/pre-squash`; never push it). The old résumé PDF was moved to the
-> gitignored `tmp/` and the site ships **without a résumé** until the new
-> one arrives.
+> gitignored `tmp/`, and the site shipped without a résumé until the new
+> one replaced it (same day).
 
 - [ ] Project screenshots: `static/img/projects/prayer-gratitude-journal.png`, `apple-care.png`.
   The build warns until they exist; check the `image_alt` text when you add them.
 - [ ] Play Store URL(s) for the projects (`projects.items[].links`).
 - [x] `static/img/picture_2.jpg` is gone from `static/` (checked 2026-10-30).
-- [ ] **Add the new résumé** (no phone number, no REFERENCES section,
-  referees "available on request") as `static/Kennedy_Muchina_Resume.pdf`.
-  Check it first: `pdftotext static/Kennedy_Muchina_Resume.pdf - | grep -i -e 703 -e referee`
-  must print nothing. Then restore `person.resume_pdf` and uncomment
-  `experience.action` in `site.yaml` (the build tests follow the content).
-  The old PDF is in `tmp/` (gitignored); delete it once replaced.
+- [x] **New résumé added** (2026-10-30): no phone number; references
+  "available upon request". Any future résumé must pass
+  `pdftotext static/Kennedy_Muchina_Resume.pdf - | grep -i -e 703 -e referee`
+  with no output before it is committed.
 - [x] The phone number in the Phase 0–1 commits: resolved by squashing the
   history before the first push (see the note above).
 - [x] Mockup, profile photo (`img/profile.jpg`, 3327×4160, 1.1 MB, optimise

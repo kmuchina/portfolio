@@ -22,9 +22,7 @@ person:
     and kindness.
   photo: "img/profile.jpg"
   photo_alt: "Portrait of Kennedy Muchina Kinuthia"
-  # Empty until the new résumé (no phone, no references) is in static/.
-  # Restore: resume_pdf: "Kennedy_Muchina_Resume.pdf" and experience.action.
-  resume_pdf: ""
+  resume_pdf: "Kennedy_Muchina_Resume.pdf"
 
 contact:
   eyebrow: "Contact"
@@ -56,7 +54,7 @@ about:
 experience:
   eyebrow: "Experience"
   heading: "Where I've worked"
-  # action: { label: "View full résumé", url: "/Kennedy_Muchina_Resume.pdf" }
+  action: { label: "View full résumé", url: "/Kennedy_Muchina_Resume.pdf" }
   # Rendered as the career graph (internal/career). Dates are YYYY-MM; end may be
   # "present". type: Internship | Volunteer | Contract | Freelance | Full-time |
   # Part-time. Titles never contain "intern" (the type says it). **bold** marks metrics.
