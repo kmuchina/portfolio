@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experience section prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+/* ============ TOKENS (subset of the site's 00-tokens.css + Phase 4 additions) ============ */
+:root, [data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1220; --surface: #111A2E; --surface-2: #111B30;
+  --ink: #E6EAF2; --muted: #9AA6BD;
+  --line: #1E2940; --line-strong: #2C3A57;
+  --accent: #3B82F6; --accent-text: #60A5FA; --accent-soft: #172746;
+  --type-internship: var(--accent-text); --type-internship-soft: var(--accent-soft);
+  --type-volunteer: #34D399; --type-volunteer-soft: #10291F;
+  --type-milestone: var(--ink); --type-milestone-soft: var(--surface);
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F7F8FA; --surface: #FFFFFF; --surface-2: #EBEFF5;
+  --ink: #0F1A2E; --muted: #4A5568;
+  --line: #E2E7EF; --line-strong: #CBD3E0;
+  --accent: #3B82F6; --accent-text: #1D4ED8; --accent-soft: #E8F0FE;
+  --type-internship: var(--accent-text); --type-internship-soft: var(--accent-soft);
+  --type-volunteer: #047857; --type-volunteer-soft: #E3F5EC;
+  --type-milestone: var(--ink); --type-milestone-soft: var(--surface);
+}
+:root {
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --fs-xs: 0.75rem; --fs-sm: 0.875rem;
+  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --fs-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --fs-xl: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --fs-2xl: clamp(1.75rem, 1.35rem + 1.8vw, 2.75rem);
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem;
+  --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --section-pad: clamp(4rem, 3rem + 5vw, 8rem);
+  --container: 1200px; --header-h: 64px;
+  --radius-sm: 6px; --radius: 12px; --radius-pill: 999px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 180ms; --dur-slow: 600ms;
+}
+@media (min-width: 1024px) { :root { --header-h: 72px; } }
+
+/* ============ BASE ============ */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 var(--fs-base)/1.65 var(--font-body);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, ul, ol { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: clamp(1.25rem, 4vw, 2rem); }
+
+/* ============ DEMO BAR (prototype only) ============ */
+.demo-bar { position: sticky; top: 0; z-index: 10; height: var(--header-h);
+  background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line); }
+.demo-bar .container { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.brand { font: 600 var(--fs-lg)/1 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; text-decoration: none; }
+.brand em { color: var(--accent-text); font-weight: 500; }
+.theme-switch { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-pill); }
+.theme-switch button { font: 500 var(--fs-xs)/1 var(--font-body); color: var(--muted); background: none; border: 0;
+  padding: .55rem .9rem; border-radius: var(--radius-pill); cursor: pointer; }
+.theme-switch button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+/* ============ SECTION SYSTEM: the "spine" layout ============ */
+.section { padding-block: var(--section-pad); border-top: 1px solid var(--line); background: var(--band, var(--bg)); --band: var(--bg); }
+.section--alt { --band: var(--surface-2); }
+.section__grid { display: grid; gap: var(--space-10); }
+@media (min-width: 1024px) {
+  .section__grid { grid-template-columns: minmax(15rem, 1fr) 2.6fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .section__aside { position: sticky; top: calc(var(--header-h) + var(--space-8)); }
+}
+.eyebrow { font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.section__title { margin-top: var(--space-3); font: 560 var(--fs-2xl)/1.1 var(--font-display);
+  font-variation-settings: "SOFT" 50, "WONK" 0; letter-spacing: -0.015em; text-wrap: balance; }
+.section__lead { margin-top: var(--space-4); color: var(--muted); max-width: 32ch; }
+.link-arrow { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-8);
+  color: var(--accent-text); font: 500 var(--fs-sm)/1 var(--font-body); text-decoration: none; }
+.link-arrow .icon { width: 16px; height: 16px; transition: transform var(--dur-fast) var(--ease-out); }
+.link-arrow:hover .icon, .link-arrow:focus-visible .icon { transform: translateX(3px); }
+
+/* stub sections (prototype only) */
+.stub-body { color: var(--muted); max-width: 60ch; }
+
+/* ============ LEGEND (filters the graph) ============ */
+.legend { margin-top: var(--space-8); display: grid; gap: var(--space-1); }
+.legend__label { font: 500 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); margin-bottom: var(--space-2); }
+.legend__item { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: var(--space-3);
+  width: 100%; max-width: 17rem; padding: .55rem .75rem; min-height: 40px;
+  font: 500 var(--fs-sm)/1.2 var(--font-body); color: var(--muted); text-align: left;
+  background: none; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer;
+  transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast); }
+.legend__item:hover { color: var(--ink); background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.legend__item[aria-pressed="true"] { color: var(--ink); background: var(--surface); border-color: var(--line-strong); }
+.legend__count { font: 400 var(--fs-xs)/1 var(--font-mono); color: var(--muted); font-feature-settings: "tnum"; }
+.legend__swatch { position: relative; width: 20px; height: 20px; display: grid; place-items: center; }
+.legend__swatch .node { position: static; translate: none; }
+.legend__swatch .node::after { transform: scale(1); }
+.legend__swatch--all { color: var(--muted); }
+.legend__swatch--all::before, .legend__swatch--all::after { content: ""; position: absolute; width: 2px; height: 14px; background: currentColor; border-radius: 1px; }
+.legend__swatch--all::before { left: 5px; } .legend__swatch--all::after { right: 5px; }
+.summary { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); max-width: 17rem;
+  display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-3); align-items: baseline; }
+.summary__num { font: 600 var(--fs-2xl)/1 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; }
+.summary__text { color: var(--muted); font-size: var(--fs-sm); line-height: 1.4; }
+
+/* ============ CAREER GRAPH ============ */
+.career { list-style: none; padding: 0; --gw: 52px; --x0: 16px; --x1: 37px; --node-y: 22px; }
+@media (min-width: 640px) { .career { --gw: 68px; --x0: 20px; --x1: 46px; } }
+
+.career__row { display: grid; grid-template-columns: var(--gw) minmax(0, 1fr); view-timeline: --row block;
+  --c: var(--type-internship); --soft: var(--type-internship-soft); }
+.career__row--volunteer { --c: var(--type-volunteer); --soft: var(--type-volunteer-soft); }
+.career__row--milestone { --c: var(--type-milestone); --soft: var(--type-milestone-soft); }
+
+.career__graph { position: relative; transition: opacity var(--dur-fast) var(--ease-out); }
+
+/* line segments: ::before = resting line, ::after = "ink" that draws in */
+.seg { position: absolute; left: var(--x); width: 2px; margin-left: -1px; }
+.seg--l0 { --x: var(--x0); --lc: var(--type-internship); }
+.seg--l1 { --x: var(--x1); --lc: var(--type-volunteer); }
+.seg--above { top: 0; height: var(--node-y); }
+.seg--below { top: var(--node-y); bottom: 0; }
+.seg--full  { top: 0; bottom: 0; }
+.seg::before, .seg::after { content: ""; position: absolute; inset: 0; border-radius: 1px; background: currentColor; }
+.seg::before { color: var(--line-strong); }
+.seg::after  { color: var(--lc); clip-path: inset(0 0 0 0); }
+.seg--dashed::before, .seg--dashed::after { background: repeating-linear-gradient(to bottom, currentColor 0 5px, transparent 5px 11px); }
+.seg--fade { -webkit-mask-image: linear-gradient(to bottom, transparent, black 85%); mask-image: linear-gradient(to bottom, transparent, black 85%); }
+
+/* merge / fork curve between lanes */
+.curve { position: absolute; top: 0; left: 0; width: var(--gw); height: var(--node-y); overflow: visible; }
+.curve path { fill: none; stroke-width: 2; stroke-linecap: round; }
+.curve .rest { stroke: var(--line-strong); }
+.curve .ink  { stroke: var(--type-volunteer); stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+/* nodes */
+.node { position: absolute; left: var(--x); top: var(--node-y); translate: -50% -50%;
+  width: 12px; height: 12px; border-radius: 50%; background: var(--band);
+  box-shadow: 0 0 0 3px var(--band), inset 0 0 0 2px var(--line-strong);
+  transition: scale var(--dur-fast) var(--ease-out); }
+.node::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--c); }
+.node--l0 { --x: var(--x0); } .node--l1 { --x: var(--x1); }
+.node--diamond { width: 11px; height: 11px; border-radius: 2px; rotate: 45deg; }
+.node--ring { width: 14px; height: 14px; }
+.node--ring::after { inset: 4px; }
+.node--current { width: 16px; height: 16px; }
+.node--current::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--c); opacity: 0; }
+
+/* ============ ENTRY ============ */
+.job { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--space-4);
+  grid-template-areas: "tile head" "meta meta" "body body";
+  padding-bottom: clamp(3rem, 5vw, 4.5rem); }
+.career__row:last-child .job { padding-bottom: 0; }
+@media (min-width: 640px) { .job { grid-template-areas: "tile head" ". meta" ". body"; } }
+@media (min-width: 1200px) {
+  .job { grid-template-columns: 44px minmax(0, 1fr) 11rem; grid-template-areas: "tile head meta" ". body meta"; column-gap: var(--space-5); }
+}
+.job__tile { grid-area: tile; width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--soft); color: var(--c); transition: filter var(--dur-fast), opacity var(--dur-fast); }
+.job__tile .icon { width: 22px; height: 22px; }
+.job__head { grid-area: head; min-width: 0; }
+.job__title { font: 600 var(--fs-xl)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0;
+  letter-spacing: -0.01em; text-wrap: balance; transition: color var(--dur-fast); }
+.job__org { margin-top: var(--space-1); font-weight: 600; font-size: var(--fs-base); line-height: 1.4; }
+
+.job__meta { grid-area: meta; margin-top: var(--space-4); display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-5); }
+@media (min-width: 1200px) {
+  .job__meta { margin-top: 0; padding-top: 2px; flex-direction: column; align-items: flex-end; text-align: right; gap: var(--space-2); }
+}
+.job__type { font: italic 500 var(--fs-base)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; color: var(--c); }
+.job__dates { font: 400 0.8125rem/1.4 var(--font-mono); color: var(--muted); font-feature-settings: "tnum"; white-space: nowrap; }
+.job__tenure { display: inline-flex; align-items: center; gap: var(--space-2); font: 400 0.8125rem/1.4 var(--font-mono); color: var(--muted); white-space: nowrap; }
+.tenure-bar { width: 3.5rem; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.tenure-bar span { display: block; height: 100%; width: var(--w); background: var(--c); border-radius: inherit; }
+.job__place { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--muted); }
+.job__place .icon { width: 15px; height: 15px; }
+@media (min-width: 1200px) { .job__place { flex-direction: row-reverse; } }
+
+.job__body { grid-area: body; margin-top: var(--space-5); }
+.job__bullets { list-style: none; padding: 0; display: grid; gap: var(--space-3); max-width: 66ch; color: var(--muted); }
+.job__bullets li { position: relative; padding-left: var(--space-5); }
+.job__bullets li::before { content: ""; position: absolute; left: 2px; top: .7em; width: 8px; height: 2px; border-radius: 1px; background: var(--c); }
+.job__bullets strong { color: var(--ink); font-weight: 600; }
+.tags { list-style: none; padding: 0; margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.tags li { font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
+
+/* milestone entry: deliberately quieter */
+.career__row--milestone .job { padding-bottom: clamp(2.5rem, 4vw, 3.5rem); }
+.career__row--milestone .job__tile { width: 36px; height: 36px; margin: 4px; border: 1px dashed var(--line-strong); background: transparent; color: var(--ink); }
+.career__row--milestone .job__title { font-size: var(--fs-lg); font-style: italic; font-weight: 500; }
+.career__row--milestone .job__org { font-weight: 500; color: var(--muted); }
+
+/* ============ INTERACTION: focus follows the reader ============ */
+.career__row:is(:hover, :focus-within) .node { scale: 1.3; }
+.career:has(.career__row:is(:hover, :focus-within)) .career__row:not(:hover, :focus-within) .career__graph { opacity: .35; }
+
+/* ============ INTERACTION: legend filter (dims, never hides) ============ */
+/* entries that don't match are quieted (text stays readable) */
+.career[data-filter="internship"] .career__row:not(.career__row--internship),
+.career[data-filter="volunteer"]  .career__row:not(.career__row--volunteer),
+.career[data-filter="milestone"]  .career__row:not(.career__row--milestone) {
+  & .job__tile { filter: grayscale(1); opacity: .45; }
+  & .job__title, & .job__org, & .job__bullets strong, & .job__type { color: var(--muted); }
+  & .job__bullets li::before, & .tenure-bar span { background: var(--line-strong); }
+}
+/* the graph is dimmed per lane, so a highlighted lane stays continuous */
+.career[data-filter="internship"] :is(.seg--l1, .node--l1, .curve, .node--ring),
+.career[data-filter="volunteer"]  :is(.seg--l0, .node--l0),
+.career[data-filter="milestone"]  :is(.seg, .curve, .node:not(.node--ring)) { opacity: .2; }
+.seg, .node, .curve { transition: opacity var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out); }
+.career[data-filter="volunteer"]  .curve { opacity: 1; }
+
+/* ============ MOTION ============ */
+@keyframes draw   { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes drawsvg{ from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes ignite { 0% { transform: scale(0); } 70% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@keyframes pulse  { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(2.8); opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* the one looping animation on the site: the current position breathes */
+  .node--current::before { animation: pulse 2.4s var(--ease-out) infinite; }
+  .node--current.is-paused::before { animation-play-state: paused; }
+
+  /* (1) modern browsers: the line is drawn by the scroll position itself */
+  @supports (animation-timeline: view()) {
+    .seg::after, .curve .ink, .node::after { animation-fill-mode: both; animation-timing-function: linear; animation-timeline: --row; }
+    .seg::after { animation-name: draw; }
+    .seg--above::after, .curve .ink { animation-range: cover 150px cover 300px; }
+    .curve .ink { animation-name: drawsvg; }
+    .seg--full::after  { animation-range: cover 150px exit 0%; }
+    .seg--below::after { animation-range: cover 300px exit 0%; }
+    .node::after { animation-name: ignite; animation-range: cover 290px cover 370px; }
+  }
+  /* (2) fallback: an IntersectionObserver adds .is-lit once per row */
+  @supports not (animation-timeline: view()) {
+    .js .seg::after { clip-path: inset(0 0 100% 0); transition: clip-path 500ms var(--ease-out); }
+    .js .seg--below::after { transition-delay: 380ms; }
+    .js .curve .ink { stroke-dashoffset: 1; transition: stroke-dashoffset 500ms var(--ease-out); }
+    .js .node::after { transform: scale(0); transition: transform var(--dur-slow) var(--ease-spring) 250ms; }
+    .js .is-lit .seg::after { clip-path: inset(0 0 0 0); }
+    .js .is-lit .curve .ink { stroke-dashoffset: 0; }
+    .js .is-lit .node::after { transform: scale(1); }
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="demo-bar">
+  <div class="container">
+    <a class="brand" href="#">Kennedy <em>Muchina</em></a>
+    <div class="theme-switch" role="group" aria-label="Colour theme">
+      <button type="button" data-set-theme="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+    </div>
+  </div>
+</header>
+
+<!-- stub: the section before, to judge separation -->
+<section class="section" id="about">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">About me</p>
+      <h2 class="section__title">Turning ideas into impactful software</h2>
+    </div>
+    <div class="section__body">
+      <p class="stub-body">I'm a Computer Science graduate passionate about building reliable, scalable and user-centred applications. I enjoy solving complex problems, working with great teams, and learning new technologies. (About section is restyled in Phase 5. It is here only so you can judge how sections separate.)</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt" id="experience" aria-labelledby="experience-title">
+  <div class="container section__grid">
+
+    <div class="section__aside">
+      <p class="eyebrow">Experience</p>
+      <h2 class="section__title" id="experience-title">Where I've worked</h2>
+
+      <div class="summary">
+        <span class="summary__num">4</span>
+        <span class="summary__text">roles since 2023, up to three at once</span>
+      </div>
+
+      <div class="legend" role="group" aria-label="Highlight roles by type">
+        <p class="legend__label">Highlight</p>
+        <button type="button" class="legend__item" data-filter="all" aria-pressed="true">
+          <span class="legend__swatch legend__swatch--all" aria-hidden="true"></span>All roles<span class="legend__count">5</span>
+        </button>
+        <button type="button" class="legend__item" data-filter="internship" aria-pressed="false">
+          <span class="legend__swatch" aria-hidden="true" style="--c:var(--type-internship);--band:var(--surface-2)"><span class="node"></span></span>Internship<span class="legend__count">2</span>
+        </button>
+        <button type="button" class="legend__item" data-filter="volunteer" aria-pressed="false">
+          <span class="legend__swatch" aria-hidden="true" style="--c:var(--type-volunteer);--band:var(--surface-2)"><span class="node node--diamond"></span></span>Volunteer<span class="legend__count">2</span>
+        </button>
+        <button type="button" class="legend__item" data-filter="milestone" aria-pressed="false">
+          <span class="legend__swatch" aria-hidden="true" style="--c:var(--type-milestone);--band:var(--surface-2)"><span class="node node--ring"></span></span>Milestone<span class="legend__count">1</span>
+        </button>
+      </div>
+
+      <a class="link-arrow" href="#">View full résumé
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+
+    <div class="section__body">
+      <ol class="career" data-filter="all">
+
+        <!-- 1 · Kenya Flower Council (current) -->
+        <li class="career__row career__row--internship">
+          <div class="career__graph" aria-hidden="true">
+            <span class="seg seg--l0 seg--above seg--fade"></span>
+            <span class="node node--l0 node--current"></span>
+            <span class="seg seg--l0 seg--below seg--dashed"></span>
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1"/><circle cx="12" cy="8" r="2"/><path d="M12 10v12"/><path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z"/><path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z"/></svg>
+            </span>
+            <div class="job__head">
+              <h3 class="job__title">ICT &amp; Digital Innovation</h3>
+              <p class="job__org">Kenya Flower Council</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">Internship</span>
+              <span class="job__dates"><time datetime="2026-08">Aug 2026</time> – Present</span>
+              <span class="job__tenure"><span class="tenure-bar"><span style="--w:23%"></span></span><span data-start="2026-08">3 mos</span></span>
+              <span class="job__place"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Karen, Kenya</span>
+            </div>
+            <div class="job__body">
+              <ul class="job__bullets">
+                <li>Owned <strong>end-to-end delivery</strong> of a new certification digital platform for the Audit &amp; Certification Department, authoring the SRS, designing the UI/UX, and shipping a <strong>functional MVP</strong> under the supervision of the Head of IT &amp; Data.</li>
+                <li>Supporting <strong>AV and PA systems</strong> for events, conferences and meetings.</li>
+              </ul>
+              <ul class="tags" aria-label="Skills used"><li>SRS</li><li>UI/UX design</li><li>MVP delivery</li><li>AV/PA systems</li></ul>
+            </div>
+          </article>
+        </li>
+
+        <!-- 2 · Graduation milestone -->
+        <li class="career__row career__row--milestone">
+          <div class="career__graph" aria-hidden="true">
+            <span class="seg seg--l0 seg--above seg--dashed"></span>
+            <span class="node node--l0 node--ring"></span>
+            <span class="seg seg--l0 seg--below seg--dashed"></span>
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+            </span>
+            <div class="job__head">
+              <h3 class="job__title">Graduated, BSc Computer Science</h3>
+              <p class="job__org">Moi University, First Class Honours</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">Milestone</span>
+              <span class="job__dates"><time datetime="2025-12">Dec 2025</time></span>
+            </div>
+          </article>
+        </li>
+
+        <!-- 3 · Kenya Roads Board (volunteer lane runs alongside, then joins) -->
+        <li class="career__row career__row--internship">
+          <div class="career__graph" aria-hidden="true">
+            <span class="seg seg--l0 seg--above seg--dashed"></span>
+            <svg class="curve" viewBox="0 0 68 22" preserveAspectRatio="none" style="width:var(--gw)">
+              <path class="rest" d="M20 0 C 20 13, 46 9, 46 22" pathLength="1" vector-effect="non-scaling-stroke"/>
+              <path class="ink"  d="M20 0 C 20 13, 46 9, 46 22" pathLength="1" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <span class="node node--l0"></span>
+            <span class="seg seg--l1 seg--below"></span>
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+            </span>
+            <div class="job__head">
+              <h3 class="job__title">ICT Officer</h3>
+              <p class="job__org">Kenya Roads Board, Ministry of Roads &amp; Transport</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">Internship</span>
+              <span class="job__dates"><time datetime="2024-05">May 2024</time> – <time datetime="2025-01">Jan 2025</time></span>
+              <span class="job__tenure"><span class="tenure-bar"><span style="--w:69%"></span></span>9 mos</span>
+              <span class="job__place"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Eldoret, Kenya</span>
+            </div>
+            <div class="job__body">
+              <ul class="job__bullets">
+                <li>Enhanced software reliability by testing internal programs against specifications, identifying and documenting bugs.</li>
+                <li>Administered and optimised LAN infrastructure (Cisco switches &amp; routers), achieving <strong>99% network uptime</strong> across the organisation.</li>
+                <li>Maintained the corporate website, <strong>Microsoft Business Central</strong> portals, and custom <strong>GIS applications</strong>.</li>
+                <li>Worked with <strong>PricewaterhouseCoopers (PwC)</strong> under a contract with KRB to audit the KeNHA, KURA &amp; KeRRA road agencies.</li>
+              </ul>
+              <ul class="tags" aria-label="Skills used"><li>Cisco networking</li><li>Business Central</li><li>GIS</li><li>Software testing</li></ul>
+            </div>
+          </article>
+        </li>
+
+        <!-- 4 · IEEE Tech4Good -->
+        <li class="career__row career__row--volunteer">
+          <div class="career__graph" aria-hidden="true">
+            <span class="seg seg--l1 seg--above"></span>
+            <span class="node node--l1 node--diamond"></span>
+            <span class="seg seg--l1 seg--below"></span>
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M11 2h2"/><path d="m14.28 14-4.56 8"/><path d="m21 22-1.558-4H4.558"/><path d="M3 10v2"/><path d="M6.245 15.04A2 2 0 0 1 8 14h12a1 1 0 0 1 .864 1.505l-3.11 5.457A2 2 0 0 1 16 22H4a1 1 0 0 1-.863-1.506z"/><path d="M7 2a4 4 0 0 1-4 4"/><path d="m8.66 7.66 1.41 1.41"/><path d="M12 6v1"/></svg>
+            </span>
+            <div class="job__head">
+              <h3 class="job__title">Project Lead &amp; Tech Lead</h3>
+              <p class="job__org">IEEE Tech4Good</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">Volunteer</span>
+              <span class="job__dates"><time datetime="2024-02">Feb 2024</time> – <time datetime="2024-12">Dec 2024</time></span>
+              <span class="job__tenure"><span class="tenure-bar"><span style="--w:85%"></span></span>11 mos</span>
+              <span class="job__place"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Eldoret, Kenya</span>
+            </div>
+            <div class="job__body">
+              <ul class="job__bullets">
+                <li>Secured a <strong>KES 472,785 (USD 3,665)</strong> grant by authoring a winning technical proposal; managed end-to-end delivery of a <strong>5 kW solar installation</strong> for a non-profit organisation.</li>
+                <li>Led a multidisciplinary engineering team through design, procurement and deployment while training <strong>20+ students</strong> in solar systems and technical safety.</li>
+              </ul>
+              <ul class="tags" aria-label="Skills used"><li>Grant writing</li><li>Solar PV</li><li>Team leadership</li></ul>
+            </div>
+          </article>
+        </li>
+
+        <!-- 5 · IEEE Moi University SB -->
+        <li class="career__row career__row--volunteer">
+          <div class="career__graph" aria-hidden="true">
+            <span class="seg seg--l1 seg--above"></span>
+            <span class="node node--l1 node--diamond"></span>
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </span>
+            <div class="job__head">
+              <h3 class="job__title">Chairperson</h3>
+              <p class="job__org">IEEE Moi University Student Branch</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">Volunteer</span>
+              <span class="job__dates"><time datetime="2023-07">Jul 2023</time> – <time datetime="2024-07">Jul 2024</time></span>
+              <span class="job__tenure"><span class="tenure-bar"><span style="--w:100%"></span></span>1 yr 1 mo</span>
+              <span class="job__place"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Moi University</span>
+            </div>
+            <div class="job__body">
+              <ul class="job__bullets">
+                <li>Coordinated and delivered <strong>15+ technical workshops</strong> and hackathons in Web, Mobile, IoT and Cloud for an audience of <strong>300+ developers</strong>.</li>
+                <li>Led the campus team to <strong>regional victory in IEEEXtreme 17.0</strong>, with the highest active team participation in IEEE Region 8 (Africa, Europe &amp; Middle East).</li>
+              </ul>
+              <ul class="tags" aria-label="Skills used"><li>Community building</li><li>Event leadership</li><li>Competitive programming</li></ul>
+            </div>
+          </article>
+        </li>
+
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- stub: the section after -->
+<section class="section" id="skills">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">Technical skills</p>
+      <h2 class="section__title">Technologies &amp; tools</h2>
+    </div>
+    <div class="section__body"><p class="stub-body">(Skills section, restyled in Phase 5.)</p></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const root = document.documentElement;
+
+  // theme (prototype switch)
+  const themeBtns = document.querySelectorAll('[data-set-theme]');
+  themeBtns.forEach(b => b.addEventListener('click', () => {
+    root.dataset.theme = b.dataset.setTheme;
+    themeBtns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
+  // legend: highlight one employment type (dims the rest; never hides)
+  const career = document.querySelector('.career');
+  const legend = document.querySelectorAll('.legend__item');
+  legend.forEach(btn => btn.addEventListener('click', () => {
+    const f = btn.getAttribute('aria-pressed') === 'true' && btn.dataset.filter !== 'all' ? 'all' : btn.dataset.filter;
+    career.dataset.filter = f;
+    legend.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === f)));
+  }));
+
+  // current role's duration stays fresh on a static site
+  document.querySelectorAll('[data-start]').forEach(el => {
+    const [y, m] = el.dataset.start.split('-').map(Number);
+    const now = new Date();
+    const months = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m) + 1;
+    const yrs = Math.floor(months / 12), mos = months % 12;
+    el.textContent = [yrs && `${yrs} yr${yrs > 1 ? 's' : ''}`, mos && `${mos} mo${mos > 1 ? 's' : ''}`].filter(Boolean).join(' ');
+  });
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // fallback for browsers without scroll-driven animations
+  if (!reduce && !CSS.supports('animation-timeline: view()')) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('is-lit'); io.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -35% 0px' });
+    document.querySelectorAll('.career__row').forEach(r => io.observe(r));
+  }
+
+  // pause the pulse when it's off-screen
+  const pulse = document.querySelector('.node--current');
+  if (pulse && !reduce) {
+    new IntersectionObserver(([e]) => pulse.classList.toggle('is-paused', !e.isIntersecting)).observe(pulse);
+  }
+})();
+</script>
+</body>
+</html>

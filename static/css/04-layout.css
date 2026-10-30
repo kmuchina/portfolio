@@ -1,0 +1,97 @@
+/* ==========================================================================
+   04-layout.css — layout primitives
+   Few and generic: sections compose from these instead of writing one-off
+   CSS. Vary them with custom properties, not modifier classes.
+   ========================================================================== */
+
+@layer layout {
+  /* The primitives' variables don't inherit: a nested .stack or .cluster
+     always gets its own default, never its parent's override. */
+  @property --stack-space   { syntax: "*"; inherits: false; }
+  @property --cluster-space { syntax: "*"; inherits: false; }
+  @property --grid-gap      { syntax: "*"; inherits: false; }
+  @property --grid-min      { syntax: "*"; inherits: false; }
+  @property --split-ratio   { syntax: "*"; inherits: false; }
+
+  /* ---- Container -------------------------------------------------------- */
+  /* --container is the whole width, gutters included (as in the prototype). */
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* ---- Sections: the "spine" (design/experience-prototype.html) ---------
+     Every section is a band: --section-pad above and below, a full-bleed
+     1px --line top border, and --band as its background (--bg, or
+     --surface-2 for .section--alt; bands alternate). Components that must
+     sit "on" the band (graph nodes) read --band. */
+  .section {
+    --band: var(--bg);
+    padding-block: var(--section-pad);
+    border-block-start: 1px solid var(--line);
+    background-color: var(--band);
+  }
+  .section--alt { --band: var(--surface-2); }
+
+  /* Below 1024px: aside (heading) above body. From 1024px: two columns,
+     the aside sticky under the header so the section's title stays in view
+     while its body scrolls. */
+  .section__grid {
+    display: grid;
+    gap: var(--space-10);
+  }
+  .section__body { min-inline-size: 0; }
+  .section__aside > .section__title { margin-block-start: var(--space-3); }
+  @media (min-width: 1024px) {
+    .section__grid {
+      grid-template-columns: minmax(15rem, 1fr) 2.6fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: start;
+    }
+    .section__aside {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--space-8));
+    }
+  }
+
+  /* ---- Stack: vertical flow ---------------------------------------------
+     --stack-space (default --space-4) between direct children. A flex
+     column with gap rather than `> * + * { margin }`, so the space is read on
+     the stack itself (a nested stack's own override can't leak into its
+     outer margin). Children's own margins don't collapse into the gap. */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-space, var(--space-4));
+  }
+
+  /* ---- Cluster: wrapping row of items ------------------------------------
+     --cluster-space (default --space-3). */
+  .cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cluster-space, var(--space-3));
+    align-items: center;
+  }
+
+  /* ---- Grid-auto: as many columns as fit ---------------------------------
+     --grid-min (default 16rem) is the narrowest a column may get;
+     --grid-gap (default --space-6). min() keeps one column on tiny screens. */
+  .grid-auto {
+    display: grid;
+    gap: var(--grid-gap, var(--space-6));
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--grid-min, 16rem), 100%), 1fr));
+  }
+
+  /* ---- Split: one column, two from 900px ---------------------------------
+     --split-ratio (default 1fr 1fr). */
+  .split {
+    display: grid;
+    gap: clamp(var(--space-8), 5vw, var(--space-12));
+  }
+  @media (min-width: 900px) {
+    .split { grid-template-columns: var(--split-ratio, 1fr 1fr); }
+  }
+}

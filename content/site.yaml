@@ -1,0 +1,207 @@
+site:
+  url: "https://kmuchina.com"
+  title: "Kennedy Muchina Kinuthia — Software Engineer"
+  description: "Graduate Software Engineer in Nairobi, Kenya, building full-stack web apps, native Android apps and on-device ML."
+  lang: "en"
+  show_phone: false         # phone removed from the site (Kennedy, 2026-10-30); needs contact.phone if turned back on
+
+person:
+  greeting: "Hello, I'm"    # hero eyebrow above the name
+  first_name: "Kennedy"
+  middle_name: "Muchina"    # rendered in Fraunces italic, accent colour
+  last_name: "Kinuthia"
+  role: "Graduate Software Engineer"
+  location: "Nairobi, Kenya"
+  availability: "Open to remote & global opportunities"
+  quote: "Build solutions that make a difference."
+  summary: >-
+    Performance-driven Software Developer and Computer Science graduate with a strong
+    foundation in full-stack architecture, native Android development, and ML deployment.
+    Proven record of shipping production-grade Android apps on Google Play, leading
+    technical teams, and delivering real-world solutions. Driven by values, empathy,
+    and kindness.
+  photo: "img/profile.jpg"
+  photo_alt: "Portrait of Kennedy Muchina Kinuthia"
+  # Empty until the new résumé (no phone, no references) is in static/.
+  # Restore: resume_pdf: "Kennedy_Muchina_Resume.pdf" and experience.action.
+  resume_pdf: ""
+
+contact:
+  eyebrow: "Contact"
+  heading: "Let's build something together"
+  body: "I'm open to full-time roles, freelance projects and collaborations. The fastest way to reach me is email."
+  email: "muchina537@gmail.com"
+  phone: ""                 # intentionally empty: no phone number on the public site
+  links:
+    - { label: "LinkedIn",    url: "https://www.linkedin.com/in/kmuchina",                         icon: "linkedin" }
+    - { label: "GitHub",      url: "https://github.com/kmuchina",                                   icon: "github" }
+    - { label: "Google Play", url: "https://play.google.com/store/apps/developer?id=Merat",         icon: "googleplay" }
+
+about:
+  eyebrow: "About me"
+  heading: "Turning ideas into impactful software"
+  body: >-
+    I'm a Computer Science graduate passionate about building reliable, scalable and
+    user-centred applications. I enjoy solving complex problems, working with great
+    teams, and learning new technologies.
+  focus:
+    - { label: "Full-Stack Development", icon: "code" }
+    - { label: "Android Development",    icon: "smartphone" }
+    - { label: "Machine Learning & AI",  icon: "brain" }
+  facts:
+    - { title: "BSc. Computer Science", detail: "Moi University · Graduated Dec 2025",      icon: "graduation-cap" }
+    - { title: "Nairobi, Kenya",        detail: "Open to remote & global opportunities",    icon: "map-pin" }
+    - { title: "Leadership",            detail: "Team player, mentor & community builder",  icon: "users" }
+
+experience:
+  eyebrow: "Experience"
+  heading: "Where I've worked"
+  # action: { label: "View full résumé", url: "/Kennedy_Muchina_Resume.pdf" }
+  # Rendered as the career graph (internal/career). Dates are YYYY-MM; end may be
+  # "present". type: Internship | Volunteer | Contract | Freelance | Full-time |
+  # Part-time. Titles never contain "intern" (the type says it). **bold** marks metrics.
+  items:
+    - title: "ICT & Digital Innovation"
+      org: "Kenya Flower Council"
+      type: "Internship"
+      icon: "flower-2"
+      location: "Karen, Kenya"
+      start: "2026-08"
+      end: "present"
+      bullets:
+        - "Owned **end-to-end delivery** of a new certification digital platform for the Audit & Certification Department, authoring the SRS, designing the UI/UX, and shipping a **functional MVP** under the supervision of the Head of IT & Data."
+        - "Supporting **AV and PA systems** for events, conferences and meetings."
+      skills: ["SRS", "UI/UX design", "MVP delivery", "AV/PA systems"]
+
+    - title: "ICT Officer"
+      org: "Kenya Roads Board, Ministry of Roads & Transport"
+      type: "Internship"
+      icon: "route"
+      location: "Eldoret, Kenya"
+      start: "2024-05"
+      end: "2025-01"
+      bullets:
+        - "Enhanced software reliability by testing internal programs against specifications, identifying and documenting bugs."
+        - "Administered and optimised LAN infrastructure (Cisco switches & routers), achieving **99% network uptime** across the organisation."
+        - "Maintained the corporate website, **Microsoft Business Central** portals, and custom **GIS applications**."
+        - "Worked with **PricewaterhouseCoopers (PwC)** under a contract with KRB to audit the KeNHA, KURA & KeRRA road agencies."
+      skills: ["Cisco networking", "Business Central", "GIS", "Software testing"]
+
+    - title: "Project Lead & Tech Lead"
+      org: "IEEE Tech4Good"
+      type: "Volunteer"
+      icon: "solar-panel"
+      location: "Eldoret, Kenya"
+      start: "2024-02"
+      end: "2024-12"
+      bullets:
+        - "Secured a **KES 472,785 (USD 3,665)** grant by authoring a winning technical proposal; managed end-to-end delivery of a **5 kW solar installation** for a non-profit organisation."
+        - "Led a multidisciplinary engineering team through design, procurement and deployment while training **20+ students** in solar systems and technical safety."
+      skills: ["Grant writing", "Solar PV", "Team leadership"]
+
+    - title: "Chairperson"
+      org: "IEEE Moi University Student Branch"
+      type: "Volunteer"
+      icon: "trophy"
+      location: "Moi University"
+      start: "2023-07"
+      end: "2024-07"
+      bullets:
+        - "Coordinated and delivered **15+ technical workshops** and hackathons in Web, Mobile, IoT and Cloud for an audience of **300+ developers**."
+        - "Led the campus team to **regional victory in IEEEXtreme 17.0**, with the highest active team participation in IEEE Region 8 (Africa, Europe & Middle East)."
+      skills: ["Community building", "Event leadership", "Competitive programming"]
+
+skills:
+  eyebrow: "Technical skills"
+  heading: "Technologies & tools"
+  groups:
+    - { name: "Programming", icon: "code",   items: ["Kotlin", "Jetpack Compose", "JavaScript", "Node.js", "Express", "HTML5", "CSS3", "C++"] }
+    - { name: "Tools",       icon: "wrench", items: ["Git & GitHub", "Android Studio", "VS Code", "Slack", "Google Meet"] }
+    - { name: "Concepts",    icon: "layers", items: ["REST APIs", "Android", "iOS", "Flow Architecture", "Backend", "Full-Stack"] }
+    - { name: "Soft skills", icon: "users",  items: ["Project Management", "Team Leadership", "Self-directed", "Accountable", "Analytical", "Time-conscious"] }
+
+projects:
+  eyebrow: "Featured projects"
+  heading: "Things I've built"
+  action: { label: "View all projects", url: "https://github.com/kmuchina?tab=repositories" }
+  items:
+    - slug: "prayer-gratitude-journal"
+      title: "Prayer & Gratitude Journal"
+      kind: "Android App"
+      stack: ["Kotlin", "Jetpack Compose", "Room"]
+      summary: "A minimalist Android app featuring background routine processing, automated prompt scheduling, and local offline-first data persistence."
+      metric: "50+ active users"
+      image: "img/projects/prayer-gratitude-journal.png"   # TODO: I'll add
+      image_alt: "Screenshot of the Prayer & Gratitude Journal Android app"
+      links: []                                             # TODO: Play Store URL
+    - slug: "apple-care"
+      title: "Apple Care"
+      kind: "ML Mobile App"
+      stack: ["Python", "TensorFlow Lite", "CNN"]
+      summary: "Trained and deployed a CNN model for on-device apple leaf disease classification, with inference optimised in TensorFlow Lite for real-time mobile performance."
+      metric: ""
+      image: "img/projects/apple-care.png"                  # TODO: I'll add
+      image_alt: "Screenshot of the Apple Care app classifying an apple leaf"
+      links: []
+
+education:
+  eyebrow: "Education"
+  heading: "Academic journey"
+  items:
+    - degree: "BSc. Computer Science (Hons)"
+      school: "Moi University"
+      date: "Dec 2025"
+      timeline: { date: "2025-12", title: "Graduated, BSc Computer Science", detail: "Moi University, First Class Honours" }
+      highlights:
+        - "Graduated Magna Cum Laude with First Class Honours, Class of 2025."
+        - "Vice-Chancellor's Merit Certificate — Best Overall Science Student in the Faculty."
+    - degree: "High School Diploma"
+      school: "Njiiri High School"
+      date: "2016 – 2019"
+      highlights:
+        - "Mean Grade: A-"
+        - "Mathematics: A"
+        - "English: B"
+
+languages:
+  - { name: "English",   level: "Professional working proficiency" }
+  - { name: "Kiswahili", level: "Native proficiency" }
+
+# Interface copy used by templates (labels, nav, buttons). Templates never hard-code text.
+ui:
+  skip_link: "Skip to content"
+  nav_label: "Primary"
+  home_label: "home"        # brand link's accessible name: "<full name> — home"
+  nav:                      # same order as the sections on the page; the brand links to #top
+    - { label: "About",      href: "#about" }
+    - { label: "Experience", href: "#experience" }
+    - { label: "Skills",     href: "#skills" }
+    - { label: "Projects",   href: "#projects" }
+    - { label: "Education",  href: "#education" }
+    - { label: "Contact",    href: "#contact" }
+  menu:
+    label: "Menu"
+    open: "Open menu"
+    close: "Close menu"
+  theme:
+    label: "Colour theme"
+    menu_label: "Colour theme (menu)"   # the second toggle, inside the mobile menu
+    dark: "Dark"
+    system: "System"
+    light: "Light"
+  cta_projects: "View my projects"
+  cta_resume: "Download résumé"
+  current: "Current"
+  languages_heading: "Languages"
+  social_label: "Contact and profiles"
+  career:                   # the experience graph (aside legend + entries)
+    highlight: "Highlight"
+    legend_label: "Highlight roles by type"
+    all: "All roles"
+    milestone: "Milestone"
+    present: "Present"
+    skills_label: "Skills used"
+  not_found:
+    title: "Page not found"
+    body: "The page you were looking for doesn't exist or has moved."
+    back: "Back to the homepage"

@@ -1,0 +1,436 @@
+{{/* Design-system verification page (dev only, noindex). Copy here is
+     hard-coded on purpose: it is not site content. */}}
+{{define "noindex"}}{{end}}
+{{define "title"}}Styleguide — {{.Site.Person.FullName}}{{end}}
+{{define "head-extra"}}
+  <style>
+    /* Styleguide-only layout. Tokens only — no literal colours. Layered, so
+       it can't outrank the motion layer's reduced-motion overrides. */
+    @layer sections {
+    .sg-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding-block: var(--space-8);
+      border-bottom: 1px solid var(--line);
+    }
+    .sg-section {
+      padding-block: var(--space-16);
+      border-bottom: 1px solid var(--line);
+    }
+    .sg-section:nth-of-type(odd) { background-color: var(--surface-2); }
+    .sg-section > .container > .eyebrow { margin-block-end: var(--space-8); }
+    .sg-row {
+      display: grid;
+      gap: var(--space-3);
+      padding-block: var(--space-6);
+      border-top: 1px solid var(--line);
+    }
+    .sg-row:first-of-type { border-top: 0; padding-block-start: 0; }
+    @media (min-width: 900px) {
+      .sg-row { grid-template-columns: 14rem 1fr; gap: var(--space-8); align-items: baseline; }
+      .sg-row--top { align-items: start; }
+    }
+    .sg-row > :last-child { min-inline-size: 0; }
+    .sg-label { display: grid; gap: var(--space-1); }
+    .sg-label code { color: var(--ink); }
+    .sg-label .meta { font-size: var(--fs-xs); }
+    .sg-note {
+      margin-block-end: var(--space-8);
+      padding: var(--space-4) var(--space-5);
+      border-inline-start: 2px solid var(--line-strong);
+      color: var(--muted);
+    }
+    .sg-pair { display: grid; gap: var(--space-6); }
+    @media (min-width: 640px) { .sg-pair { grid-template-columns: 1fr 1fr; } }
+
+    /* Swatches */
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+      gap: var(--space-6);
+    }
+    .swatch { display: grid; gap: var(--space-2); }
+    .swatch-chip {
+      block-size: 4rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+    .swatch .meta { font-size: var(--fs-xs); }
+
+    /* Demo boxes (motion + layout primitives) */
+    .demo-boxes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+      margin-block-end: var(--space-6);
+    }
+    .demo-box {
+      display: grid;
+      place-items: center;
+      min-block-size: 3rem;
+      padding: var(--space-2) var(--space-3);
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+    }
+    .demo-boxes .demo-box { block-size: 6rem; border-radius: var(--radius); }
+    .demo-frame { outline: 1px dashed var(--line); outline-offset: var(--space-2); }
+
+    .font-checks { display: grid; gap: var(--space-4); }
+    .font-checks li { display: grid; gap: var(--space-1); }
+    .ok { color: var(--accent-text); }
+    }
+  </style>
+{{end}}
+{{define "main" -}}
+    <section class="sg-section" aria-labelledby="sg-title">
+      <div class="container">
+        <p class="eyebrow">Phases 0–2 · Verification</p>
+        <h1 id="sg-title" style="font-size: var(--fs-2xl)">Styleguide</h1>
+        <p class="muted">Dev-only page (noindex). Use the theme toggle in the header.</p>
+      </div>
+    </section>
+    <!-- ================================================================ -->
+    <section class="sg-section" aria-labelledby="type-h">
+      <div class="container">
+        <h2 id="type-h" class="eyebrow">Type specimen</h2>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>--fs-3xl</code><span class="meta">Fraunces 600 · 40–80px (360–1360px vw)</span><span class="meta" data-live-size></span></div>
+          <p class="display-name">Kennedy <em>Muchina</em> Kinuthia</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.quote · --fs-xl</code><span class="meta">Fraunces italic 400 · 20–26px · accent quotes</span><span class="meta" data-live-size></span></div>
+          <p class="quote">{{.Site.Person.Quote}}</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.section__title · --fs-2xl</code><span class="meta">Fraunces 560 · 28–44px (356–1244px vw)</span><span class="meta" data-live-size></span></div>
+          <p class="section__title">{{.Site.About.Heading}}</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.eyebrow · --fs-xs</code><span class="meta">JetBrains Mono 500 · 12px · 0.14em</span><span class="meta" data-live-size></span></div>
+          <p class="eyebrow">About me</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.lead · --fs-lg</code><span class="meta">Inter 400 · 18–20px (343–914px vw) · muted</span><span class="meta" data-live-size></span></div>
+          <p class="lead">I'm a Computer Science graduate passionate about building reliable, scalable and user-centred applications.</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>body · --fs-base</code><span class="meta">Inter 400 · 16–17px (320–820px vw) · lh 1.65</span><span class="meta" data-live-size></span></div>
+          <p>Performance-driven Software Developer and Computer Science graduate with a strong foundation in full-stack architecture, native Android development, and ML deployment. Proven record of shipping production-grade Android apps on Google Play, leading technical teams, and delivering real-world solutions. Driven by values, empathy, and kindness.</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>h3 · --fs-xl</code><span class="meta">Inter 600 · 20–26px (343–1200px vw)</span><span class="meta" data-live-size></span></div>
+          <h3>Prayer &amp; Gratitude Journal</h3>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.meta · --fs-meta</code><span class="meta">JetBrains Mono 400 · 13px · tnum</span><span class="meta" data-live-size></span></div>
+          <p class="meta">May 2024 — Jan 2025 · Eldoret, Kenya</p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.tag · --fs-xs</code><span class="meta">JetBrains Mono 400 · 12px · no caps</span><span class="meta" data-live-size></span></div>
+          <p><span class="tag">Kotlin</span></p>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>--fs-sm</code><span class="meta">Inter 400 · 14px · captions</span><span class="meta" data-live-size></span></div>
+          <p style="font-size: var(--fs-sm)" class="muted">Moi University · Graduated Dec 2025</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="sg-section" aria-labelledby="colour-h">
+      <div class="container">
+        <h2 id="colour-h" class="eyebrow">Colour tokens · <span data-theme-name></span></h2>
+        <ul class="swatches" data-swatches></ul>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="sg-section" aria-labelledby="components-h">
+      <div class="container">
+        <h2 id="components-h" class="eyebrow">Components</h2>
+        <p class="sg-note">Reviewer: press <kbd>Tab</kbd> through this page. Every link, button and toggle option must show the 2px focus ring in its own shape. On the theme toggle, use the arrow keys, <kbd>Home</kbd> and <kbd>End</kbd>.</p>
+        {{- $s := .Site}}
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.btn--primary · .btn--ghost</code><span class="meta">44px tall · Inter 500 · --fs-sm · .press</span></div>
+          <div class="cluster">
+            <a class="btn btn--primary press" href="/#projects">{{icon "arrow-up-right"}}<span class="btn__label">{{$s.UI.CTAProjects}}</span></a>
+            <a class="btn btn--primary press" href="/#projects"><span class="btn__label">{{$s.UI.CTAProjects}}</span></a>
+            {{- with $s.Person.ResumePDF}}
+            <a class="btn btn--ghost press" href="{{asset .}}" download>{{icon "download"}}<span class="btn__label">{{$s.UI.CTAResume}}</span></a>
+            <a class="btn btn--ghost press" href="{{asset .}}" download><span class="btn__label">{{$s.UI.CTAResume}}</span></a>
+            {{- end}}
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.icon-btn · .social</code><span class="meta">44px round · --muted → --ink · labelled icon</span></div>
+          <ul class="social cluster" aria-label="{{$s.UI.SocialLabel}}">
+            <li class="social__item"><a class="social__link icon-btn" href="{{$s.Contact.MailtoHref}}">{{icon "mail" $s.Contact.Email}}</a></li>
+            {{- template "social-links" $s}}
+            <li class="social__item social__item--location">{{icon "map-pin"}}<span class="social__label">{{$s.Person.Location}}</span></li>
+          </ul>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.link-arrow</code><span class="meta">--accent-text · arrow nudges 3px</span></div>
+          <div class="cluster" style="--cluster-space: var(--space-8)">
+            {{- with $s.Experience.Action}}<a class="link-arrow" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>{{end}}
+            {{- with $s.Projects.Action}}<a class="link-arrow" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>{{end}}
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.prose · .link</code><span class="meta">prose links: native underline, fades in · .link: grows</span></div>
+          <div class="stack">
+            <div class="prose">
+              <p>{{$s.Contact.Body}} Write to <a href="{{$s.Contact.MailtoHref}}">{{$s.Contact.Email}}</a>, or see the code on <a href="{{(index $s.Contact.Links 1).URL}}">{{(index $s.Contact.Links 1).Label}}</a>.</p>
+              <p>{{$s.About.Body}}</p>
+            </div>
+            <p><a class="link tap-target" href="{{$s.Contact.MailtoHref}}">{{icon "mail"}} {{$s.Contact.Email}}</a></p>
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.tag-list · .tag--accent</code><span class="meta">mono --fs-xs · accent = "Current" only</span></div>
+          <div class="stack">
+            {{- with index $s.Skills.Groups 0}}
+            <ul class="tag-list">
+              {{- range .Items}}<li class="tag">{{.}}</li>{{end}}
+            </ul>
+            {{- end}}
+            <p><span class="tag tag--accent">{{$s.UI.Current}}</span></p>
+          </div>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.card · .card--interactive</code><span class="meta">the only card style · projects &amp; about facts</span></div>
+          <div class="sg-pair">
+            {{- with index $s.Projects.Items 0}}
+            <article class="card stack" style="--stack-space: var(--space-3)">
+              <p class="meta">{{.Kind}}</p>
+              <h3>{{.Title}}</h3>
+              <ul class="tag-list">{{range .Stack}}<li class="tag">{{.}}</li>{{end}}</ul>
+              <p>{{.Summary}}</p>
+            </article>
+            {{- end}}
+            {{- with index $s.Projects.Items 1}}
+            <article class="card card--interactive stack" style="--stack-space: var(--space-3)">
+              <p class="meta">{{.Kind}}</p>
+              <h3><a class="card__link" href="/#project-{{.Slug}}">{{.Title}}</a></h3>
+              <ul class="tag-list">{{range .Stack}}<li class="tag">{{.}}</li>{{end}}</ul>
+              <p>{{.Summary}}</p>
+            </article>
+            {{- end}}
+          </div>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.section__aside</code><span class="meta">the spine's heading column (sticky from 1024px on real sections) · shown with h3 to keep this page's outline</span></div>
+          {{- with $s.Projects}}
+          <div class="section__aside demo-frame">
+            <p class="eyebrow">{{.Eyebrow}}</p>
+            <h3 class="section__title">{{.Heading}}</h3>
+            {{- with .Action}}
+            <a class="link-arrow section__action tap-target" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>
+            {{- end}}
+          </div>
+          {{- end}}
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.media · .media--plain</code><span class="meta">40px --accent-soft tile · plain icon</span></div>
+          <div class="sg-pair">
+            <dl class="stack">
+              {{- range $s.About.Facts}}
+              <div class="media">
+                <dt class="media__title"><span class="media__icon">{{icon .Icon}}</span>{{.Title}}</dt>
+                <dd class="media__text">{{.Detail}}</dd>
+              </div>
+              {{- end}}
+            </dl>
+            <ul class="stack" style="--stack-space: var(--space-3)">
+              {{- range $s.About.Focus}}
+              <li class="media media--plain"><span class="media__icon">{{icon .Icon}}</span><span class="media__title">{{.Label}}</span></li>
+              {{- end}}
+            </ul>
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.quote</code><span class="meta">Fraunces italic · --fs-xl · accent quotes</span></div>
+          <blockquote><p class="quote">{{$s.Person.Quote}}</p></blockquote>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.list</code><span class="meta">5px --accent dot on the x-height</span></div>
+          {{- with index $s.Experience.Items 1}}
+          <ul class="list">{{range .Bullets}}<li>{{bold .}}</li>{{end}}</ul>
+          {{- end}}
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.divider</code><span class="meta">1px --line · no margin of its own</span></div>
+          <hr class="divider">
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.theme-toggle</code><span class="meta">40px pill · 32px options · arrows / Home / End · synced with the header</span></div>
+          <div>{{template "theme-toggle" (dict "Theme" .Site.UI.Theme "Label" "Colour theme (styleguide demo)")}}</div>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.stack</code><span class="meta">--stack-space (default --space-4)</span></div>
+          <div class="stack">
+            <div class="demo-box meta">--space-4</div><div class="demo-box meta">--space-4</div><div class="demo-box meta">--space-4</div>
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.cluster</code><span class="meta">--cluster-space (default --space-3)</span></div>
+          <div class="cluster">
+            {{- range $s.Skills.Groups}}<div class="demo-box meta">{{.Name}}</div>{{end}}
+          </div>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.grid-auto</code><span class="meta">--grid-min (16rem) · --grid-gap (--space-6)</span></div>
+          <div class="grid-auto" style="--grid-min: 10rem">
+            {{- range $s.Skills.Groups}}<div class="demo-box meta">{{.Name}}</div>{{end}}
+          </div>
+        </div>
+
+        <div class="sg-row sg-row--top">
+          <div class="sg-label"><code>.split</code><span class="meta">--split-ratio (1fr 1fr) from 900px</span></div>
+          <div class="split" style="--split-ratio: 2fr 1fr">
+            <div class="demo-box meta">2fr</div><div class="demo-box meta">1fr</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="sg-section" aria-labelledby="motion-h">
+      <div class="container stack" style="--stack-space: var(--space-6)">
+        <h2 id="motion-h" class="eyebrow">Motion</h2>
+
+        <p class="meta">Reduced motion: <strong data-reduced-motion>…</strong></p>
+
+        <div style="inline-size: 100%">
+          <div class="demo-boxes" data-reveal-group data-demo-group>
+            <div class="demo-box meta">--i: 0</div>
+            <div class="demo-box meta">--i: 1</div>
+            <div class="demo-box meta">--i: 2</div>
+            <div class="demo-box meta">--i: 3</div>
+          </div>
+          <button type="button" class="btn btn--ghost press" data-replay>Replay reveal</button>
+        </div>
+
+        <p><a class="link tap-target" href="#motion-h">.link — underline grows from the left</a></p>
+        <p><a class="link-arrow" href="#motion-h">.link-arrow — the arrow nudges 3px{{icon "arrow-right"}}</a></p>
+        <p class="muted">Card lift and button press: see the Components section.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <section class="sg-section" aria-labelledby="fonts-h">
+      <div class="container">
+        <h2 id="fonts-h" class="eyebrow">Font check</h2>
+        <ul class="font-checks">
+          <li><span class="meta" data-font-check='400 1em "Fraunces"'>Fraunces …</span>
+              <span style="font-family: var(--font-display); font-size: var(--fs-xl)">Fraunces — the quick brown fox jumps over the lazy dog</span></li>
+          <li><span class="meta" data-font-check='italic 400 1em "Fraunces"'>Fraunces italic …</span>
+              <span style="font-family: var(--font-display); font-style: italic; font-size: var(--fs-xl)">Fraunces italic — Muchina</span></li>
+          <li><span class="meta" data-font-check='400 1em "Inter"'>Inter …</span>
+              <span>Inter — the quick brown fox jumps over the lazy dog 0123456789</span></li>
+          <li><span class="meta" data-font-check='400 1em "JetBrains Mono"'>JetBrains Mono …</span>
+              <code>JetBrains Mono — const theme = "dark"; // 0O 1lI</code></li>
+        </ul>
+      </div>
+    </section>
+  <script>
+    // Styleguide-only helpers (not part of the site's JS).
+    (() => {
+      const root = document.documentElement;
+      const TOKENS = ["bg", "surface", "surface-2", "ink", "muted", "line", "line-strong", "accent",
+        "accent-strong", "accent-strong-hover", "accent-text", "accent-soft", "on-accent", "focus", "shadow"];
+
+      const list = document.querySelector("[data-swatches]");
+      for (const name of TOKENS) {
+        const li = document.createElement("li");
+        li.className = "swatch";
+        const chip = document.createElement("div");
+        chip.className = "swatch-chip";
+        if (name === "shadow") {
+          chip.style.background = "var(--surface)";
+          chip.style.boxShadow = "var(--shadow)";
+        } else {
+          chip.style.background = `var(--${name})`;
+        }
+        li.append(chip);
+        li.insertAdjacentHTML("beforeend",
+          `<code>--${name}</code><span class="meta" data-token="${name}"></span>`);
+        list.append(li);
+      }
+
+      function refresh() {
+        const cs = getComputedStyle(root);
+        for (const el of document.querySelectorAll("[data-token]")) {
+          el.textContent = cs.getPropertyValue(`--${el.dataset.token}`).trim();
+        }
+        document.querySelector("[data-theme-name]").textContent =
+          `${root.dataset.theme} (preference: ${root.dataset.themePref})`;
+      }
+      refresh();
+      document.addEventListener("themechange", refresh);
+
+      function sizes() {
+        for (const el of document.querySelectorAll("[data-live-size]")) {
+          const sample = el.closest(".sg-row").lastElementChild;
+          el.textContent = `now: ${parseFloat(getComputedStyle(sample).fontSize).toFixed(1)}px @ ${innerWidth}px vw`;
+        }
+      }
+      sizes();
+      addEventListener("resize", sizes);
+
+      const rm = matchMedia("(prefers-reduced-motion: reduce)");
+      const showRM = () => document.querySelector("[data-reduced-motion]").textContent =
+        rm.matches ? "detected — reveals, lifts, press and arrow nudge disabled" : "not detected";
+      showRM();
+      rm.addEventListener("change", showRM);
+
+      document.querySelector("[data-replay]").addEventListener("click", () => {
+        const group = document.querySelector("[data-demo-group]");
+        group.classList.remove("is-visible");
+        void group.offsetWidth; // drop the finished animation so it can restart
+        group.classList.add("is-visible");
+      });
+
+      document.fonts.ready.then(async () => {
+        for (const el of document.querySelectorAll("[data-font-check]")) {
+          const font = el.dataset.fontCheck;
+          const faces = await document.fonts.load(font, "Ab").catch(() => []);
+          // load() returns [] when no @font-face matches; check() alone would
+          // then report true for a system fallback.
+          const ok = faces.length > 0 && faces.every((f) => f.status === "loaded") && document.fonts.check(font);
+          el.textContent = `${ok ? "✓" : "✗"} ${font}`;
+          el.classList.toggle("ok", ok);
+        }
+      });
+    })();
+  </script>
+{{- end}}

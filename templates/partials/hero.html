@@ -1,0 +1,39 @@
+{{/* Hero. Entrance is CSS-only: each [data-hero] item animates with
+     delay --i × --stagger (09-motion.css). No data-reveal: it's in view on load. */}}
+{{define "hero" -}}
+{{- $ui := .Site.UI}}
+{{- with .Site}}
+<section id="top" class="section hero" aria-labelledby="top-title">
+  <div class="container hero__inner split">
+    <div class="hero__content">
+      <p class="eyebrow eyebrow--accent hero__eyebrow" data-hero style="--i: 0">{{.Person.Greeting}}</p>
+      <h1 id="top-title" class="display-name hero__name" data-hero style="--i: 1">{{.Person.FirstName}} <em>{{.Person.MiddleName}}</em> {{.Person.LastName}}</h1>
+      <p class="hero__role" data-hero style="--i: 2">{{.Person.Role}}</p>
+      <p class="lead hero__summary" data-hero style="--i: 2">{{.Person.Summary}}</p>
+      <div class="hero__actions cluster" data-hero style="--i: 3">
+        <a class="btn btn--primary press" href="#projects">{{icon "arrow-up-right"}}<span class="btn__label">{{$ui.CTAProjects}}</span></a>
+        {{- with .Person.ResumePDF}}
+        <a class="btn btn--ghost press" href="{{asset .}}" download>{{icon "download"}}<span class="btn__label">{{$ui.CTAResume}}</span></a>
+        {{- end}}
+      </div>
+      <ul class="social hero__social cluster" aria-label="{{$ui.SocialLabel}}" data-hero style="--i: 3">
+        {{- template "social-links" .}}
+        {{- if .Meta.ShowPhone}}
+        <li class="social__item social__item--phone"><a class="meta tap-target" href="{{.Contact.TelHref}}">{{icon "phone"}}{{.Contact.Phone}}</a></li>
+        {{- end}}
+        <li class="social__item social__item--location">{{icon "map-pin"}}<span class="social__label">{{.Person.Location}}</span></li>
+      </ul>
+    </div>
+    <div class="hero__aside">
+      {{- $size := imgSize .Person.Photo}}
+      <div class="hero__media" data-hero-photo>
+        <img class="hero__photo" src="{{asset .Person.Photo}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{.Person.PhotoAlt}}" fetchpriority="high">
+      </div>
+      <figure class="hero__quote" data-hero style="--i: 3">
+        <blockquote><p class="quote">{{.Person.Quote}}</p></blockquote>
+      </figure>
+    </div>
+  </div>
+</section>
+{{- end}}
+{{- end}}

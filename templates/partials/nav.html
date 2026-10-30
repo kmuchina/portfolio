@@ -1,0 +1,41 @@
+{{/* Sticky site header + the mobile menu dialog (below 1024px, JS only).
+     Without JS the menu button is hidden and the nav stays visible. */}}
+{{define "nav" -}}
+{{- $home := .Home}}
+{{- $ui := .Site.UI}}
+<header class="site-header" data-site-header>
+  <div class="container site-header__inner">
+    <a class="brand" href="{{$home}}#top" aria-label="{{.Site.Person.FullName}} — {{$ui.HomeLabel}}">{{.Site.Person.FirstName}} <em>{{.Site.Person.MiddleName}}</em></a>
+    <nav class="nav" aria-label="{{$ui.NavLabel}}">
+      <ul class="nav__list">
+        {{- range $ui.Nav}}
+        <li class="nav__item"><a class="nav__link underline-grow" href="{{$home}}{{.Href}}">{{.Label}}</a></li>
+        {{- end}}
+      </ul>
+    </nav>
+    {{template "theme-toggle" (dict "Theme" $ui.Theme "Label" $ui.Theme.Label)}}
+    <button type="button" class="icon-btn site-header__menu-btn" aria-controls="site-menu" aria-expanded="false" aria-label="{{$ui.Menu.Open}}" data-menu-open>{{icon "menu"}}</button>
+  </div>
+</header>
+<dialog class="menu" id="site-menu" aria-label="{{$ui.Menu.Label}}" data-menu>
+  <div class="container menu__inner">
+    <div class="menu__bar">
+      <button type="button" class="icon-btn menu__close" aria-label="{{$ui.Menu.Close}}" data-menu-close>{{icon "x"}}</button>
+    </div>
+    <nav aria-label="{{$ui.NavLabel}}">
+      <ul class="menu__list">
+        {{- range $ui.Nav}}
+        <li class="menu__item"><a class="menu__link" href="{{$home}}{{.Href}}">{{.Label}}</a></li>
+        {{- end}}
+      </ul>
+    </nav>
+    <div class="menu__footer stack">
+      {{template "theme-toggle" (dict "Theme" $ui.Theme "Label" $ui.Theme.MenuLabel)}}
+      <p><a class="link tap-target" href="{{.Site.Contact.MailtoHref}}">{{icon "mail"}} {{.Site.Contact.Email}}</a></p>
+      <ul class="social cluster" aria-label="{{$ui.SocialLabel}}">
+        {{- template "social-links" .Site}}
+      </ul>
+    </div>
+  </div>
+</dialog>
+{{- end}}

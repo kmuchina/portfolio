@@ -1,0 +1,99 @@
+{{/* Experience: the career graph (design/experience-prototype.html).
+     Everything comes from .Career (internal/career), built from site.yaml:
+     row order, lanes, segments, the merge/fork curve, node shapes, dates,
+     durations, tenure widths, legend counts and the summary. */}}
+{{define "experience" -}}
+{{- $ui := .Site.UI}}
+{{- $g := .Career}}
+{{- with .Site.Experience}}
+<section id="experience" class="section section--alt experience" aria-labelledby="experience-title">
+  <div class="container section__grid">
+
+    <div class="section__aside" data-reveal>
+      <p class="eyebrow">{{.Eyebrow}}</p>
+      <h2 id="experience-title" class="section__title">{{.Heading}}</h2>
+      {{- with $g.Summary}}{{if .Roles}}
+
+      <div class="summary">
+        <span class="summary__num">{{.Roles}}</span>
+        <span class="summary__text">{{.Text}}</span>
+      </div>
+      {{- end}}{{end}}
+
+      <div class="legend" role="group" aria-label="{{$ui.Career.LegendLabel}}">
+        <p class="legend__label">{{$ui.Career.Highlight}}</p>
+        {{- range $i, $l := $g.Legend}}
+        <button type="button" class="legend__item" data-filter="{{.Filter}}" data-lane="{{.Lane}}" aria-pressed="{{if eq $i 0}}true{{else}}false{{end}}">
+          {{- if eq .Filter "all"}}<span class="legend__swatch legend__swatch--all" aria-hidden="true"></span>
+          {{- else}}<span class="legend__swatch legend__swatch--{{.Filter}}" aria-hidden="true"><span class="{{.NodeClass}}"></span></span>
+          {{- end}}{{.Label}}<span class="legend__count">{{.Count}}</span>
+        </button>
+        {{- end}}
+      </div>
+      {{- with .Action}}
+
+      <a class="link-arrow section__action tap-target" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>
+      {{- end}}
+    </div>
+
+    <div class="section__body">
+      <ol class="career" data-filter="all" data-lane="all">
+        {{- range $g.Rows}}
+        <li class="career__row career__row--{{.Kind}}">
+          <div class="career__graph" aria-hidden="true">
+            {{- range .Above}}
+            <span class="{{.Class}}"></span>
+            {{- end}}
+            {{- with .Curve}}
+            <svg class="curve{{if .Fork}} curve--fork{{end}}" viewBox="0 0 68 22" preserveAspectRatio="none">
+              <path class="rest" d="{{.Path}}" pathLength="1" vector-effect="non-scaling-stroke"/>
+              <path class="ink" d="{{.Path}}" pathLength="1" vector-effect="non-scaling-stroke"/>
+            </svg>
+            {{- end}}
+            <span class="{{.Node.Class}}"></span>
+            {{- range .Below}}
+            <span class="{{.Class}}"></span>
+            {{- end}}
+          </div>
+          <article class="job">
+            <span class="job__tile" aria-hidden="true">{{icon .Icon}}</span>
+            <div class="job__head">
+              <h3 class="job__title">{{.Title}}</h3>
+              <p class="job__org">{{.Org}}</p>
+            </div>
+            <div class="job__meta">
+              <span class="job__type">{{.TypeLabel}}</span>
+              <span class="job__dates"><time datetime="{{.StartISO}}">{{.StartText}}</time>
+                {{- if .EndText}} – {{if .EndISO}}<time datetime="{{.EndISO}}">{{.EndText}}</time>{{else}}{{.EndText}}{{end}}{{end}}</span>
+              {{- if .Duration}}
+              <span class="job__tenure"><span class="tenure-bar"><span style="--w:{{.TenurePct}}%"></span></span>
+                {{- if .Present}}<span data-start="{{.StartISO}}">{{.Duration}}</span>{{else}}{{.Duration}}{{end}}</span>
+              {{- end}}
+              {{- with .Location}}
+              <span class="job__place">{{icon "map-pin"}}{{.}}</span>
+              {{- end}}
+            </div>
+            {{- if .Bullets}}
+            <div class="job__body">
+              <ul class="job__bullets">
+                {{- range .Bullets}}
+                <li>{{bold .}}</li>
+                {{- end}}
+              </ul>
+              {{- with .Skills}}
+              <ul class="tag-list job__tags" aria-label="{{$ui.Career.SkillsLabel}}">
+                {{- range .}}<li class="tag">{{.}}</li>{{end -}}
+              </ul>
+              {{- end}}
+            </div>
+            {{- end}}
+          </article>
+        </li>
+        {{- end}}
+      </ol>
+    </div>
+
+  </div>
+</section>
+{{- end}}
+{{- end}}

@@ -1,0 +1,6 @@
+{{/* <li> icon buttons for contact.links. Data: *site.Site. */}}
+{{define "social-links" -}}
+{{- range .Contact.Links}}
+<li class="social__item"><a class="social__link icon-btn" href="{{.URL}}" rel="me">{{icon .Icon .Label}}</a></li>
+{{- end}}
+{{- end}}

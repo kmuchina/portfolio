@@ -1,0 +1,8 @@
+dist/
+tmp/
+node_modules/
+.DS_Store
+*.log
+
+# Local-only: the mockup shows a phone number and a retired email.
+design/mockup.png

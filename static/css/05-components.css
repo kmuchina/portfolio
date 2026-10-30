@@ -1,0 +1,524 @@
+/* ==========================================================================
+   05-components.css — the design system's reusable building blocks
+   Tokens only: no colour literals, no unexplained numbers. Mobile-first.
+   Motion behaviour (lift, press, underline, arrow nudge, reveal) lives in
+   09-motion.css; components here only declare `transition: var(--transition-ui)`.
+   Catalogue and usage rules: CLAUDE.md § Components.
+   ========================================================================== */
+
+@layer components {
+
+/* ---- Icon ----------------------------------------------------------------
+   Inline SVGs have no width/height attributes, so they need a size here or
+   they fill their container. Components set --icon-size; it inherits. */
+.icon {
+  display: inline-block;
+  inline-size: var(--icon-size, var(--icon-md));
+  block-size: var(--icon-size, var(--icon-md));
+  flex-shrink: 0;
+  vertical-align: -0.25em;
+  stroke-width: 1.5;
+}
+
+/* ---- Skip link ---------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tap);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-strong);
+  color: var(--on-accent);
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+/* Hero name: Fraunces 600. <em> inside = italic accent ("Muchina"). */
+.display-name {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-3xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--lh-tight);
+  text-wrap: balance;
+}
+.display-name em {
+  font-style: italic;
+  color: var(--accent-text);
+}
+
+/* Eyebrow: mono label above a heading ("ABOUT ME"). */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Hero "Hello, I'm" only. */
+.eyebrow--accent { color: var(--accent-text); }
+
+/* Lead paragraph: the first, larger paragraph of a section. */
+.lead {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--muted);
+}
+
+/* Mono dates / meta. */
+.meta {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+/* Pull-quote: Fraunces italic with curly quotes in --accent (decorative,
+   large text, so --accent is allowed). */
+.quote {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-style: italic;
+  font-size: var(--fs-xl);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: var(--lh-snug);
+  color: var(--ink);
+  quotes: "\201C" "\201D";
+}
+.quote::before { content: open-quote; color: var(--accent); }
+.quote::after { content: close-quote; color: var(--accent); }
+
+/* Prose: running text at the reading measure. */
+.prose { max-width: var(--measure); }
+.prose > * + * { margin-block-start: var(--space-4); }
+/* Prose links keep the native underline (a pseudo-element can't follow a
+   wrapped line); it cross-fades from faint to full on hover. */
+.prose a {
+  color: var(--accent-text);
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: var(--transition-ui);
+}
+.prose a:hover { text-decoration-color: currentColor; }
+
+/* Bulleted list: a 5px accent dot centred on the first line's x-height.
+   0.5lh is the middle of the first line box; Inter's x-height centre sits
+   ~0.1em below it; 2.5px is half the dot. */
+.list { max-width: var(--measure); }
+.list > li {
+  position: relative;
+  padding-inline-start: var(--space-5);
+}
+.list > li + li { margin-block-start: var(--space-2); }
+.list > li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: var(--space-1);
+  inset-block-start: calc(0.5lh + 0.1em - 2.5px);
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+}
+
+/* Divider: an <hr>. The parent controls spacing. */
+.divider {
+  border: 0;
+  border-block-start: 1px solid var(--line);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+/* Standalone single-line text link. The underline grows on hover
+   (09-motion.css). In running text use .prose links instead. */
+.link {
+  color: var(--accent-text);
+  text-decoration: none;
+  transition: var(--transition-ui);
+}
+.link .icon { --icon-size: var(--icon-sm); }
+
+/* Text link with a trailing arrow ("View full résumé →"). The arrow nudges
+   right on hover/focus (09-motion.css, item 7). */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap);
+  color: var(--accent-text);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--transition-ui);
+  --icon-size: var(--icon-sm);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: var(--transition-ui);
+  --icon-size: var(--icon-sm);
+}
+
+.btn--primary {
+  background-color: var(--accent-strong);
+  color: var(--on-accent);
+}
+.btn--primary:hover { background-color: var(--accent-strong-hover); }
+
+.btn--ghost {
+  border-color: var(--line);
+  background-color: transparent;
+  color: var(--ink);
+}
+.btn--ghost:hover {
+  border-color: var(--line-strong);
+  background-color: var(--surface);
+}
+
+/* Square, icon-only button or link. Needs an accessible name: the icon
+   label ({{icon "github" "GitHub"}}) or aria-label. */
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--tap);
+  block-size: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--muted);
+  transition: var(--transition-ui);
+  --icon-size: var(--icon-md);
+}
+.icon-btn:hover {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* ---- Social row ----------------------------------------------------------
+   A .cluster of .icon-btn links (hero, contact, footer), optionally ending
+   with the location as plain icon + text (it is not a link). The row's
+   negative margin lines the first icon's glyph up with the text edge
+   (44px button, 20px icon → 12px of padding). */
+.social {
+  --cluster-space: var(--space-1);
+  margin-inline-start: calc((var(--tap) - var(--icon-md)) / -2);
+}
+.social__item--location,
+.social__item--phone > a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted);
+  --icon-size: var(--icon-sm);
+}
+.social__item--location { font-size: var(--fs-sm); }
+/* Text items follow the icon buttons after a little extra gap. */
+.social__item--location,
+.social__item--phone { padding-inline-start: var(--space-3); }
+.social__item--phone > a {
+  text-decoration: none;
+  transition: var(--transition-ui);
+}
+.social__item--phone > a:hover { color: var(--ink); }
+
+/* ==========================================================================
+   Tags
+   ========================================================================== */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--muted);
+}
+/* Only for the "Current" job marker. Transparent border keeps the size. */
+.tag--accent {
+  border-color: transparent;
+  background-color: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* ==========================================================================
+   Legend: a group of toggle buttons (aria-pressed) that highlight one kind
+   of item; each shows a swatch, a label and a count. Used by the career
+   graph (the swatch's node shape and colour are set in 06-sections.css).
+   ========================================================================== */
+
+.legend {
+  display: grid;
+  gap: var(--space-1);
+  margin-block-start: var(--space-8);
+}
+.legend__label {
+  margin-block-end: var(--space-2);
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.legend__item {
+  display: grid;
+  grid-template-columns: var(--icon-md) 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  inline-size: 100%;
+  max-inline-size: 17rem;
+  min-block-size: var(--space-10); /* 40px target */
+  padding: 0.55rem var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: start;
+  color: var(--muted);
+  transition: var(--transition-ui);
+}
+.legend__item:hover {
+  background-color: color-mix(in srgb, var(--surface) 70%, transparent);
+  color: var(--ink);
+}
+.legend__item[aria-pressed="true"] {
+  border-color: var(--line-strong);
+  background-color: var(--surface);
+  color: var(--ink);
+}
+.legend__count {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--muted);
+}
+.legend__swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+/* "All": two short parallel lanes. */
+.legend__swatch--all { color: var(--muted); }
+.legend__swatch--all::before,
+.legend__swatch--all::after {
+  content: "";
+  position: absolute;
+  inline-size: 2px;
+  block-size: 14px;
+  border-radius: 1px;
+  background-color: currentColor;
+}
+.legend__swatch--all::before { inset-inline-start: 5px; }
+.legend__swatch--all::after { inset-inline-end: 5px; }
+
+/* ==========================================================================
+   Card — the ONLY card style on the site (projects, about facts)
+   ========================================================================== */
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  padding: clamp(var(--space-5), 1rem + 1vw, var(--space-8));
+}
+
+/* Whole-card link: the hover lift is in 09-motion.css. Put .card__link on
+   the title's <a>; its ::before stretches over the card so the whole card
+   is clickable, and the card shows the focus ring. */
+.card--interactive { cursor: pointer; }
+.card__link {
+  color: inherit;
+  text-decoration: none;
+}
+.card__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.card__link:focus-visible { outline: none; }
+.card--interactive:has(.card__link:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Section title (inside .section__aside; see 04-layout.css for the spine)
+   ========================================================================== */
+
+/* The aside's action link: --space-8 below what precedes it, a 16px box as
+   in the prototype. Its 44px hit area comes from .tap-target (an invisible
+   ::before), so the tap target doesn't move the layout. */
+.section__action {
+  min-block-size: 0;
+  margin-block-start: var(--space-8);
+}
+
+.section__title {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-2xl);
+  font-weight: 560;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+/* ==========================================================================
+   Media object: icon + title + detail (about facts, focus items)
+   The icon sits in a fixed gutter (absolute) rather than a grid column, so
+   the same component works for <li> and for <dl> groups, where the icon has
+   to live inside the <dt>.
+   ========================================================================== */
+
+.media {
+  --media-icon: var(--space-10);   /* 40px tile */
+  position: relative;
+  min-block-size: var(--media-icon);
+  padding-inline-start: calc(var(--media-icon) + var(--space-3));
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.media__icon {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  display: grid;
+  place-items: center;
+  inline-size: var(--media-icon);
+  block-size: var(--media-icon);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-soft);
+  color: var(--accent-text);
+  --icon-size: var(--icon-md);
+}
+.media__title {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+.media__text {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+/* Plain: no tile, the icon is centred on the first line. */
+.media--plain {
+  --media-icon: var(--icon-md);
+  min-block-size: 0;
+}
+.media--plain .media__icon {
+  inset-block-start: calc((1lh - var(--media-icon)) / 2);
+  background-color: transparent;
+}
+
+/* ==========================================================================
+   Theme toggle: segmented pill of three 32px round buttons.
+   3px padding + 1px border around 32px buttons = a 40px-tall control; each
+   option's ::before extends its hit area to 36 × 40px (no overlap with the
+   4px gap).
+   ========================================================================== */
+
+/* Without JS the toggle can't work, so it isn't shown. */
+html:not(.js) .theme-toggle { display: none; }
+
+.theme-toggle {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+}
+.theme-toggle__option {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--muted);
+  transition: var(--transition-ui);
+  --icon-size: var(--icon-sm);
+}
+.theme-toggle__option::before {
+  content: "";
+  position: absolute;
+  inset: -5px -3px; /* 1px border + 4px → 40px tall; 3px → 36px wide */
+}
+.theme-toggle__option:hover { color: var(--ink); }
+.theme-toggle__option[aria-checked="true"] {
+  border-color: var(--line-strong);
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+} /* @layer components */

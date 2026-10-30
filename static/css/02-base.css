@@ -1,0 +1,104 @@
+/* ==========================================================================
+   02-base.css — reset + base element styles
+   Two layers: `reset` (normalise the browser) and `base` (bare elements,
+   focus, selection). No classes here: those belong in components.
+   ========================================================================== */
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    hanging-punctuation: first last;
+  }
+
+  img, picture, video, canvas, svg { display: block; max-width: 100%; }
+  img { height: auto; } /* keeps aspect ratio when width/height attributes are set */
+  input, button, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  p, li, dt, dd, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+
+  /* Lists with a class are UI lists (tag lists, clusters, nav): no bullets,
+     no indent. Bare <ul>/<ol> in prose keep their markers. */
+  ul[class], ol[class] { list-style: none; padding: 0; }
+}
+
+@layer base {
+  body {
+    min-height: 100svh;
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    line-height: var(--lh-body);
+    font-feature-settings: "cv11", "ss01";
+    /* Inter at its default optical size (14), as in the approved Phase 4
+       prototype. Fraunces elements set font-optical-sizing: auto. */
+    font-optical-sizing: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Theme cross-fade default for every element (see 09-motion.css).
+     Components that transition use var(--transition-ui), which starts with
+     var(--theme-fade). This lives in `base` so components can override it. */
+  *, *::before, *::after { transition: var(--theme-fade); }
+
+  /* Anchor targets land below the sticky header, never under it. */
+  [id] { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+  /* ---- Text ------------------------------------------------------------- */
+  p { max-width: var(--measure); text-wrap: pretty; }
+
+  h1, h2 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50, "WONK" 0;
+    font-feature-settings: normal;
+    font-weight: 560;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  h2 { font-size: var(--fs-2xl); }
+
+  /* Card titles: Inter 600 */
+  h3 {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: var(--lh-snug);
+    text-wrap: balance;
+  }
+
+  /* Bare links (prose, anywhere unclassed) keep the native underline. */
+  a {
+    color: var(--accent-text);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+    font-feature-settings: normal;
+    font-size: 0.9em;
+  }
+
+  hr { border: 0; border-block-start: 1px solid var(--line); }
+
+  ::selection { background-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+  /* ---- Focus -------------------------------------------------------------
+     One ring everywhere. Outlines follow border-radius, so buttons, icon
+     buttons and the theme toggle get a ring of their own shape. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+  :focus:not(:focus-visible) { outline: none; }
+}

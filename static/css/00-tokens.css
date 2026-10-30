@@ -1,0 +1,176 @@
+/* ==========================================================================
+   00-tokens.css — design tokens
+   The ONLY file in the project allowed to contain colour literals.
+   Everything else references these custom properties.
+   tools/contrast parses this file: keep colours as plain hex values.
+
+   Cascade layers: the order below decides which rule wins, before
+   specificity. Later layers win. @font-face (01-fonts.css) is unlayered.
+   ========================================================================== */
+
+@layer reset, tokens, base, layout, components, sections, utilities, motion;
+
+@layer tokens {
+
+:root {
+  /* ---- Type families ---------------------------------------------------- */
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+  /* ---- Fluid type scale ------------------------------------------------- */
+  --fs-xs:   0.75rem;                                    /* mono labels, tags */
+  --fs-sm:   0.875rem;                                   /* meta, captions */
+  --fs-meta: 0.8125rem;                                  /* mono dates / meta */
+  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);    /* body */
+  --fs-lg:   clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem); /* lead paragraph */
+  --fs-xl:   clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);   /* card titles */
+  --fs-2xl:  clamp(1.75rem, 1.35rem + 1.8vw, 2.75rem);   /* section headings */
+  --fs-3xl:  clamp(2.5rem, 1.6rem + 4vw, 5rem);          /* hero name */
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.2;
+  --lh-body: 1.65;
+
+  --measure: 65ch;
+
+  /* ---- Spacing (4px base: --space-N = N × 4px) -------------------------- */
+  --space-1: 0.25rem;   /*  4px */
+  --space-2: 0.5rem;    /*  8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --section-pad: clamp(4rem, 3rem + 5vw, 8rem);
+  --container: 1200px;                    /* max container width, gutters included */
+  --gutter: clamp(1.25rem, 4vw, 2rem);    /* container padding-inline */
+  --header-h: 64px;                       /* sticky header; 72px from 1024px */
+  /* Breakpoints (mobile-first, use literally in @media): 640px · 900px · 1200px,
+     plus 1024px for the header nav (desktop links vs menu button). */
+
+  /* ---- Radii ------------------------------------------------------------ */
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-pill: 999px;
+
+  /* ---- Motion: one curve, two durations --------------------------------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot: career-graph node ignite ONLY */
+  --dur-fast: 180ms;   /* hovers, colour changes, underlines */
+  --dur-slow: 600ms;   /* reveals, hero entrance */
+  --stagger: 80ms;     /* delay between items in a group */
+  --reveal-distance: 16px;
+
+  /* Theme cross-fade. Instant until main.js adds html.theme-fade after the
+     first user toggle (see 03-motion.css). Include var(--theme-fade) first
+     in any element's own `transition` list. */
+  --theme-fade: background-color 0s, color 0s, border-color 0s, fill 0s, stroke 0s;
+
+  /* The one transition list for interactive elements (buttons, links,
+     cards, toggles). Starts with --theme-fade, then cross-fades colours and
+     moves transform at --dur-fast. Every component that transitions uses
+     exactly this, so no layer can drop another's properties. */
+  --transition-ui:
+    var(--theme-fade),
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    text-decoration-color var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  /* ---- Icons & touch ---------------------------------------------------- */
+  --icon-sm: 16px;   /* inside buttons, link-arrows, the theme toggle */
+  --icon-md: 20px;   /* default; icon buttons, media tiles */
+  --icon-lg: 24px;
+  --tap: 44px;       /* minimum touch target (buttons, icon buttons) */
+}
+
+@media (min-width: 1024px) {
+  :root { --header-h: 72px; }
+}
+
+/* ---- Dark theme (default) ---------------------------------------------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0B1220;
+  --surface: #111A2E;
+  --surface-2: #111B30;            /* alternating section band */
+  --ink: #E6EAF2;
+  --muted: #9AA6BD;
+  --line: #1E2940;
+  --accent: #3B82F6;               /* decorative / large text only */
+  --accent-strong: #2563EB;        /* primary button fill */
+  --accent-strong-hover: #1D4ED8;  /* primary button hover */
+  --accent-text: #60A5FA;          /* links & accent text */
+  --accent-soft: #172746;          /* icon tiles, "Current" tag background */
+  --on-accent: #FFFFFF;            /* text on --accent-strong */
+  --line-strong: #2C3A57;          /* hover borders */
+  --focus: #60A5FA;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .25);
+
+  /* Employment types: ONLY inside the experience section and its legend.
+     Components read --c / --soft (set per row), never these directly. */
+  --type-internship: var(--accent-text);
+  --type-internship-soft: var(--accent-soft);
+  --type-volunteer: #34D399;
+  --type-volunteer-soft: #10291F;
+  --type-contract: #FBBF24;              /* defined for future roles; unused today */
+  --type-contract-soft: #2A220C;
+  --type-freelance: #A78BFA;             /* defined for future roles; unused today */
+  --type-freelance-soft: #1E1A38;
+  --type-full-time: var(--ink);
+  --type-full-time-soft: var(--surface);
+  --type-part-time: var(--ink);
+  --type-part-time-soft: var(--surface);
+  --type-milestone: var(--ink);
+  --type-milestone-soft: var(--surface);
+}
+
+/* ---- Light theme -------------------------------------------------------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-2: #EBEFF5;
+  --ink: #0F1A2E;
+  --muted: #4A5568;
+  --line: #E2E7EF;
+  --accent: #3B82F6;
+  --accent-strong: #2563EB;
+  --accent-strong-hover: #1D4ED8;
+  --accent-text: #1D4ED8;
+  --accent-soft: #E8F0FE;
+  --on-accent: #FFFFFF;
+  --line-strong: #CBD3E0;
+  --focus: #2563EB;
+  --shadow: 0 1px 2px rgb(15 26 46 / .06), 0 8px 24px rgb(15 26 46 / .08);
+
+  --type-internship: var(--accent-text);
+  --type-internship-soft: var(--accent-soft);
+  --type-volunteer: #047857;
+  --type-volunteer-soft: #E3F5EC;
+  --type-contract: #AD5009;              /* unused today; nudged from #B45309 (4.35:1 on --surface-2) */
+  --type-contract-soft: #FDF3E1;
+  --type-freelance: #6D28D9;             /* defined for future roles; unused today */
+  --type-freelance-soft: #F0EBFE;
+  --type-full-time: var(--ink);
+  --type-full-time-soft: var(--surface);
+  --type-part-time: var(--ink);
+  --type-part-time-soft: var(--surface);
+  --type-milestone: var(--ink);
+  --type-milestone-soft: var(--surface);
+}
+
+} /* @layer tokens */

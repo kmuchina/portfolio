@@ -1,0 +1,12 @@
+{{/* Served by GitHub Pages for unknown paths. Links are root-absolute. */}}
+{{define "noindex"}}{{end}}
+{{define "title"}}{{.Site.UI.NotFound.Title}} — {{.Site.Person.FullName}}{{end}}
+{{define "main" -}}
+<section class="section not-found" aria-labelledby="not-found-title">
+  <div class="container stack">
+    <h1 id="not-found-title" class="not-found__title section__title">{{.Site.UI.NotFound.Title}}</h1>
+    <p class="not-found__body lead">{{.Site.UI.NotFound.Body}}</p>
+    <p class="not-found__action"><a class="btn btn--primary press" href="/">{{icon "arrow-right"}}<span class="btn__label">{{.Site.UI.NotFound.Back}}</span></a></p>
+  </div>
+</section>
+{{- end}}

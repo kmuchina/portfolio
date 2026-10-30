@@ -1,0 +1,16 @@
+{{define "footer" -}}
+{{- with .Site}}
+<footer class="site-footer">
+  <div class="container site-footer__inner stack">
+    <p class="site-footer__id cluster"><span class="site-footer__name">{{.Person.FullName}}</span> <span class="site-footer__role">{{.Person.Role}}</span></p>
+    <ul class="social site-footer__social cluster" aria-label="{{.UI.SocialLabel}}">
+      <li class="social__item"><a class="social__link icon-btn" href="{{.Contact.MailtoHref}}">{{icon "mail" .Contact.Email}}</a></li>
+      {{- range .Contact.Links}}
+      <li class="social__item"><a class="social__link icon-btn" href="{{.URL}}" rel="me">{{icon .Icon .Label}}</a></li>
+      {{- end}}
+    </ul>
+    <p class="site-footer__copy meta"><small>© {{year}} {{.Person.FullName}}</small></p>
+  </div>
+</footer>
+{{- end}}
+{{- end}}

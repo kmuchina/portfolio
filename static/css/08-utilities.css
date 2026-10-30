@@ -1,0 +1,36 @@
+/* ==========================================================================
+   08-utilities.css — single-purpose helpers
+   Above components and sections, so a utility always wins over them.
+   ========================================================================== */
+
+@layer utilities {
+  /* Screen-reader-only text. No !important needed: this layer outranks
+     every component. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .muted { color: var(--muted); }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* Extends a small single-line link's hit area to --tap height without
+     changing layout (an invisible ::before). Only for links laid out in a
+     row: stacked vertically, their hit areas would overlap. */
+  .tap-target { position: relative; }
+  .tap-target::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    /* Negative when the link is shorter than --tap; 0 when it is taller. */
+    inset-block: min(0px, calc((100% - var(--tap)) / 2));
+  }
+}

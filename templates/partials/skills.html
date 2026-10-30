@@ -1,0 +1,26 @@
+{{define "skills" -}}
+{{- with .Site.Skills}}
+<section id="skills" class="section skills" aria-labelledby="skills-title">
+  <div class="container section__grid">
+    <div class="section__aside" data-reveal>
+      <p class="eyebrow">{{.Eyebrow}}</p>
+      <h2 id="skills-title" class="section__title">{{.Heading}}</h2>
+    </div>
+    <div class="section__body">
+      <div class="skills__grid stack" data-reveal-group>
+        {{- range .Groups}}
+        <div class="skill-group stack">
+          <h3 class="skill-group__title cluster">{{icon .Icon}}<span>{{.Name}}</span></h3>
+          <ul class="tag-list">
+            {{- range .Items}}
+            <li class="tag">{{.}}</li>
+            {{- end}}
+          </ul>
+        </div>
+        {{- end}}
+      </div>
+    </div>
+  </div>
+</section>
+{{- end}}
+{{- end}}

@@ -1,0 +1,17 @@
+{{define "head" -}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>{{.ThemeInit}}</script>
+<title>{{block "title" .}}{{.Site.Meta.Title}}{{end}}</title>
+<meta name="description" content="{{.Site.Meta.Description}}">
+{{if .NoIndex}}<meta name="robots" content="noindex">{{else}}<link rel="canonical" href="{{.Canonical}}">{{end}}
+{{/* Initial value = dark --bg (HTML can't read CSS vars); main.js syncs it. */}}
+<meta name="theme-color" content="#0B1220">
+<link rel="preload" href="{{asset "fonts/fraunces-var.woff2"}}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{asset "fonts/inter-var.woff2"}}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{asset "css/site.css"}}">
+<script src="{{asset "js/main.js"}}" defer></script>
+<link rel="icon" href="{{asset "favicon.svg"}}" type="image/svg+xml">
+{{/* Phase 7: SEO/OG/JSON-LD */}}
+{{block "head-extra" .}}{{end}}
+{{- end}}

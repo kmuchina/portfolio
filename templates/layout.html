@@ -1,0 +1,22 @@
+{{/*
+  layout.html — the <html> shell shared by every page in pages/.
+  Pages define "main" and may define "title", "head-extra" and "noindex".
+*/}}
+{{define "layout" -}}
+<!doctype html>
+<html lang="{{.Site.Meta.Lang}}" data-theme="dark">
+<head>
+{{template "head" .}}
+</head>
+<body>
+{{template "skip-link" .}}
+{{/* 1px marker at the very top: main.js watches it to toggle .site-header--scrolled. */}}
+<div class="scroll-sentinel" aria-hidden="true" data-scroll-sentinel></div>
+{{template "nav" .}}
+<main id="main">
+{{template "main" .}}
+</main>
+{{template "footer" .}}
+</body>
+</html>
+{{end}}

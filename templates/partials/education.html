@@ -1,0 +1,44 @@
+{{define "education" -}}
+{{- $site := .Site}}
+{{- with .Site.Education}}
+<section id="education" class="section education" aria-labelledby="education-title">
+  <div class="container section__grid">
+    <div class="section__aside" data-reveal>
+      <p class="eyebrow">{{.Eyebrow}}</p>
+      <h2 id="education-title" class="section__title">{{.Heading}}</h2>
+    </div>
+    <div class="section__body">
+      <div class="education__grid stack" data-reveal-group>
+        {{- range .Items}}
+        <article class="school stack">
+          <h3 class="school__degree">{{.Degree}}</h3>
+          <p class="school__meta meta cluster">
+            <span class="school__name">{{.School}}</span>
+            {{with .DateISO}}<time class="school__date" datetime="{{.}}">{{else}}<span class="school__date">{{end}}{{.Date}}{{if .DateISO}}</time>{{else}}</span>{{end}}
+          </p>
+          <ul class="school__highlights list">
+            {{- range .Highlights}}
+            <li>{{.}}</li>
+            {{- end}}
+          </ul>
+        </article>
+        {{- end}}
+        {{- with $site.Languages}}
+        <div class="languages stack">
+          <h3 class="languages__title">{{$site.UI.LanguagesHeading}}</h3>
+          <dl class="languages__list stack">
+            {{- range .}}
+            <div class="languages__item">
+              <dt class="languages__name">{{.Name}}</dt>
+              <dd class="languages__level">{{.Level}}</dd>
+            </div>
+            {{- end}}
+          </dl>
+        </div>
+        {{- end}}
+      </div>
+    </div>
+  </div>
+</section>
+{{- end}}
+{{- end}}

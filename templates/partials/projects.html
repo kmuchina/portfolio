@@ -1,0 +1,49 @@
+{{define "projects" -}}
+{{- with .Site.Projects}}
+<section id="projects" class="section section--alt projects" aria-labelledby="projects-title">
+  <div class="container section__grid">
+    <div class="section__aside" data-reveal>
+      <p class="eyebrow">{{.Eyebrow}}</p>
+      <h2 id="projects-title" class="section__title">{{.Heading}}</h2>
+      {{- with .Action}}
+      <a class="link-arrow section__action tap-target" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>
+      {{- end}}
+    </div>
+    <div class="section__body">
+      <div class="projects__grid stack" data-reveal-group>
+        {{- range .Items}}
+        <article id="project-{{.Slug}}" class="project card">
+          {{- if and .Image (exists .Image)}}
+          {{- $size := imgSize .Image}}
+          <div class="project__media">
+            <img class="project__image" src="{{asset .Image}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{.ImageAlt}}" loading="lazy" decoding="async">
+          </div>
+          {{- end}}
+          <div class="project__body stack">
+            <p class="project__kind meta">{{.Kind}}</p>
+            <h3 class="project__title">{{.Title}}</h3>
+            <ul class="tag-list project__stack">
+              {{- range .Stack}}
+              <li class="tag">{{.}}</li>
+              {{- end}}
+            </ul>
+            <p class="project__summary">{{.Summary}}</p>
+            {{- with .Metric}}
+            <p class="project__metric meta">{{.}}</p>
+            {{- end}}
+            {{- if .HasLinks}}
+            <ul class="project__links">
+              {{- range .Links}}
+              <li><a class="project__link" href="{{.URL}}">{{with .Icon}}{{icon .}}{{end}}<span>{{.Label}}</span>{{icon "arrow-up-right"}}</a></li>
+              {{- end}}
+            </ul>
+            {{- end}}
+          </div>
+        </article>
+        {{- end}}
+      </div>
+    </div>
+  </div>
+</section>
+{{- end}}
+{{- end}}

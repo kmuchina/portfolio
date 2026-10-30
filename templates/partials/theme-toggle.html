@@ -1,0 +1,10 @@
+{{/* Theme toggle. Data: (dict "Theme" .Site.UI.Theme "Label" "<unique radiogroup label>").
+     Every instance on a page is initialised and kept in sync by main.js. */}}
+{{define "theme-toggle" -}}
+{{- $t := .Theme}}
+<div class="theme-toggle" role="radiogroup" aria-label="{{.Label}}" data-theme-toggle>
+  <button type="button" class="theme-toggle__option" role="radio" aria-checked="true" tabindex="0" data-value="dark" title="{{$t.Dark}}">{{icon "moon"}}<span class="sr-only">{{$t.Dark}}</span></button>
+  <button type="button" class="theme-toggle__option" role="radio" aria-checked="false" tabindex="-1" data-value="system" title="{{$t.System}}">{{icon "monitor"}}<span class="sr-only">{{$t.System}}</span></button>
+  <button type="button" class="theme-toggle__option" role="radio" aria-checked="false" tabindex="-1" data-value="light" title="{{$t.Light}}">{{icon "sun"}}<span class="sr-only">{{$t.Light}}</span></button>
+</div>
+{{- end}}

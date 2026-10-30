@@ -1,0 +1,303 @@
+/* ==========================================================================
+   09-motion.css — the complete motion vocabulary (CLAUDE.md § Motion)
+   Only opacity and transform move. Colour properties may cross-fade at
+   --dur-fast. Nothing loops. This is the top layer, so the reduced-motion
+   block at the end beats every component without !important.
+   ========================================================================== */
+
+@layer motion {
+
+/* ---- 6. Theme cross-fade ------------------------------------------------
+   --theme-fade is 0s until main.js adds html.theme-fade on the first user
+   toggle, so the initial page load never animates. The universal
+   `transition: var(--theme-fade)` default lives in 02-base.css (`base`
+   layer) so components can override it with var(--transition-ui). */
+html.theme-fade {
+  --theme-fade:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    fill var(--dur-fast) var(--ease-out),
+    stroke var(--dur-fast) var(--ease-out);
+}
+
+/* ---- Smooth anchor scrolling (never under reduced motion) -------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ---- 1. Hero entrance -----------------------------------------------------
+   CSS only, on load, under html.js. Each [data-hero] text item rises in with
+   delay --i × --stagger (--i set inline, 0–3: ≈ 840ms in total); the photo
+   ([data-hero-photo]) fades in and settles from scale 1.02 just after the
+   text starts. fill-mode both: hidden during the delay, then held at rest. */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+}
+@keyframes hero-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+html.js [data-hero] {
+  animation: hero-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+html.js [data-hero-photo] {
+  animation: hero-photo-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: var(--stagger);
+}
+
+/* ---- 2. Scroll reveal ------------------------------------------------------
+   Hidden only under html.js (set by theme-init.js), so content is never
+   hidden without JS. main.js adds .is-visible once, then unobserves, and
+   sets --i on each [data-reveal-group] child for the stagger.
+   A one-shot keyframe animation (fill: backwards), not a transition: once
+   it ends it leaves no trace, so a revealed card's own hover transitions
+   are untouched. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+}
+html.js [data-reveal]:not(.is-visible),
+html.js [data-reveal-group]:not(.is-visible) > * {
+  opacity: 0;
+}
+html.js [data-reveal].is-visible,
+html.js [data-reveal-group].is-visible > * {
+  animation: reveal var(--dur-slow) var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+/* ---- 3. Card hover lift --------------------------------------------------
+   .lift (or .card--interactive): up 2px, border to --line-strong, and
+   --shadow on ::after fading in via opacity. */
+.lift,
+.card--interactive {
+  position: relative;
+  transition: var(--transition-ui);
+}
+.lift::after,
+.card--interactive::after {
+  content: "";
+  position: absolute;
+  inset: -1px; /* cover the 1px border too */
+  border-radius: inherit;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--theme-fade), opacity var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .lift:hover,
+  .card--interactive:hover {
+    transform: translateY(-2px);
+    border-color: var(--line-strong);
+  }
+  .lift:hover::after,
+  .card--interactive:hover::after { opacity: 1; }
+}
+.lift:focus-within,
+.card--interactive:focus-within { border-color: var(--line-strong); }
+
+/* ---- 4. Link / nav underline ---------------------------------------------
+   For single-line links (nav, footer, CTAs, .link). Links in running text
+   (.prose a) keep the native underline. */
+.underline-grow,
+.link {
+  position: relative;
+  text-decoration: none;
+}
+.underline-grow::after,
+.link::after {
+  content: "";
+  position: absolute;
+  /* A padded or tall link (nav) moves the line in with --underline-inset
+     and up with --underline-offset (distance from the box bottom). */
+  inset-inline: var(--underline-inset, 0);
+  inset-block-end: var(--underline-offset, -0.15em);
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: var(--theme-fade), transform var(--dur-fast) var(--ease-out);
+}
+.underline-grow:hover::after,
+.underline-grow:focus-visible::after,
+.underline-grow[aria-current="true"]::after,
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ---- 5. Button press ---------------------------------------------------- */
+.press { transition: var(--transition-ui); }
+.press:active { transform: scale(0.98); }
+
+/* ---- 7. Arrow nudge ------------------------------------------------------
+   The trailing arrow of .link-arrow moves 3px right on hover/focus. */
+.link-arrow .icon { transition: var(--transition-ui); }
+.link-arrow:hover .icon,
+.link-arrow:focus-visible .icon {
+  transform: translateX(3px);
+}
+
+/* ---- Mobile menu ---------------------------------------------------------
+   The panel fades in and drops 8px; the backdrop fades in. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--space-2) * -1));
+  }
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+}
+.menu[open] { animation: menu-in var(--dur-fast) var(--ease-out); }
+.menu[open]::backdrop { animation: backdrop-in var(--dur-fast) var(--ease-out); }
+
+/* ---- 10–12. Career graph (Phase 4; design/experience-prototype.html) -----
+   10. The line draws itself as you scroll: each row's segment "ink"
+       (.seg::after) grows downward via clip-path, the merge curve via
+       stroke-dashoffset, driven by the row's view timeline (--row, set on
+       .career__row). px ranges keep the drawing tip about two-thirds down
+       the viewport whatever the row height. clip-path / stroke-dashoffset
+       are the only way to "draw" a line; they run on a scroll timeline,
+       not on a clock.
+   11. Nodes ignite (scale 0 → 1.35 → 1) as the ink reaches them. With
+       the IntersectionObserver fallback they ignite once, on --ease-spring
+       (its ONLY use).
+   12. The current role breathes: a halo scales 1 → 2.8 and fades, 2.4s,
+       infinite. THE ONE LOOPING ANIMATION ON THE SITE. main.js pauses it
+       (.is-paused) whenever the node is off-screen.
+   Without scroll-driven animations, main.js adds .is-lit to each row as it
+   enters (rootMargin -35% bottom) and the same visuals run once on a
+   clock. Under reduced motion none of this applies: the graph is drawn,
+   lit and still. */
+@keyframes career-draw {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes career-draw-svg {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes career-ignite {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+@keyframes career-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .career .node--current::before { animation: career-pulse 2.4s var(--ease-out) infinite; }
+  .career .node--current.is-paused::before { animation-play-state: paused; }
+
+  @supports (animation-timeline: view()) {
+    .career .seg::after,
+    .career .curve .ink,
+    .career .node::after {
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-timeline: --row;
+    }
+    .career .seg::after { animation-name: career-draw; }
+    .career .seg--above::after,
+    .career .curve .ink { animation-range: cover 150px cover 300px; }
+    .career .curve .ink { animation-name: career-draw-svg; }
+    .career .seg--full::after { animation-range: cover 150px exit 0%; }
+    .career .seg--below::after { animation-range: cover 300px exit 0%; }
+    .career .node::after {
+      animation-name: career-ignite;
+      animation-range: cover 290px cover 370px;
+    }
+  }
+
+  @supports not (animation-timeline: view()) {
+    .js .career .seg::after {
+      clip-path: inset(0 0 100% 0);
+      transition: clip-path 500ms var(--ease-out);
+    }
+    .js .career .seg--below::after { transition-delay: 380ms; }
+    .js .career .curve .ink {
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 500ms var(--ease-out);
+    }
+    .js .career .node::after {
+      transform: scale(0);
+      transition: transform var(--dur-slow) var(--ease-spring) 250ms;
+    }
+    .js .career .is-lit .seg::after { clip-path: inset(0 0 0 0); }
+    .js .career .is-lit .curve .ink { stroke-dashoffset: 0; }
+    .js .career .is-lit .node::after { transform: scale(1); }
+  }
+}
+
+/* ---- Reduced motion -----------------------------------------------------
+   Everything is visible immediately; nothing moves. Only short opacity and
+   colour changes remain. Selectors repeat the ones above so they win on
+   source order at equal specificity. */
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal]:not(.is-visible),
+  html.js [data-reveal-group]:not(.is-visible) > * {
+    opacity: 1;
+  }
+  html.js [data-reveal].is-visible,
+  html.js [data-reveal-group].is-visible > * {
+    animation: none;
+  }
+
+  html.js [data-hero],
+  html.js [data-hero-photo],
+  .menu[open],
+  .menu[open]::backdrop {
+    animation: none;
+  }
+
+  /* Career graph: hover/filter changes are instant; nodes still mark the
+     hovered row (a size change, not a movement over time). */
+  .seg,
+  .node,
+  .curve,
+  .career__graph,
+  .job__tile { transition: var(--theme-fade); }
+
+  .lift:hover,
+  .card--interactive:hover,
+  .press:active,
+  .link-arrow:hover .icon,
+  .link-arrow:focus-visible .icon {
+    transform: none;
+  }
+
+  .underline-grow::after,
+  .link::after {
+    transform: none;
+    opacity: 0;
+    transition: var(--theme-fade), opacity var(--dur-fast) linear;
+  }
+  .underline-grow:hover::after,
+  .underline-grow:focus-visible::after,
+  .underline-grow[aria-current="true"]::after,
+  .link:hover::after,
+  .link:focus-visible::after {
+    opacity: 1;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    scroll-behavior: auto;
+  }
+}
+
+} /* @layer motion */

@@ -1,0 +1,32 @@
+{{define "about" -}}
+{{- with .Site.About}}
+<section id="about" class="section about" aria-labelledby="about-title">
+  <div class="container section__grid">
+    <div class="section__aside" data-reveal>
+      <p class="eyebrow">{{.Eyebrow}}</p>
+      <h2 id="about-title" class="section__title">{{.Heading}}</h2>
+    </div>
+    <div class="section__body">
+      <div class="about__content stack">
+        <div class="about__body" data-reveal>
+          <p class="lead">{{.Body}}</p>
+        </div>
+        <ul class="focus-list stack" data-reveal-group>
+          {{- range .Focus}}
+          <li class="focus-list__item media media--plain"><span class="media__icon">{{icon .Icon}}</span><span class="focus-list__label media__title">{{.Label}}</span></li>
+          {{- end}}
+        </ul>
+        <dl class="facts card stack" data-reveal-group>
+          {{- range .Facts}}
+          <div class="facts__item media">
+            <dt class="facts__title media__title"><span class="media__icon">{{icon .Icon}}</span>{{.Title}}</dt>
+            <dd class="facts__detail media__text">{{.Detail}}</dd>
+          </div>
+          {{- end}}
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+{{- end}}
+{{- end}}

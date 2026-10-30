@@ -1,0 +1,739 @@
+/* ==========================================================================
+   06-sections.css — section composition
+   Rules here arrange components inside one section (header, hero, timeline,
+   project grid…). Anything reusable belongs in 05-components.css instead.
+   ========================================================================== */
+
+@layer sections {
+
+/* ==========================================================================
+   Site header (Phase 3)
+   Sticky. With JS it is transparent at the very top (it blends into the
+   hero) and frosted once .site-header--scrolled is set by main.js. Without
+   JS it is always solid. Desktop nav + toggle from 1024px; below that the
+   menu button opens the <dialog class="menu"> (JS) or, without JS, the nav
+   becomes a sideways-scrolling row under the brand.
+   ========================================================================== */
+
+/* 1px marker at the top of the page, watched by an IntersectionObserver. */
+.scroll-sentinel {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  pointer-events: none;
+}
+
+.site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  border-block-end: 1px solid var(--line);
+  background-color: var(--bg);
+  transition: var(--transition-ui);
+}
+html.js .site-header:not(.site-header--scrolled) {
+  border-block-end-color: transparent;
+  background-color: transparent;
+}
+/* Frosted only where backdrop-filter works; otherwise it stays solid --bg. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .site-header--scrolled {
+    background-color: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+  }
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-block-size: calc(var(--header-h) - 1px); /* + the 1px border = --header-h */
+}
+
+/* Brand: the name, so Fraunces (§3), "Muchina" as in the hero.
+   line-height (not flex) gives the tap height and keeps the space before
+   the <em>. */
+.brand {
+  margin-inline-end: auto;
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: var(--tap);
+  white-space: nowrap;
+  color: var(--ink);
+  text-decoration: none;
+}
+.brand em { color: var(--accent-text); }
+
+.nav__list { display: flex; }
+.nav__link {
+  display: inline-block;
+  padding-inline: var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: var(--space-10); /* 40px hit area */
+  white-space: nowrap;
+  color: var(--muted);
+  transition: var(--transition-ui);
+  /* 09-motion.css: underline under the text, not across the padding. */
+  --underline-inset: var(--space-3);
+  --underline-offset: var(--space-2);
+}
+.nav__link:hover,
+.nav__link[aria-current="true"] { color: var(--ink); }
+
+/* ---- Below 1024px ------------------------------------------------------- */
+.site-header__menu-btn { display: none; }
+
+/* With JS: the menu button replaces the nav and the toggle. */
+html.js .site-header__menu-btn { display: inline-grid; }
+html.js .site-header .nav,
+html.js .site-header .theme-toggle { display: none; }
+
+/* Without JS: brand on top, the nav as a sideways-scrolling row under it.
+   Not sticky: the two-row header is taller than --header-h. The row bleeds
+   to the screen edges so a clipped link signals "scroll me"; its block
+   padding keeps focus rings inside the scroll box. */
+html:not(.js) .site-header { position: relative; }
+html:not(.js) .site-header__inner { flex-wrap: wrap; }
+html:not(.js) .site-header .nav {
+  flex-basis: 100%;
+  min-inline-size: 0;
+}
+html:not(.js) .nav__list {
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-inline: calc(var(--gutter) * -1);
+  padding: var(--space-1) calc(var(--gutter) - var(--space-3)) var(--space-2);
+}
+
+/* ---- From 1024px: one row, brand | links | toggle ------------------------ */
+@media (min-width: 1024px) {
+  html.js .site-header__menu-btn { display: none; }
+  html.js .site-header .nav { display: block; }
+  html.js .site-header .theme-toggle { display: inline-flex; }
+
+  html:not(.js) .site-header { position: sticky; }
+  html:not(.js) .site-header__inner { flex-wrap: nowrap; }
+  html:not(.js) .site-header .nav { flex-basis: auto; }
+  html:not(.js) .nav__list {
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* ==========================================================================
+   Mobile menu — <dialog class="menu"> opened with showModal() (main.js)
+   Full width, just under the header; fills the viewport height on small
+   screens. The page behind is inert and doesn't scroll.
+   ========================================================================== */
+
+html:has(dialog[open]) { overflow: hidden; }
+
+.menu {
+  position: fixed;
+  inset: var(--header-h) 0 auto;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: calc(100dvh - var(--header-h));
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-block-start: 1px solid var(--line);
+  background-color: var(--bg);
+  color: var(--ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.menu::backdrop { background-color: color-mix(in srgb, var(--bg) 60%, transparent); }
+@media (min-width: 640px) {
+  .menu {
+    block-size: auto;
+    max-block-size: calc(100dvh - var(--header-h));
+    border-block-end: 1px solid var(--line);
+  }
+}
+
+.menu__inner { padding-block: var(--space-2) var(--space-10); }
+/* Close sits directly under the menu button it replaces (same x). */
+.menu__bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.menu__list { margin-block-end: var(--space-8); }
+.menu__item + .menu__item { border-block-start: 1px solid var(--line); }
+.menu__link {
+  display: block;
+  padding-block: var(--space-3);
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-xl);
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: var(--transition-ui);
+}
+.menu__link:hover,
+.menu__link[aria-current="true"] { color: var(--accent-text); }
+
+.menu__footer {
+  --stack-space: var(--space-6);
+  align-items: flex-start;
+}
+
+/* ==========================================================================
+   Hero (Phase 3) — text column + photo column
+   ========================================================================== */
+
+.hero {
+  border-block-start: 0; /* the first band: no boundary line under the header */
+  overflow: clip; /* the glow and offset shape may poke past the gutter or the section */
+  padding-block: calc(var(--section-pad) / 2) var(--section-pad);
+}
+
+.hero__inner { align-items: center; }
+
+/* ---- Text column -------------------------------------------------------- */
+.hero__name { margin-block-start: var(--space-4); }
+.hero__role {
+  margin-block-start: var(--space-3);
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  color: var(--muted);
+}
+.hero__summary {
+  margin-block-start: var(--space-5);
+  max-inline-size: 52ch;
+}
+.hero__actions { margin-block-start: var(--space-8); }
+/* Narrow phones: the two CTAs stack full-width. */
+.hero__actions > .btn { flex: 1 1 100%; }
+@media (min-width: 400px) {
+  .hero__actions > .btn { flex: 0 0 auto; }
+}
+.hero__social { margin-block-start: var(--space-6); }
+
+/* ---- Photo column: framed portrait (treatment B) -------------------------
+   The photo is a pale-grey studio shot, so it can't fade into the navy --bg;
+   it is framed instead. It is exactly 4:5 already, with the eyes at ~27% of
+   the height, so cover + 50% 30% crops nothing and keeps the face in the
+   upper third. Behind it: an --accent-soft rounded rectangle offset down
+   and right, and a very faint --accent glow (the "subtle hero backdrop"). */
+.hero__aside {
+  position: relative;
+  isolation: isolate;
+  inline-size: 100%;
+  max-inline-size: 22rem;
+  margin-inline: auto;
+}
+.hero__aside::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  z-index: -2;
+  /* Eased falloff (not a linear 8% → 0), so no disc edge shows. */
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--accent) 8%, transparent),
+    color-mix(in srgb, var(--accent) 5.5%, transparent) 25%,
+    color-mix(in srgb, var(--accent) 3%, transparent) 50%,
+    color-mix(in srgb, var(--accent) 1.2%, transparent) 72%,
+    color-mix(in srgb, var(--accent) 0.4%, transparent) 88%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.hero__media { position: relative; }
+.hero__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--radius);
+  background-color: var(--accent-soft);
+  transform: translate(var(--space-4), var(--space-4));
+}
+.hero__photo {
+  inline-size: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+/* ---- Quote: under the photo, aligned to the end --------------------------
+   Never over the photo: light --ink on its pale-grey backdrop fails
+   contrast in dark mode, and the top corners sit right beside the face. */
+.hero__quote {
+  max-inline-size: 24ch; /* two balanced lines; 14ch broke it into four */
+  text-wrap: balance;
+  margin-block-start: var(--space-10);
+  margin-inline-start: auto;
+  text-align: end;
+}
+
+/* ---- ≥ 900px: two columns, filling the first screen --------------------- */
+@media (min-width: 900px) {
+  .hero {
+    display: grid;
+    align-items: center;
+    min-block-size: min(calc(100svh - var(--header-h)), 54rem);
+    padding-block: var(--space-12);
+  }
+  .hero__inner { --split-ratio: 1.15fr 0.85fr; }
+  .hero__aside {
+    max-inline-size: 26rem;
+    margin-inline: auto 0;
+  }
+}
+
+/* ---- ≥ 1200px: more air between the columns ----------------------------- */
+@media (min-width: 1200px) {
+  .hero__inner { column-gap: var(--space-20); }
+}
+
+/* ==========================================================================
+   Experience (Phase 4): the career graph
+   Visual reference: design/experience-prototype.html. Markup and every
+   number in it come from internal/career. The --type-* colours may appear
+   ONLY here and in the legend; components read --c / --soft per row.
+   ========================================================================== */
+
+/* ---- Aside: summary + legend swatches ------------------------------------ */
+.summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  max-inline-size: 17rem;
+  margin-block-start: var(--space-6);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--line);
+}
+.summary__num {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  line-height: 1;
+}
+.summary__text {
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.legend__swatch--internship { --c: var(--type-internship); }
+.legend__swatch--volunteer  { --c: var(--type-volunteer); }
+.legend__swatch--contract   { --c: var(--type-contract); }
+.legend__swatch--freelance  { --c: var(--type-freelance); }
+.legend__swatch--full-time  { --c: var(--type-full-time); }
+.legend__swatch--part-time  { --c: var(--type-part-time); }
+.legend__swatch--milestone  { --c: var(--type-milestone); }
+/* The swatch reuses the graph's node shapes, sitting in place. */
+.legend__swatch .node {
+  position: static;
+  translate: none;
+}
+
+/* ---- Graph geometry --------------------------------------------------------
+   --gw graph column, --x0/--x1 lane centres, --node-y node centre (the
+   title's first line). Both lanes stay visible on phones. */
+.career {
+  --gw: 52px;
+  --x0: 16px;
+  --x1: 37px;
+  --node-y: 22px;
+}
+@media (min-width: 640px) {
+  .career {
+    --gw: 68px;
+    --x0: 20px;
+    --x1: 46px;
+  }
+}
+
+.career__row {
+  display: grid;
+  grid-template-columns: var(--gw) minmax(0, 1fr);
+  view-timeline: --row block; /* drives the scroll-drawn line (09-motion.css) */
+  --c: var(--type-internship);
+  --soft: var(--type-internship-soft);
+}
+.career__row--volunteer { --c: var(--type-volunteer);  --soft: var(--type-volunteer-soft); }
+.career__row--contract  { --c: var(--type-contract);   --soft: var(--type-contract-soft); }
+.career__row--freelance { --c: var(--type-freelance);  --soft: var(--type-freelance-soft); }
+.career__row--full-time { --c: var(--type-full-time);  --soft: var(--type-full-time-soft); }
+.career__row--part-time { --c: var(--type-part-time);  --soft: var(--type-part-time-soft); }
+.career__row--milestone { --c: var(--type-milestone);  --soft: var(--type-milestone-soft); }
+
+.career__graph {
+  position: relative;
+  transition: var(--theme-fade), opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Line segments: ::before is the resting line (--line-strong), ::after the
+   lane-coloured "ink" that draws in (09-motion.css). Dashed = a time gap;
+   fade = the line is still going (above the current role). */
+.seg {
+  position: absolute;
+  left: var(--x);
+  width: 2px;
+  margin-left: -1px;
+}
+.seg--l0 { --x: var(--x0); --lc: var(--type-internship); }
+.seg--l1 { --x: var(--x1); --lc: var(--type-volunteer); }
+.seg--above { top: 0; height: var(--node-y); }
+.seg--below { top: var(--node-y); bottom: 0; }
+.seg--full  { top: 0; bottom: 0; }
+.seg::before,
+.seg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1px;
+  background: currentColor;
+}
+.seg::before { color: var(--line-strong); }
+.seg::after {
+  color: var(--lc);
+  clip-path: inset(0 0 0 0);
+}
+/* 5px dash, 6px gap */
+.seg--dashed::before,
+.seg--dashed::after { background: repeating-linear-gradient(to bottom, currentColor 0 5px, transparent 5px 11px); }
+.seg--fade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 85%);
+  mask-image: linear-gradient(to bottom, transparent, black 85%);
+}
+
+/* Merge / fork curve between the lanes (top half of the row). */
+.curve {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--gw);
+  height: var(--node-y);
+  overflow: visible;
+}
+.curve path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.curve .rest { stroke: var(--line-strong); }
+.curve .ink {
+  stroke: var(--type-volunteer);
+  stroke-dasharray: 1; /* pathLength="1": the dash offset draws it in */
+  stroke-dashoffset: 0;
+}
+
+/* Nodes: circle = work, diamond = volunteer, ring = milestone, larger circle
+   with a breathing halo = the current role. The 3px --band ring lets a node
+   sit cleanly on its line. ::after is the coloured fill (it ignites). */
+.node {
+  position: absolute;
+  left: var(--x);
+  top: var(--node-y);
+  translate: -50% -50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--band);
+  box-shadow: 0 0 0 3px var(--band), inset 0 0 0 2px var(--line-strong);
+}
+.node::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--c);
+}
+.node--l0 { --x: var(--x0); }
+.node--l1 { --x: var(--x1); }
+.node--diamond {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  rotate: 45deg;
+}
+.node--ring {
+  width: 14px;
+  height: 14px;
+}
+.node--ring::after { inset: 4px; }
+.node--current {
+  width: 16px;
+  height: 16px;
+}
+.node--current::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--c);
+  opacity: 0;
+}
+
+/* ---- Entry ------------------------------------------------------------------
+   [tile][title + org]; meta under it, then the body. From 1200px the meta
+   becomes a right-aligned column. */
+.job {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-areas: "tile head" "meta meta" "body body";
+  column-gap: var(--space-4);
+  padding-block-end: clamp(3rem, 5vw, 4.5rem);
+}
+.career__row:last-child .job { padding-block-end: 0; }
+@media (min-width: 640px) {
+  .job { grid-template-areas: "tile head" ". meta" ". body"; }
+}
+@media (min-width: 1200px) {
+  .job {
+    grid-template-columns: 44px minmax(0, 1fr) 11rem;
+    grid-template-areas: "tile head meta" ". body meta";
+    column-gap: var(--space-5);
+  }
+}
+
+/* Org tile: the role's icon on its type's soft tint (no logos). */
+.job__tile {
+  grid-area: tile;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--c);
+  transition: var(--theme-fade), filter var(--dur-fast), opacity var(--dur-fast);
+  --icon-size: 22px;
+}
+.job__head {
+  grid-area: head;
+  min-width: 0;
+}
+.job__title {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-wrap: balance;
+  transition: var(--theme-fade), color var(--dur-fast);
+}
+.job__org {
+  margin-top: var(--space-1);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.job__meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-4);
+}
+@media (min-width: 1200px) {
+  .job__meta {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-2);
+    margin-top: 0;
+    padding-top: 2px;
+    text-align: right;
+  }
+}
+/* Employment type: Fraunces italic in the type colour (the PDF's italics). */
+.job__type {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: var(--fs-base);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--c);
+}
+.job__dates,
+.job__tenure {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.job__tenure {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+/* Tenure bar: this role's length relative to the longest (--w from Go). */
+.tenure-bar {
+  width: 3.5rem;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+.tenure-bar span {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--c);
+}
+.job__place {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  --icon-size: 15px;
+}
+@media (min-width: 1200px) {
+  .job__place { flex-direction: row-reverse; }
+}
+
+.job__body {
+  grid-area: body;
+  margin-top: var(--space-5);
+}
+.job__bullets {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 66ch;
+  color: var(--muted);
+}
+.job__bullets li {
+  position: relative;
+  padding-left: var(--space-5);
+}
+/* An 8px dash in the type colour. */
+.job__bullets li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.7em;
+  width: 8px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--c);
+}
+.job__bullets strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.job__tags { margin-top: var(--space-5); }
+
+/* Milestone: deliberately quieter. */
+.career__row--milestone .job { padding-block-end: clamp(2.5rem, 4vw, 3.5rem); }
+.career__row--milestone .job__tile {
+  width: 36px;
+  height: 36px;
+  margin: 4px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+}
+.career__row--milestone .job__title {
+  font-size: var(--fs-lg);
+  font-style: italic;
+  font-weight: 500;
+}
+.career__row--milestone .job__org {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ---- Focus follows the reader -----------------------------------------------
+   The hovered/focused row's node grows; the other rows' graph cells dim.
+   Only the decorative graph dims, never text. */
+.seg,
+.node,
+.curve {
+  transition:
+    var(--theme-fade),
+    opacity var(--dur-fast) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+}
+.career__row:is(:hover, :focus-within) .node { scale: 1.3; }
+.career:has(.career__row:is(:hover, :focus-within)) .career__row:not(:hover, :focus-within) .career__graph { opacity: 0.35; }
+
+/* ---- Legend filter: dims, never hides --------------------------------------
+   main.js sets data-lane on .career ("work" | "volunteer" | "milestone")
+   and .is-quiet on rows of other kinds. Quiet entries keep readable text
+   (--muted is ≥ 4.5:1); only the graph lanes drop to 20%, per lane, so the
+   highlighted lane stays continuous (e.g. through the KRB row). */
+.career__row.is-quiet .job__tile {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.career__row.is-quiet :is(.job__title, .job__org, .job__type, .job__bullets strong) { color: var(--muted); }
+.career__row.is-quiet .job__bullets li::before,
+.career__row.is-quiet .tenure-bar span { background: var(--line-strong); }
+
+.career[data-lane="work"] :is(.seg--l1, .node--l1, .curve),
+.career[data-lane="work"] .is-quiet .node--l0,
+.career[data-lane="volunteer"] :is(.seg--l0, .node--l0),
+.career[data-lane="milestone"] :is(.seg, .curve, .node:not(.node--ring)) { opacity: 0.2; }
+
+/* ==========================================================================
+   Interim (Phase 2) — replaced by the Phase 4–5 section layouts
+   ========================================================================== */
+
+/* Vertical rhythm, via the primitives' custom properties. */
+.about__content { --stack-space: var(--space-8); }
+.timeline { --stack-space: var(--space-12); }
+.job__header { --stack-space: var(--space-1); }
+.skills__grid { --stack-space: var(--space-8); }
+.projects__grid { --stack-space: var(--space-6); }
+.education__grid { --stack-space: var(--space-10); }
+.focus-list,
+.skill-group,
+.project__body,
+.school,
+.languages { --stack-space: var(--space-3); }
+.languages__list { --stack-space: var(--space-2); }
+.skill-group__title { --cluster-space: var(--space-2); }
+.contact__channels { --cluster-space: var(--space-6); }
+.site-footer { padding-block: var(--space-12); border-block-start: 1px solid var(--line); }
+.site-footer__id { --cluster-space: var(--space-2); }
+.site-footer__role,
+.languages__level { color: var(--muted); }
+.not-found__action { margin-block-start: var(--space-4); }
+
+/* Single column until the Phase 4–5 layouts: keep cards at reading width
+   instead of stretching an empty panel across 1120px. */
+.about__content,
+.projects__grid { max-inline-size: var(--measure); }
+
+} /* @layer sections */
