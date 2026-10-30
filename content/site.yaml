@@ -3,7 +3,6 @@ site:
   title: "Kennedy Muchina Kinuthia — Software Engineer"
   description: "Graduate Software Engineer in Nairobi, Kenya, building full-stack web apps, native Android apps and on-device ML."
   lang: "en"
-  source_url: "https://github.com/kmuchina/portfolio"   # footer "View the source"
 
 person:
   greeting: "Hello, I'm"    # hero eyebrow above the name
@@ -270,8 +269,7 @@ ui:
     time_before: "It's"     # It's {15:26} here ({EAT, UTC+3})
     time_after: "here"
   footer:
-    built: "Built with Go and hand-written CSS."
-    source: "View the source"
+    built: "Built with Golang"
     to_top: "Back to top"
   not_found:
     title: "Page not found"

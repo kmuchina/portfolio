@@ -78,7 +78,6 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		{"ui.career.milestone", s.UI.Career.Milestone},
 		{"ui.career.present", s.UI.Career.Present},
 		{"ui.career.skills_label", s.UI.Career.SkillsLabel},
-		{"site.source_url", s.Meta.SourceURL},
 		{"contact.timezone.iana", s.Contact.Timezone.IANA},
 		{"contact.timezone.label", s.Contact.Timezone.Label},
 		{"ui.about.currently", s.UI.About.Currently},
@@ -94,7 +93,6 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		{"ui.contact.copied_status", s.UI.Contact.CopiedStatus},
 		{"ui.contact.fallback_status", s.UI.Contact.FallbackStatus},
 		{"ui.footer.built", s.UI.Footer.Built},
-		{"ui.footer.source", s.UI.Footer.Source},
 		{"ui.footer.to_top", s.UI.Footer.ToTop},
 	}
 	for _, r := range required {
@@ -125,9 +123,6 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 	}
 	if s.Meta.URL != "" {
 		checkURL("site.url", s.Meta.URL)
-	}
-	if s.Meta.SourceURL != "" {
-		checkURL("site.source_url", s.Meta.SourceURL)
 	}
 
 	checkFile := func(field, rel string) {

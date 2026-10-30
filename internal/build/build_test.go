@@ -306,10 +306,12 @@ func phase5(t *testing.T, html string) {
 		}
 	}
 
-	// Footer: source link and Back to top.
-	if !strings.Contains(html, `<a href="https://github.com/kmuchina/portfolio">View the source</a>`) ||
-		!strings.Contains(html, `<a class="to-top" href="#top">`) {
-		t.Error("footer: source link or Back to top missing")
+	// Footer: the credit line (no source link) and Back to top.
+	if !regexp.MustCompile(`<p class="site-footer__built">© <span data-year>[0-9]{4}</span>. Built with Golang</p>`).MatchString(html) {
+		t.Error("footer: credit line should be just © year. Built with Golang")
+	}
+	if !strings.Contains(html, `<a class="to-top" href="#top">`) {
+		t.Error("footer: Back to top missing")
 	}
 }
 

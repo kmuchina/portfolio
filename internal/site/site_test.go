@@ -135,7 +135,6 @@ func TestSectionRules(t *testing.T) {
 		{"duplicate skill", func(s *Site) { s.Skills.Groups[0].Items[1].Name = "kotlin" }, "panel id"},
 		{"bad placeholder", func(s *Site) { s.Projects.Items[0].Placeholder = "phone" }, "must be one of journal | scanner | none"},
 		{"bad time zone", func(s *Site) { s.Contact.Timezone.IANA = "Africa/Atlantis" }, "is not a time zone"},
-		{"source url", func(s *Site) { s.Meta.SourceURL = "http://github.com/x" }, "site.source_url"},
 		{"education date", func(s *Site) { s.Education.Items[0].Date = "Dec 2025" }, "must be YYYY-MM"},
 		{"education years", func(s *Site) { s.Education.Items[1].End = "19" }, "must both be YYYY"},
 		{"education neither", func(s *Site) { s.Education.Items[1].Grades = nil }, "needs honours"},

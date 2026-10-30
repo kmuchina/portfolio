@@ -661,7 +661,7 @@ every icon name.
   `start` / `end` (`YYYY`), `icon`, `honours`, `honours_detail`, `award:
   {title, detail}`, `grades[]` `{label, value}` (no more `highlights`);
   `languages[].level` from LinkedIn's scale; `contact.timezone: {iana,
-  label}`, `contact.links[].handle`; `site.source_url`; and the `ui.about`,
+  label}`, `contact.links[].handle`; and the `ui.about`,
   `ui.skills`, `ui.projects`, `ui.contact`, `ui.footer` blocks.
 - Fields added in Phase 1: `person.greeting` (the hero eyebrow, "Hello, I'm"),
   `contact.eyebrow`, `contact.heading`, `contact.body`,
@@ -729,7 +729,7 @@ templates/ ────────▶ internal/render  layout + partials + page
 - `ui.nav[].href` is one of the section anchors.
 - `experience.action` / `projects.action`, when present, have a label and a
   `url` that is an `https://` URL or an existing file under `static/`.
-- `site.source_url` is https; `contact.timezone.iana` loads with
+- `contact.timezone.iana` loads with
   `time.LoadLocation`.
 - Skills: every group has a name and icon, every item a name and an
   **existing icon file**; panel ids (`used-<group>-<skill>`) are unique.
@@ -1263,7 +1263,8 @@ without comments). Every section uses the spine (§7).
   `Dec 2025`, "First Class Honours" in Fraunces italic `--fs-2xl`
   `--accent-text` with its detail, the award row). Items with `grades` form
   the quieter `.school` column (title, school + mono years, a 3-cell
-  `dl.grades`). **Languages** (`.langs`, full width under a hairline): name,
+  `dl.grades`; each column is at least its label's one-line width, so
+  "Mean grade" never wraps and the values stay on one line). **Languages** (`.langs`, full width under a hairline): name,
   level and a 5-bar `.meter` (`role="img"`, `aria-label` "Level N of 5"
   from Go). **`languages[].level` is LinkedIn's scale:** Elementary (1),
   Limited working (2), Professional working (3), Full professional (4),
@@ -1280,9 +1281,10 @@ without comments). Every section uses the spine (§7).
   UTC+3)"; Go renders the build's time in `contact.timezone.iana` as the
   no-JS value; `main.js` formats `Intl.DateTimeFormat` with the `data-tz`
   zone every 30s) and availability.
-- **Footer.** Name (Fraunces), "© {year}. {ui.footer.built} {View the
-  source}." (the link is `site.source_url`; `main.js` refreshes the year),
-  then the social icon buttons and the **Back to top** pill.
+- **Footer.** Name (Fraunces), "© {year}. {ui.footer.built}" ("Built with
+  Golang"; Kennedy, 2026-10-30: no "View the source" link; `main.js`
+  refreshes the year), then the social icon buttons and the **Back to top**
+  pill.
 - **Deliberate differences from the prototype:** the real Lucide / Simple
   Icons files instead of its stand-in sprite (e.g. Lucide `brain`, not a
   chip; the Google Play logo, not a triangle); self-hosted fonts; the real
@@ -1290,7 +1292,8 @@ without comments). Every section uses the spine (§7).
   hex values; motion in the `motion` layer without `!important`; the
   site's `.link-arrow` keeps its 0.01em letter-spacing (shared with the
   Phase 4 port); short paragraphs keep the site's 65ch `max-width` box
-  (no visual change).
+  (no visual change); the footer credit is "Built with Golang" with no
+  source link; the grades columns grow to keep "Mean grade" on one line.
 
 ## 18. Working agreement for future sessions
 

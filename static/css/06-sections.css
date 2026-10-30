@@ -1061,15 +1061,16 @@ html:has(dialog[open]) { overflow: hidden; }
   font-feature-settings: normal;
   font-size: var(--fs-meta);
 }
+/* Each column is at least as wide as its label on one line ("Mean grade"
+   never wraps, so the values line up); equal thirds when there's room. */
 .grades {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  overflow: hidden;
+  grid-template-columns: repeat(3, minmax(max-content, 1fr));
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
 .grades > div {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) clamp(var(--space-3), 3vw, var(--space-4)); /* 12px on small phones: fits at 320px */
   border-inline-start: 1px solid var(--line);
 }
 .grades > div:first-child { border-inline-start: 0; }
@@ -1252,13 +1253,6 @@ html:has(dialog[open]) { overflow: hidden; }
   color: var(--ink);
 }
 .site-footer__built { margin-block-start: var(--space-1); }
-.site-footer__built a {
-  color: var(--ink);
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 3px;
-  transition: var(--transition-ui);
-}
-.site-footer__built a:hover { text-decoration-color: var(--accent-text); }
 .site-footer__end {
   display: flex;
   flex-wrap: wrap;

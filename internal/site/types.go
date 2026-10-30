@@ -29,7 +29,6 @@ type Meta struct {
 	Title       string `yaml:"title"`
 	Description string `yaml:"description"`
 	Lang        string `yaml:"lang"`
-	SourceURL   string `yaml:"source_url"` // the site's repo ("View the source" in the footer)
 }
 
 type Person struct {
@@ -390,9 +389,8 @@ type ContactUI struct {
 
 // FooterUI is the footer's copy.
 type FooterUI struct {
-	Built  string `yaml:"built"`  // "Built with Go and hand-written CSS."
-	Source string `yaml:"source"` // "View the source"
-	ToTop  string `yaml:"to_top"` // "Back to top"
+	Built string `yaml:"built"`  // "Built with Golang"
+	ToTop string `yaml:"to_top"` // "Back to top"
 }
 
 type NavItem struct {
