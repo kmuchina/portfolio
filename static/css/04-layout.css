@@ -44,6 +44,7 @@
   }
   .section__body { min-inline-size: 0; }
   .section__aside > .section__title { margin-block-start: var(--space-3); }
+  .section__aside > .section__title:first-child { margin-block-start: 0; } /* no eyebrow (about) */
   @media (min-width: 1024px) {
     .section__grid {
       grid-template-columns: minmax(15rem, 1fr) 2.6fr;

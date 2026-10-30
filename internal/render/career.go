@@ -19,7 +19,7 @@ func careerGraph(s *site.Site, now time.Time) (*career.Graph, error) {
 			return nil, fmt.Errorf("experience.items[%d].start: %w", i, err)
 		}
 		e := career.Entry{
-			Title: j.Title, Org: j.Org, Type: j.Type, Icon: j.Icon, Location: j.Location,
+			ID: j.ID(), Title: j.Title, Org: j.Org, Type: j.Type, Icon: j.Icon, Location: j.Location,
 			Start: start, Present: j.End == site.Present, Bullets: j.Bullets, Skills: j.Skills,
 		}
 		if !e.Present {

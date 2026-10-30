@@ -38,6 +38,9 @@ var pairs = []pair{
 	{"on-accent", "accent-strong-hover", 4.5, ""},
 	{"accent", "bg", 3.0, "large text"},
 	{"accent", "surface-2", 3.0, "large text"},
+	// Project phones: the placeholder UI's text sits on --screen.
+	{"screen-ink", "screen", 4.5, ""},
+	{"leaf", "screen", 4.5, ""},
 }
 
 // Employment-type colours (the experience section lives on --surface-2):

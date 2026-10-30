@@ -3,9 +3,10 @@
 package site
 
 import (
-	"html/template"
+	"fmt"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // Site is the root of content/site.yaml.
@@ -28,7 +29,7 @@ type Meta struct {
 	Title       string `yaml:"title"`
 	Description string `yaml:"description"`
 	Lang        string `yaml:"lang"`
-	ShowPhone   bool   `yaml:"show_phone"`
+	SourceURL   string `yaml:"source_url"` // the site's repo ("View the source" in the footer)
 }
 
 type Person struct {
@@ -52,25 +53,19 @@ func (p Person) FullName() string {
 }
 
 type Contact struct {
-	Eyebrow string `yaml:"eyebrow"`
-	Heading string `yaml:"heading"`
-	Body    string `yaml:"body"`
-	Email   string `yaml:"email"`
-	Phone   string `yaml:"phone"`
-	Links   []Link `yaml:"links"`
+	Eyebrow  string   `yaml:"eyebrow"`
+	Heading  string   `yaml:"heading"`
+	Body     string   `yaml:"body"`
+	Email    string   `yaml:"email"`
+	Timezone Timezone `yaml:"timezone"`
+	Links    []Link   `yaml:"links"`
 }
 
-// TelHref turns "+254 700 000 000" into "tel:+254700000000". It returns
-// template.URL because html/template rejects the tel: scheme; the value is
-// built from digits and a leading "+" only, so it is safe.
-func (c Contact) TelHref() template.URL {
-	var b strings.Builder
-	for i, r := range strings.TrimSpace(c.Phone) {
-		if (r >= '0' && r <= '9') || (r == '+' && i == 0) {
-			b.WriteRune(r)
-		}
-	}
-	return template.URL("tel:" + b.String())
+// Timezone drives the contact section's live local time: IANA is a
+// time.LoadLocation name ("Africa/Nairobi"), Label its display ("EAT, UTC+3").
+type Timezone struct {
+	IANA  string `yaml:"iana"`
+	Label string `yaml:"label"`
 }
 
 // MailtoHref returns "mailto:<email>".
@@ -78,9 +73,10 @@ func (c Contact) MailtoHref() string { return "mailto:" + c.Email }
 
 // Link is an external link (profiles, project links).
 type Link struct {
-	Label string `yaml:"label"`
-	URL   string `yaml:"url"`
-	Icon  string `yaml:"icon"`
+	Label  string `yaml:"label"`
+	Handle string `yaml:"handle"` // contact channels: "in/kmuchina"
+	URL    string `yaml:"url"`
+	Icon   string `yaml:"icon"`
 }
 
 // Action is an optional section-header link ("View full résumé →"). URL is
@@ -99,22 +95,39 @@ func (a Action) IsExternal() bool { return strings.Contains(a.URL, "://") }
 func (a Action) AssetPath() string { return strings.TrimPrefix(a.URL, "/") }
 
 type About struct {
-	Eyebrow string      `yaml:"eyebrow"`
+	Eyebrow string      `yaml:"eyebrow"` // optional: none is rendered when empty
 	Heading string      `yaml:"heading"`
-	Body    string      `yaml:"body"`
+	Body    string      `yaml:"body"` // **bold** allowed (internal/textfmt)
 	Focus   []FocusItem `yaml:"focus"`
-	Facts   []Fact      `yaml:"facts"`
+	Facts   []Fact      `yaml:"facts"` // "Currently" is derived (Site.Facts), not listed
 }
 
 type FocusItem struct {
-	Label string `yaml:"label"`
-	Icon  string `yaml:"icon"`
+	Label  string `yaml:"label"`
+	Icon   string `yaml:"icon"`
+	Detail string `yaml:"detail"`
 }
 
+// Fact is one row of the about fact sheet: "Based in" → "Nairobi, Kenya",
+// with a quieter detail line under the value.
 type Fact struct {
-	Title  string `yaml:"title"`
+	Label  string `yaml:"label"`
+	Value  string `yaml:"value"`
 	Detail string `yaml:"detail"`
-	Icon   string `yaml:"icon"`
+}
+
+// Facts is the about fact sheet: "Currently" (the job whose end is
+// "present": its title, then its org) first, when there is one, then
+// about.facts in order.
+func (s *Site) Facts() []Fact {
+	var out []Fact
+	for _, j := range s.Experience.Items {
+		if j.End == Present {
+			out = append(out, Fact{Label: s.UI.About.Currently, Value: j.Title, Detail: j.Org})
+			break
+		}
+	}
+	return append(out, s.About.Facts...)
 }
 
 type Experience struct {
@@ -139,6 +152,14 @@ type Job struct {
 	Skills   []string `yaml:"skills"`
 }
 
+// ID is the job's anchor id: "job-" + the slug of its org up to the first
+// comma ("Kenya Roads Board, Ministry of…" → "job-kenya-roads-board").
+// Skill evidence links point at it; validation keeps it unique.
+func (j Job) ID() string {
+	org, _, _ := strings.Cut(j.Org, ",")
+	return "job-" + Slug(org)
+}
+
 // EmploymentTypes are the allowed experience `type` values (as on LinkedIn).
 var EmploymentTypes = []string{"Internship", "Volunteer", "Contract", "Freelance", "Full-time", "Part-time"}
 
@@ -148,13 +169,27 @@ const Present = "present"
 type Skills struct {
 	Eyebrow string       `yaml:"eyebrow"`
 	Heading string       `yaml:"heading"`
+	Lead    string       `yaml:"lead"`
 	Groups  []SkillGroup `yaml:"groups"`
 }
 
 type SkillGroup struct {
-	Name  string   `yaml:"name"`
-	Icon  string   `yaml:"icon"`
-	Items []string `yaml:"items"`
+	Name  string      `yaml:"name"`
+	Icon  string      `yaml:"icon"`
+	Note  string      `yaml:"note"` // optional mono line under the name
+	Items []SkillItem `yaml:"items"`
+}
+
+// SkillItem is one skill pill. Evidence (where it was used) is matched on
+// Name; Icon is a templates/icons file (a brand logo or a Lucide icon).
+type SkillItem struct {
+	Name string `yaml:"name"`
+	Icon string `yaml:"icon"`
+}
+
+// PanelID is the id of the skill's "used in" panel: used-<group>-<skill>.
+func (g SkillGroup) PanelID(item SkillItem) string {
+	return "used-" + Slug(g.Name) + "-" + Slug(item.Name)
 }
 
 type Projects struct {
@@ -165,16 +200,27 @@ type Projects struct {
 }
 
 type Project struct {
-	Slug     string   `yaml:"slug"`
-	Title    string   `yaml:"title"`
-	Kind     string   `yaml:"kind"`
-	Stack    []string `yaml:"stack"`
-	Summary  string   `yaml:"summary"`
-	Metric   string   `yaml:"metric"`
-	Image    string   `yaml:"image"`
-	ImageAlt string   `yaml:"image_alt"`
-	Links    []Link   `yaml:"links"`
+	Slug        string   `yaml:"slug"`
+	Title       string   `yaml:"title"`
+	Kind        string   `yaml:"kind"`
+	Stack       []string `yaml:"stack"`
+	Summary     string   `yaml:"summary"`
+	Metric      *Metric  `yaml:"metric"` // optional: "50+" "active users"
+	Note        string   `yaml:"note"`   // optional mono line when there's no metric/link
+	Links       []Link   `yaml:"links"`
+	Screenshot  string   `yaml:"screenshot"`  // optional, under static/; the placeholder shows until it exists
+	Placeholder string   `yaml:"placeholder"` // one of Placeholders
 }
+
+// Metric is a project's headline number: Value in large Fraunces, then Label.
+type Metric struct {
+	Value string `yaml:"value"`
+	Label string `yaml:"label"`
+}
+
+// Placeholders are the abstract phone-screen UIs drawn in CSS until a real
+// screenshot exists ("none": no phone at all).
+var Placeholders = []string{"journal", "scanner", "none"}
 
 // HasLinks reports whether the project has any links to render.
 func (p Project) HasLinks() bool { return len(p.Links) > 0 }
@@ -185,12 +231,30 @@ type Education struct {
 	Items   []School `yaml:"items"`
 }
 
+// School is one education entry. The first item with Honours renders as the
+// degree card; items with Grades render as the quieter school column.
 type School struct {
-	Degree     string     `yaml:"degree"`
-	School     string     `yaml:"school"`
-	Date       string     `yaml:"date"`
-	Highlights []string   `yaml:"highlights"`
-	Timeline   *Milestone `yaml:"timeline"` // optional: also a milestone in the career graph
+	Degree        string     `yaml:"degree"`
+	School        string     `yaml:"school"`
+	Date          string     `yaml:"date"`  // "YYYY-MM": a single date (graduation)
+	Start         string     `yaml:"start"` // "YYYY": a span of years, with End
+	End           string     `yaml:"end"`
+	Icon          string     `yaml:"icon"`
+	Honours       string     `yaml:"honours"`
+	HonoursDetail string     `yaml:"honours_detail"`
+	Award         *Award     `yaml:"award"`
+	Grades        []Grade    `yaml:"grades"`
+	Timeline      *Milestone `yaml:"timeline"` // optional: also a milestone in the career graph
+}
+
+type Award struct {
+	Title  string `yaml:"title"`
+	Detail string `yaml:"detail"`
+}
+
+type Grade struct {
+	Label string `yaml:"label"`
+	Value string `yaml:"value"`
 }
 
 // Milestone is a dated point in the career graph (e.g. graduation).
@@ -200,13 +264,68 @@ type Milestone struct {
 	Detail string `yaml:"detail"`
 }
 
-// DateISO returns the date as a <time datetime> value ("2025-12"), or "" when
-// it isn't a single month (e.g. "2016 – 2019").
-func (s School) DateISO() string { return monthISO(s.Date) }
+// DateText is Date for display: "2025-12" → "Dec 2025".
+func (s School) DateText() string {
+	t, err := time.Parse("2006-01", s.Date)
+	if err != nil {
+		return s.Date
+	}
+	return t.Format("Jan 2006")
+}
+
+// Degree is the education item shown as the headline card: the first with
+// honours (nil if none).
+func (e Education) Degree() *School {
+	for i := range e.Items {
+		if e.Items[i].Honours != "" {
+			return &e.Items[i]
+		}
+	}
+	return nil
+}
+
+// Schools are the items shown in the quieter column: those with grades.
+func (e Education) Schools() []School {
+	var out []School
+	for _, it := range e.Items {
+		if len(it.Grades) > 0 {
+			out = append(out, it)
+		}
+	}
+	return out
+}
 
 type Language struct {
 	Name  string `yaml:"name"`
-	Level string `yaml:"level"`
+	Level string `yaml:"level"` // one of LanguageLevels
+}
+
+// LanguageLevels is LinkedIn's proficiency scale, lowest first; a level's
+// meter shows its position (1–5).
+var LanguageLevels = []string{"Elementary", "Limited working", "Professional working", "Full professional", "Native"}
+
+// Meter is the level's position on LanguageLevels (1–5), 0 if unknown.
+func (l Language) Meter() int {
+	for i, v := range LanguageLevels {
+		if v == l.Level {
+			return i + 1
+		}
+	}
+	return 0
+}
+
+// MeterLabel is the meter's accessible name: "Level 3 of 5".
+func (l Language) MeterLabel() string {
+	return fmt.Sprintf("Level %d of %d", l.Meter(), len(LanguageLevels))
+}
+
+// MeterBars is one bool per bar of the meter: true = lit.
+func (l Language) MeterBars() []bool {
+	bars := make([]bool, len(LanguageLevels))
+	for i := range l.Meter() {
+		bars[i] = true
+	}
+	return bars
 }
 
 // UI holds interface copy (labels, nav, buttons) so templates never
@@ -224,7 +343,56 @@ type UI struct {
 	LanguagesHeading string    `yaml:"languages_heading"`
 	SocialLabel      string    `yaml:"social_label"`
 	Career           CareerUI  `yaml:"career"`
+	About            AboutUI   `yaml:"about"`
+	Skills           SkillsUI  `yaml:"skills"`
+	Projects         ProjectUI `yaml:"projects"`
+	Contact          ContactUI `yaml:"contact"`
+	Footer           FooterUI  `yaml:"footer"`
 	NotFound         NotFound  `yaml:"not_found"`
+}
+
+// AboutUI: the derived fact's label.
+type AboutUI struct {
+	Currently string `yaml:"currently"` // label of the derived "Currently" fact
+}
+
+// SkillsUI words the skill-evidence panels: "{skill}, {used in|used at|shown at}".
+type SkillsUI struct {
+	UsedIn  string `yaml:"used_in"`  // all evidence is projects
+	UsedAt  string `yaml:"used_at"`  // all evidence is paid work
+	ShownAt string `yaml:"shown_at"` // mixed, or includes volunteer roles
+	Project string `yaml:"project"`  // kind label of project evidence
+}
+
+// ProjectUI labels the project cards.
+type ProjectUI struct {
+	StackLabel    string `yaml:"stack_label"`    // accessible name of the tag list ("Built with")
+	ScreenshotAlt string `yaml:"screenshot_alt"` // alt prefix: "Screenshot of" + title
+	Journal       struct {
+		Title string `yaml:"title"`
+	} `yaml:"journal"` // placeholder phone UI copy (decorative)
+	Scanner struct {
+		Title  string `yaml:"title"`
+		Status string `yaml:"status"`
+	} `yaml:"scanner"`
+}
+
+// ContactUI: the copy-email button and the local-time line.
+type ContactUI struct {
+	Copy           string `yaml:"copy"`            // button label
+	Copied         string `yaml:"copied"`          // after a successful copy
+	Fallback       string `yaml:"fallback"`        // clipboard blocked: text selected instead
+	CopiedStatus   string `yaml:"copied_status"`   // announced after a copy
+	FallbackStatus string `yaml:"fallback_status"` // announced when the text was selected
+	TimeBefore     string `yaml:"time_before"`     // "It's" {time}
+	TimeAfter      string `yaml:"time_after"`      // {time} "here" ({zone})
+}
+
+// FooterUI is the footer's copy.
+type FooterUI struct {
+	Built  string `yaml:"built"`  // "Built with Go and hand-written CSS."
+	Source string `yaml:"source"` // "View the source"
+	ToTop  string `yaml:"to_top"` // "Back to top"
 }
 
 type NavItem struct {
@@ -265,11 +433,21 @@ type NotFound struct {
 	Back  string `yaml:"back"`
 }
 
-// monthISO parses "Aug 2026" into "2026-08"; anything else returns "".
-func monthISO(s string) string {
-	t, err := time.Parse("Jan 2006", strings.TrimSpace(s))
-	if err != nil {
-		return ""
+// Slug lower-cases s and joins its runs of letters and digits with "-":
+// "Git & GitHub" → "git-github", "IEEE Tech4Good" → "ieee-tech4good".
+func Slug(s string) string {
+	var b strings.Builder
+	dash := false
+	for _, r := range strings.ToLower(s) {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			if dash && b.Len() > 0 {
+				b.WriteByte('-')
+			}
+			b.WriteRune(r)
+			dash = false
+		} else {
+			dash = true
+		}
 	}
-	return t.Format("2006-01")
+	return b.String()
 }

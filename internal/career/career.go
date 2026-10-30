@@ -73,6 +73,7 @@ func (k Kind) lane() int {
 
 // Entry is one role, or a milestone (Start == End, Milestone set).
 type Entry struct {
+	ID                               string // anchor id of the entry ("job-…"); "" for milestones
 	Title, Org, Type, Icon, Location string
 	Start, End                       Month // End is ignored when Present
 	Present                          bool

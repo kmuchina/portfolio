@@ -22,6 +22,11 @@ change**.
   site reproduces it (same markup classes, geometry, motion); it is the
   visual reference for that section. Its Google Fonts link, demo bar, stub
   sections and hand-drawn icons are prototype-only and never copied.
+- **Sections reference:** `design/sections-prototype.html` (Phase 5) is the
+  approved prototype of About, Skills, Projects, Education, Contact and the
+  footer (§17). The site reproduces it. Its Google Fonts link, demo bar,
+  `<symbol>` sprite of stand-in icons, hard-coded content and blanket
+  `!important` reduced-motion rule are prototype-only and never copied.
 
 ### Roadmap (8 phases)
 
@@ -32,10 +37,10 @@ change**.
 | 2 | Design system components (buttons, card, tags, section shell, icons) | ✅ done (2026-10-30) |
 | 3 | Header (sticky, scrolled state), nav, **mobile menu**, hero | ✅ done (2026-10-30) |
 | 4 | Section system ("spine" layout, bands) + experience career graph | ✅ done (2026-10-30) |
-| 5 | About, skills, projects, education, contact: content design inside the spine layout | ⬜ |
+| 5 | About, skills, projects, education, contact, footer: the sections prototype (§17) | ✅ done (2026-10-30) |
 | 6 | Scrollspy (live `aria-current`) and interaction polish | ⬜ |
 | 7 | Polish, SEO and images | ⬜ |
-| 8 | Deploy to GitHub Pages (Actions, CNAME, custom domain) | 🟡 pipeline done early (2026-10-30): workflow, `CNAME`, `.nojekyll`, `make ci`. Still to do: first push, Pages + DNS + HTTPS (§12 Deployment) |
+| 8 | Deploy to GitHub Pages (Actions, CNAME, custom domain) | ✅ done (2026-10-30): workflow, `CNAME`, `.nojekyll`, `make ci`, Pages + DNS (§12 Deployment) |
 
 ---
 
@@ -189,9 +194,12 @@ There are two exceptions, because neither can read CSS variables: the initial
 ### Rules
 - **Accent ≤ 5% of any screen.** It appears only on links (and `.link-arrow`),
   the primary button, the active nav item, focus rings, the "*Muchina*"
-  highlight, the hero eyebrow (`.eyebrow--accent`), `.media` icons, `.list`
-  dots, the `.quote` marks and the "Current" tag (`.tag--accent`). Everything
-  else is neutral.
+  highlight, the hero eyebrow (`.eyebrow--accent`), `.tile` icons, `.list`
+  dots, the `.quote` marks, the "Current" tag (`.tag--accent`) and, since
+  Phase 5, skill evidence (count badge, open pill), the project kind, the
+  "First Class Honours" line, the award icon, the lit meter bars, the
+  email's 2px underline and the phone stage's glow. Everything else is
+  neutral.
 - **`--accent-strong` vs `--accent-text`:** white on `#3B82F6` is only about 3.7:1,
   so **buttons use `--accent-strong`** (with `--on-accent` text) and
   **body-size accent text uses `--accent-text`**, which changes per theme.
@@ -201,9 +209,10 @@ There are two exceptions, because neither can read CSS variables: the initial
 - `::selection` = accent at 30% (`color-mix(in srgb, var(--accent) 30%, transparent)`).
 - The hero **follows the theme**; it is not forced dark. Section rhythm comes
   from alternating `--bg` and `--surface-2`.
-- The only decorative gradient on the site is the hero glow: a radial
-  `--accent` at ≤ 8% (`color-mix`), with eased stops so no disc edge or
-  banding shows. (The career graph's dashed lines and fading stub use
+- The decorative gradients on the site are the hero glow (a radial
+  `--accent` at ≤ 8%, `color-mix`, with eased stops so no disc edge or
+  banding shows) and, since Phase 5, the project phone stage (a radial
+  `--accent` at 14% from the bottom edge, as in the prototype). (The career graph's dashed lines and fading stub use
   `repeating-linear-gradient` / mask gradients as drawing techniques, not
   decoration.)
 - **Employment-type colours (Phase 4).** `--type-<kind>` and
@@ -216,7 +225,14 @@ There are two exceptions, because neither can read CSS variables: the initial
   today. **These are the only hues besides the accent, and they may appear
   only inside the experience section and its legend.** Rows set local `--c`
   / `--soft`; components read those, never `--type-*` directly.
-- In dark mode, use borders (`--line`), not shadows. Shadows appear only on hover.
+- In dark mode, use borders (`--line`), not shadows. Shadows appear only on
+  hover, with one exception: the project phone's resting drop shadow
+  (`--shadow-phone`, Phase 5), which grounds the device on its stage.
+- **Project phones (Phase 5):** `--screen` / `--screen-ink` (dark `#0E1526` /
+  `#C9D3E6`, light `#F4F6FA` / `#2B3648`) are the placeholder app screen and
+  its ink; `--leaf` (dark `#22C55E`, light `#15803D`) is the Apple Care
+  scanner green; `--shadow-phone` is the phone's drop shadow. They appear
+  only inside `.phone`.
 - **No `color-mix()` for text colours.** Text colours must be real tokens so
   `tools/contrast` can verify them. `color-mix()` is fine for borders and
   backgrounds that carry no text (e.g. `::selection`, the faint prose underline).
@@ -224,8 +240,10 @@ There are two exceptions, because neither can read CSS variables: the initial
   any colour change. Body-text pairs checked: ink, muted and accent-text on
   bg / surface / surface-2; accent-text and ink on accent-soft; on-accent on
   both button fills; **every `--type-*` on `--surface-2` and on its own
-  `-soft`** (the tool resolves `var(--alias)` tokens). Large-text pairs:
-  accent on bg / surface-2 (≥ 3:1).
+  `-soft`** (the tool resolves `var(--alias)` tokens); and (Phase 5)
+  screen-ink and leaf on screen. Large-text pairs: accent on bg / surface-2
+  (≥ 3:1). The scanner's 9px "Analysing" pill sits on a `color-mix` tint of
+  `--leaf`; it is part of the decorative, `aria-hidden` placeholder picture.
 
 ---
 
@@ -368,6 +386,20 @@ line in from the sides, e.g. past a link's padding) and `--underline-offset`
     highlighted lane stays continuous, e.g. the volunteer lane through the
     KRB merge). Pressing it again or "All" resets. Dims, never hides.
 
+15. **Project phone rise** (Phase 5): hovering a project card (`(hover:
+    hover)` only) lifts the card 2px (item 3, `.lift`) and raises its phone
+    `translateY(-10px)` over `--dur-slow`.
+16. **Email underline** (Phase 5, an extension of item 4): the contact
+    address's 2px `--accent` underline rests at `scaleX(0.18)` and grows to
+    `scaleX(1)` on hover/focus over `--dur-slow`.
+17. **Diagonal nudge** (Phase 5, a sibling of item 7): `arrow-up-right`
+    icons (`.link-arrow--external`, `.project__link`, `.channels__go`) move
+    `translate(2px, -2px)` over `--dur-fast`; the footer's Back to top
+    arrow moves `translateY(-2px)`.
+18. **Copy confirmation** (Phase 5): the copy button shows "Copied" plus a
+    check for 2.2s (`main.js`), then resets. The skill "used in" panel
+    appears with **no** animation (it toggles `hidden`).
+
 **Banned:** parallax, scroll-jacking, typing/typewriter text, cursor followers,
 particles, auto-playing carousels, bounce/elastic easings (`--ease-spring`
 above is the one deliberate, graph-only exception), and anything that loops
@@ -377,7 +409,8 @@ above is the one deliberate, graph-only exception), and anything that loops
 Under `@media (prefers-reduced-motion: reduce)`, revealed elements are visible
 immediately (`opacity: 1`, `animation: none`), the hero entrance and the menu
 animation are off, scrolling is instant, hover lifts, press scaling and
-the arrow nudge are disabled, the career graph is fully drawn and lit and
+the arrow nudges, the project phone rise and the email underline's growth
+(it switches at once) are disabled, the career graph is fully drawn and lit and
 static (no scroll drawing, no ignite, no pulse; hover and filter changes are
 instant), the underline fades in instead of growing, and
 animations are cut to 0.01ms. Only short opacity and colour changes remain.
@@ -446,6 +479,9 @@ Every non-hero section:
   + var(--space-8))`, so the title stays in view while the body scrolls. Below
   1024px they stack (gap `--space-10`) and nothing is sticky.
 - `.section__body` takes the remaining width; paragraphs still cap at 65ch.
+- The eyebrow is optional (About has none: `.section__title:first-child`
+  drops its top margin). `.section__lead` is an optional `--muted` line
+  under the title, 30ch (Skills, Contact).
 - The action link (`.link-arrow.section__action.tap-target`) lives in the
   aside: a 16px box `--space-8` below what precedes it, with the 44px hit
   area from `.tap-target`.
@@ -475,10 +511,13 @@ leak into its outer spacing. Children's own margins don't collapse into the gap.
 - Use whitespace instead of boxes. Separate content with hairline `--line`
   dividers (1px).
 - **At most one card style** in the whole site: `.card`. **Cards are for
-  projects and the about-facts panel only.** Experience, skills and education
-  are not cards; they use whitespace and hairline dividers.
-- No gradients, except possibly a very subtle hero backdrop.
-- **No company or organisation logos.** Use Lucide icons or text instead.
+  projects and the degree only** (Phase 5; the about facts became a
+  hairline fact sheet). Experience, skills, the school column and the about
+  section are not cards; they use whitespace and hairline dividers.
+- No gradients, except the subtle hero backdrop and the project phone stage.
+- **No company or organisation logos** (employers, schools). Use Lucide
+  icons or text instead. Technology logos on skill pills (Kotlin, Git,
+  Cisco…) are fine: they name a tool, monochrome in `currentColor`.
 - Content width ≤ 65ch.
 - When in doubt, remove it.
 
@@ -507,14 +546,56 @@ every icon name.
 - **UI icons, from Lucide 1.65.0 (ISC):** `code smartphone brain graduation-cap
   map-pin users wrench layers phone mail download arrow-up-right arrow-right
   moon sun monitor menu x external-link calendar`, plus (Phase 4, the
-  experience org tiles) `flower-2 route solar-panel trophy`.
+  experience org tiles) `flower-2 route solar-panel trophy`, plus (Phase 5)
+  `book-open award globe clock briefcase copy check arrow-up plus leaf`
+  and the skill icons below. (`phone` is still in the folder but unused:
+  there is no phone number on the site.)
 - **`linkedin`:** from Lucide **0.577.0**, the last Lucide release before it
   removed brand icons. Simple Icons has also removed LinkedIn.
-- **Brands, from Simple Icons 16.36.0 (CC0):** `github`, `googleplay`.
+- **Brands, from Simple Icons 16.36.0 (CC0):** `github`, `googleplay`, plus
+  (Phase 5, skill pills) `kotlin jetpackcompose javascript nodedotjs express
+  html5 css cplusplus python tensorflow git androidstudio cisco googlemeet
+  android ios`. **Never** use an older Simple Icons release to bring back a
+  removed brand, and never draw a logo by hand.
+- **Skill icons (Phase 5).** Every skill pill has an icon (validation
+  requires it), monochrome `currentColor` at 16px, no brand colours.
+
+  | Skill | Icon file | Source |
+  |---|---|---|
+  | Kotlin | `kotlin` | Simple Icons |
+  | Jetpack Compose | `jetpackcompose` | Simple Icons |
+  | JavaScript | `javascript` | Simple Icons |
+  | Node.js | `nodedotjs` | Simple Icons |
+  | Express | `express` | Simple Icons |
+  | HTML5 | `html5` | Simple Icons |
+  | CSS3 | `css` | Simple Icons |
+  | C++ | `cplusplus` | Simple Icons |
+  | Python | `python` | Simple Icons |
+  | TensorFlow Lite | `tensorflow` | Simple Icons |
+  | CNN | `network` | Lucide |
+  | Git & GitHub | `git` | Simple Icons |
+  | Android Studio | `androidstudio` | Simple Icons |
+  | VS Code | `code-xml` | Lucide fallback (Simple Icons removed `visualstudiocode`) |
+  | Business Central | `building-2` | Lucide fallback (Simple Icons removed `dynamics365`) |
+  | Cisco networking | `cisco` | Simple Icons |
+  | Slack | `message-square` | Lucide fallback (Simple Icons removed `slack`) |
+  | Google Meet | `googlemeet` | Simple Icons |
+  | REST APIs | `webhook` | Lucide |
+  | Android | `android` | Simple Icons |
+  | iOS | `ios` | Simple Icons |
+  | Flow architecture | `workflow` | Lucide |
+  | Backend | `server` | Lucide |
+  | Full-stack | `layers` | Lucide |
+  | Project management | `kanban` | Lucide |
+  | Team leadership | `users` | Lucide |
+  | Self-directed | `compass` | Lucide |
+  | Accountable | `shield-check` | Lucide |
+  | Analytical | `chart-line` | Lucide |
 - **Licences:** in `templates/icons/LICENSES/`, which also has a README of
   sources and versions.
-- **Adding an icon:** fetch it once (`npm pack lucide-static` into a scratch
-  folder), normalise it to the format above, and copy only that file.
+- **Adding an icon:** fetch it once (`npm pack lucide-static` or `npm pack
+  simple-icons` into a scratch folder), normalise it to the format above, and
+  copy only that file.
 
 ---
 
@@ -526,15 +607,15 @@ every icon name.
   in the **`ui:`** block. The only exception is the dev-only styleguide page.
 - The contact email is always **muchina537@gmail.com**. The build **fails** if
   `kmuchina22` appears anywhere in the content.
-- **No phone number on the public site** (Kennedy's decision, 2026-10-30):
-  `site.show_phone: false` and `contact.phone` is empty. The `show_phone`
-  mechanism stays (hero `tel:` link, contact phone link); when it is `false`
-  the number appears nowhere, and a build test fails if any `tel:` link
-  renders. Test fixtures use a fictional number, never the real one.
+- **No phone number on the site** (Kennedy's decision, 2026-10-30). There
+  is no phone field in the content model (`contact.phone`, `site.show_phone`
+  and `TelHref` were removed in Phase 5) and no template branch renders one.
+  A build test fails if any file in `dist/` contains `tel:`, `703 537`,
+  `703537` or `+254` (also as `&#43;254`, html/template's escape).
 - **No references section.** References are deliberately left off the public
   site *and* the résumé; Kennedy provides three referees on request.
-- Alt text comes from the YAML: `person.photo_alt`, plus `projects.items[].image_alt`,
-  which is required once that image exists.
+- Alt text comes from the YAML: `person.photo_alt`; a project screenshot's alt
+  is `ui.projects.screenshot_alt` + the title ("Screenshot of Apple Care").
 - **Section actions (Phase 2):** `experience.action` and `projects.action` are
   optional `{ label, url }`, rendered as a `.link-arrow` in the section header.
   `url` is either an absolute `https://` URL or a file path under `static/`
@@ -562,12 +643,26 @@ every icon name.
     each closed `**…**` into `<strong>`; an unclosed `**` stays literal.
     Templates call it as `{{bold .}}`. No Markdown dependency.
   - `skills` terms come from the bullets; nothing invented.
+- **Job anchors (Phase 5):** each job `<article>` has `id="job-<slug>"`, the
+  slug of `org` up to its first comma (`Job.ID()`: "Kenya Roads Board,
+  Ministry of…" → `job-kenya-roads-board`). Validation keeps them unique.
 - **Milestones:** an education item with `timeline: { date: "YYYY-MM", title,
   detail }` also appears in the career graph as a milestone row.
 - `ui.career`: `highlight`, `legend_label`, `all`, `milestone`, `present`,
   `skills_label` (the graph's interface copy). Durations ("1 yr 1 mo") and the
   summary sentence ("roles since 2023, up to three at once") are English
   generated in Go (`internal/career`).
+- **Phase 5 schema** (details in §17): `about.eyebrow` optional, `about.body`
+  takes `**bold**`, `about.focus[]` `{label, icon, detail}`, `about.facts[]`
+  `{label, value, detail}`; `skills.lead`, `skills.groups[].note`,
+  `skills.groups[].items[]` `{name, icon}`; projects `metric: {value,
+  label}`, `note`, `screenshot`, `placeholder` (`journal | scanner |
+  none`), no more `image` / `image_alt`; education `date` (`YYYY-MM`) or
+  `start` / `end` (`YYYY`), `icon`, `honours`, `honours_detail`, `award:
+  {title, detail}`, `grades[]` `{label, value}` (no more `highlights`);
+  `languages[].level` from LinkedIn's scale; `contact.timezone: {iana,
+  label}`, `contact.links[].handle`; `site.source_url`; and the `ui.about`,
+  `ui.skills`, `ui.projects`, `ui.contact`, `ui.footer` blocks.
 - Fields added in Phase 1: `person.greeting` (the hero eyebrow, "Hello, I'm"),
   `contact.eyebrow`, `contact.heading`, `contact.body`,
   `projects.items[].image_alt`, and the `ui:` block.
@@ -613,11 +708,12 @@ templates/ ────────▶ internal/render  layout + partials + page
 ### Packages
 | Package | Responsibility |
 |---|---|
-| `internal/site` | `types.go`: structs mirroring `site.yaml`, plus helpers (`Person.FullName`, `Contact.TelHref` / `MailtoHref`, `Action.IsExternal` / `AssetPath`, `School.DateISO`, `Project.HasLinks`, `EmploymentTypes`). `load.go`: `Load`/`Parse` with `KnownFields(true)`. `validate.go`: `Validate(site, staticDir, iconDir) (warnings, error)`, which collects every problem into a numbered `Problems` error. `SectionIDs` lists the page anchors. |
+| `internal/site` | `types.go`: structs mirroring `site.yaml`, plus helpers (`Person.FullName`, `Contact.MailtoHref`, `Action.IsExternal` / `AssetPath`, `Site.Facts` (the derived "Currently"), `Job.ID`, `SkillGroup.PanelID`, `Slug`, `Education.Degree` / `Schools`, `School.DateText`, `Language.Meter` / `MeterLabel` / `MeterBars`, `Project.HasLinks`, `EmploymentTypes`, `Placeholders`, `LanguageLevels`). `load.go`: `Load`/`Parse` with `KnownFields(true)`. `validate.go`: `Validate(site, staticDir, iconDir) (warnings, error)`, which collects every problem into a numbered `Problems` error. `SectionIDs` lists the page anchors. |
 | `internal/assets` | `Build(static, out, protect…)`: wipes `out` (refusing if it contains a source dir), copies `static/`, fingerprints, and returns a `Manifest`. `ImageSize` reads JPEG/PNG dimensions with `image.DecodeConfig`. |
 | `internal/render` | `render.go`: parses `layout.html` + `partials/*.html`, clones them per page, executes `"layout"`. `funcs.go`: the FuncMap. |
 | `internal/build` | `Run(Options)`, `Defaults()`, and a `Result` summary that includes warnings. Also writes the GitHub Pages files: `CNAME` (the host of `site.url`, never hard-coded) and an empty `.nojekyll`. |
 | `internal/career` | Pure: `Build(entries, now, labels) Graph`, the career-graph view model (§16). |
+| `internal/evidence` | Pure: `Build(site, labels) []Group`, each skill's evidence (§17). |
 | `internal/textfmt` | `Bold(s)`: the `**bold**` formatter (escape first, then `<strong>`). |
 
 ### What validation checks
@@ -633,12 +729,22 @@ templates/ ────────▶ internal/render  layout + partials + page
 - `ui.nav[].href` is one of the section anchors.
 - `experience.action` / `projects.action`, when present, have a label and a
   `url` that is an `https://` URL or an existing file under `static/`.
-- If `show_phone` is on, the phone number is set.
+- `site.source_url` is https; `contact.timezone.iana` loads with
+  `time.LoadLocation`.
+- Skills: every group has a name and icon, every item a name and an
+  **existing icon file**; panel ids (`used-<group>-<skill>`) are unique.
+- Projects: `placeholder` is in the enum; a `metric` has value and label;
+  links have labels.
+- Education: degree and school set; `date` is `YYYY-MM`; `start`/`end` are
+  both `YYYY` and in order; every item has `honours` or `grades` (else it
+  wouldn't render); at most one has honours. `languages[].level` is one of
+  the LinkedIn levels. Job ids are unique. Every `ui.*` label is set.
 - Experience: required fields, `type` in the enum, no "intern" in a title,
   `YYYY-MM` dates (or `end: present`), `end` ≥ `start`, at least one bullet,
   the icon file exists. Education `timeline.date` is `YYYY-MM`. The
   `ui.career` labels are set.
-- A missing project image is only a **warning**; the image is simply not rendered.
+- A missing project screenshot is only a **warning**; the placeholder UI
+  renders instead.
 
 ### Fingerprinting & manifest
 - `static/css/*.css` are concatenated in filename order and written as
@@ -662,9 +768,7 @@ templates/ ────────▶ internal/render  layout + partials + page
 | `dict "k" v …` | a `map[string]any`, to pass several values to a partial (the theme toggle). |
 | `bold s` | `template.HTML` of `textfmt.Bold(s)`: escaped text with `**x**` → `<strong>x</strong>`. |
 
-There's no `safeURL`. The one URL that `html/template` would reject, `tel:`,
-comes from `Contact.TelHref()`, which returns a `template.URL` built only from
-digits and `+`.
+There's no `safeURL` and no URL that needs one.
 
 ### Templates
 ```
@@ -675,8 +779,8 @@ templates/
 │   ├── 404.html           noindex; GitHub Pages serves it for unknown paths
 │   └── styleguide.html    noindex; dev-only design-system verification page
 ├── partials/              head, skip-link, nav, theme-toggle, social-links,
-│                          hero, about, experience, skills, projects,
-│                          education, contact, footer
+│                          section-action, hero, about, experience, skills,
+│                          projects, education, contact, footer
 └── icons/                 <name>.svg + LICENSES/
 ```
 - A page can define the blocks `"main"` (required), `"title"`, `"head-extra"`
@@ -685,7 +789,9 @@ templates/
 - Template data is `render.Page`: `.Site` (`*site.Site`), `.Name`, `.Path`,
   `.Home` (`""` on the index, `"/"` elsewhere; prefix in-page anchors with it,
   as in `{{$.Home}}#about`), `.Canonical`, `.NoIndex`, `.ThemeInit` and
-  `.Career` (the `*career.Graph`, built once per build for the current month).
+  `.Career` (the `*career.Graph`, built once per build for the current month),
+  `.Skills` (`[]evidence.Group`) and `.LocalTime` (`{Text, ISO}`: the build's
+  time in `contact.timezone`, the contact clock's no-JS value).
 - **`<head>` order (`partials/head.html`):** charset → viewport → inlined
   `theme-init.js` → `<title>` → description → canonical or robots →
   `theme-color` → font preloads (Fraunces normal + Inter only) →
@@ -710,16 +816,19 @@ templates/
 | Contact | `contact` | `contact-title` | `.section--alt` |
 
 Every section is a `<section id aria-labelledby="<id>-title">`. Each project
-is `<article id="project-<slug>">`.
+is `<article id="project-<slug>">`; each job `<article class="job"
+id="job-<slug>">`; each evidence panel `<div class="used"
+id="used-<group>-<skill>">`. The footer's Back to top links to `#top` on the
+index and `#main` elsewhere.
 
 **Nav order decision:** the mockup's *nav* lists Projects before Skills, but
 its *page* shows Skills before Projects. The page order wins, and the nav
 (`ui.nav`) matches it: About, Experience, Skills, Projects, Education, Contact
 (no "Home" since Phase 3: the brand does that job).
 
-**Reveal hooks:** every `.section__aside` has `data-reveal`. Lists and grids use
-`data-reveal-group` (focus list, facts, skills grid, projects grid, education
-grid, contact social list). The career graph has **no** reveal hooks: its
+**Reveal hooks:** every `.section__aside` has `data-reveal`, and so does the
+about intro. Lists and grids use `data-reveal-group` (`.focus`, `.facts`,
+`.skill-table`, `.projects__grid`, `.edu`, `.contact-body`). The career graph has **no** reveal hooks: its
 motion is the graph itself (§6 items 10–14). The hero has **no** reveal hooks: its
 entrance is CSS-only (`data-hero`, §6 item 1).
 
@@ -740,7 +849,7 @@ Numbered files in `static/css/` are concatenated in filename order:
 | `02-base.css` | `reset`, then `base` | reset; bare elements, the theme-fade default, focus, selection |
 | `04-layout.css` | `layout` | the primitives (§7), `.section`, `.section--alt` |
 | `05-components.css` | `components` | the component catalogue (§14) and type roles |
-| `06-sections.css` | `sections` | per-section composition: header, menu, hero (§15), the career graph (§16); Phase 5 replaces its interim block |
+| `06-sections.css` | `sections` | per-section composition: header, menu, hero (§15), the career graph (§16), about … footer (§17) |
 | `08-utilities.css` | `utilities` | `.sr-only`, `.muted`, `.tnum`, `.tap-target` |
 | `09-motion.css` | `motion` | the motion vocabulary (§6), reveal, reduced motion |
 
@@ -775,8 +884,14 @@ rebuilds on any request for `/`, a path ending in `/`, or `*.html` (guarded by
 an RWMutex), serves with `Cache-Control: no-store`, and turns a failed build
 into a plain-text 500.
 
-**Tests:** `internal/site` loads and validates the real content, runs table
-tests for `TelHref`, checks that an unknown field or the retired email fails,
+**Tests:** `internal/site` loads and validates the real content, checks the
+language meter mapping (all five levels, an unknown level fails), the
+derived "Currently" fact (and its absence without a current role), the job
+ids and their uniqueness, `Slug`, the degree/school split, the screenshot
+warning, a table of Phase 5 rules (missing/empty skill icon, duplicate
+skill, bad placeholder, bad time zone, non-https source URL, education
+dates and years, an item with neither honours nor grades, a half metric),
+checks that an unknown field or the retired email fails,
 that problems are collected, that a bad section `action` fails (missing file,
 missing label, non-https URL), and table-tests the experience rules (intern in
 a title, the type enum, `YYYY-MM` dates, end before start, a missing icon) and
@@ -786,7 +901,11 @@ fork, overlapping internships, a lane-1 role ending after lane 0's newest
 started, an ongoing volunteer role), durations (same month, 1 month apart,
 12 and 14 months, Jul–Jul, two years, present), tenure widths, the legend and
 the summary. `internal/textfmt` tests `**bold**`, `<script>` escaping and an
-unclosed `**`. `internal/build`
+unclosed `**`. `internal/evidence` table-tests the real evidence (the 8
+skills of §17 and that every other skill has none), the hrefs and kinds,
+normalisation ("Node.js" = "nodejs", "Git & GitHub" = "git github", "C++"
+≠ "C"), a duplicate match counted once, the three panel wordings and the
+empty case. `internal/build`
 runs a full build into a temp dir and asserts: one `<h1`, every section id, the
 email, no retired email, every header and menu nav `href` matching a
 rendered `id` (12 links, no "Home"), two theme toggles, two section
@@ -795,7 +914,16 @@ summary text, one merge curve, `**bold**` rendered as `<strong>`, no "intern"
 in a job title, the `@layer` order declared before the first layer block,
 fingerprinted assets that exist, theme-init inlined and not copied, no
 `design/`, the 404/styleguide/favicon files present, `CNAME` equal to
-`kmuchina.com`, and an empty `.nojekyll`.
+`kmuchina.com`, and an empty `.nojekyll`. Phase 5 adds: no phone number in
+any output file, the "About me" heading, the intro first in the about body
+with its `<strong>`, "Currently" as the first fact, 29 skill pills each
+with an icon, 8 evidence buttons with panels (open without JS) whose links
+all resolve, 2 `aria-hidden` placeholder stages, the interactive journal
+card, the degree/grades/meter markup, the channels in order, the
+build-time Nairobi clock, the copy button and live region, the 4 job ids,
+the source link and Back to top. A second test builds with a temporary
+screenshot and checks it replaces the scanner placeholder (size, alt, no
+`aria-hidden`).
 
 Go is installed for the user at `~/.local/go`. If `go` isn't on `PATH`, run
 `export PATH="$HOME/.local/go/bin:$PATH"`.
@@ -851,15 +979,15 @@ when a class is genuinely missing, and update this list when you do.
 | `.hero` | `__inner`, `__content`, `__eyebrow`, `__name`, `__role`, `__summary`, `__actions`, `__social`, `__aside` (photo column), `__media`, `__photo`, `__quote` (`<figure>`) | hero.html |
 | `.btn` | `--primary`, `--ghost`, `__label` | hero, 404 |
 | `.icon-btn` | | social rows |
-| `.link` | | contact email/phone |
-| `.link-arrow` | | section actions |
+| `.link` | | menu email |
+| `.link-arrow` | `--external` (`arrow-up-right`, diagonal nudge) | section actions |
 | `.eyebrow` | `--accent` (hero only) | every section header |
-| `.card` | `--interactive`, `__link` | projects, about facts |
-| `.media` | `--plain`, `__icon`, `__title`, `__text` | about facts & focus items |
-| `.social` | `__item`, `__item--phone`, `__item--location`, `__link`, `__label` | hero, contact, footer, menu |
-| `.about` | `__inner`, `__content`, `__body` | about.html |
-| `.focus-list` | `__item`, `__label` | about.html |
-| `.facts` (`<dl>`) | `__item`, `__title`, `__detail` | about.html |
+| `.card` | `--interactive`, `__link` | projects, the degree |
+| `.tile` | (`--tile-size`, `--tile-radius`; reads `--soft` / `--c`) | about focus, skill groups, degree, job org tiles |
+| `.social` | `__item`, `__item--location`, `__link`, `__label` | hero, footer, menu |
+| `.intro` | (`<strong>` = the ink phrase) | about.html |
+| `.focus` | `__item`, `__title`, `__text` | about.html |
+| `.facts` (`<dl>`) | `__item`, `__label` (`<dt>`), `__value` (`<dd>`), `__detail` | about.html |
 | `.experience` | | experience.html |
 | `.summary` | `__num`, `__text` | experience aside |
 | `.legend` | `__label`, `__item` (`[aria-pressed]`), `__swatch` (`--all`, `--<kind>`), `__count` | experience aside |
@@ -871,15 +999,29 @@ when a class is genuinely missing, and update this list when you do.
 | `.tenure-bar` | (inner `span`, width `--w`) | job meta |
 | `.tag` | `--accent` ("Current" only) | experience, skills, projects |
 | `.tag-list` | (children are `li.tag`) | experience, skills, projects |
-| `.skills` | `__grid` | skills.html |
-| `.skill-group` | `__title` | skills.html |
+| `.skill-table` (was the prototype's `.stack`, which clashes with the primitive) | `__row` (`[data-skill-row]`), `__head`, `__name`, `__note` | skills.html |
+| `.skill-list` / `.skill` | `--plain`, `__count`; `button.skill[aria-expanded]` | skills.html |
+| `.used` | `__label`, `__list`, `__link`, `__kind` | skills.html (evidence panel) |
 | `.projects` | `__grid` | projects.html |
-| `.project` | `__media`, `__image`, `__body`, `__kind`, `__title`, `__stack`, `__summary`, `__metric`, `__links`, `__link` | projects.html |
-| `.education` | `__grid` | education.html |
-| `.school` | `__degree`, `__meta`, `__name`, `__date`, `__highlights` | education.html |
-| `.languages` | `__title`, `__list`, `__item`, `__name`, `__level` | education.html |
-| `.contact` | `__body`, `__channels`, `__email-link`, `__phone-link`, `__social` | contact.html |
-| `.site-footer` | `__inner`, `__id`, `__name`, `__role`, `__social`, `__copy` | footer.html |
+| `.project` | `--staged`, `__text`, `__kind`, `__title`, `__summary`, `__foot`, `__metric`, `__link`, `__note`, `__stage` | projects.html |
+| `.phone` | `__screen`, `__notch`, `__image` | project stage |
+| `.ui` (placeholder screen) | `__bar`, `__title`, `__dot`, `__chips`, `__chip` (`--on`), `__card`, `__line` (`--accent`; width `--w`), `__fab`, `__finder`, `__scan`, `__sheet`, `__pill` | project stage |
+| `.edu` | | education.html (the grid) |
+| `.degree` | `__head`, `__title`, `__school` | education.html |
+| `.honours` | (`<small>` = detail) | degree card |
+| `.award` | | degree card |
+| `.school` | `__title`, `__meta` | education.html |
+| `.grades` (`<dl>`) | | school column |
+| `.langs` | `__label` | education.html |
+| `.lang` | `__name`, `__level` | education.html |
+| `.meter` | (`i`, `i.on`) | languages |
+| `.contact-body` | | contact.html |
+| `.mail` | `__address` | contact.html |
+| `.copy` | `__icon` (`--copy`, `--done`), `__label`; `.is-done` | contact.html |
+| `.channels` | `__link`, `__icon`, `__name`, `__handle`, `__go` | contact.html |
+| `.here` | `__item` | contact.html |
+| `.site-footer` | `__inner`, `__name`, `__built`, `__end`, `__social` | footer.html |
+| `.to-top` | | footer.html |
 | `.not-found` | `__title`, `__body`, `__action` | 404.html |
 | `.icon` | | every `{{icon}}` |
 
@@ -898,18 +1040,22 @@ content from `site.yaml`, on `/styleguide.html` (Components section).
 |---|---|---|---|
 | `.btn` | 44px button or button-link, Inter 500 `--fs-sm`, `--radius-sm`, `--icon-sm` icons | `--primary` (`--accent-strong` → `-hover`), `--ghost` (`--line` border → `--line-strong` + `--surface`) | Hero CTAs, 404. Always add `.press`. One primary per view. |
 | `.icon-btn` | 44px round icon-only target, `--muted` → `--ink` + `--surface` | — | Social rows. **Needs an accessible name.** |
-| `.link` | standalone single-line `--accent-text` link; underline grows | — | Contact email/phone. In a row, add `.tap-target`. |
-| `.link-arrow` | `--accent-text` Inter 500 `--fs-sm` link (line-height 1) + trailing `arrow-right`, 44px tall | `.section__action` (16px box + `.tap-target`) | Section actions ("View full résumé →") in the spine aside. |
+| `.link` | standalone single-line `--accent-text` link; underline grows | — | The menu's email. In a row, add `.tap-target`. |
+| `.link-arrow` | `--accent-text` Inter 500 `--fs-sm` link (line-height 1) + trailing `arrow-right`, 44px tall | `.section__action` (16px box + `.tap-target`); `--external` (`arrow-up-right`) | Section actions ("View full résumé →", "More on GitHub ↗") in the spine aside; the `section-action` partial picks the variant. |
 | `.prose` | 65ch running text, `--space-4` between children; links keep a native underline that fades in | — | Any multi-paragraph copy with inline links. |
 | `.tag-list` / `.tag` | reset `<ul>` of mono `--fs-xs` pills with a `--line-strong` border (Phase 4, as in the prototype) | `.tag--accent` (`--accent-soft` bg, `--accent-text`) | Skills, project stacks. `--accent` **only** for "Current". |
-| `.card` | `--surface`, 1px `--line`, `--radius`, fluid padding, no shadow | `--interactive` (+ `.card__link` on the title: whole card clickable, lift on hover) | **Projects and the about-facts panel only.** |
+| `.card` | `--surface`, 1px `--line`, `--radius`, fluid padding, no shadow | `--interactive` (+ `.card__link`: whole card clickable, lift on hover) | **Projects and the degree only.** |
+| `.tile` | 44px icon tile, radius 10px, `--soft`/`--c` or the accent pair, 22px icon | `--tile-size`, `--tile-radius`, `--icon-size` | About focus areas, skill groups (36px), the degree, the job org tiles. |
+| `.skill` | pill, Inter 500 `--fs-sm`, `--line-strong` border, 16px `--muted` icon | `--plain` (400, `--muted`); `button.skill` + `__count`: hover/open = `--accent-text` | Skill pills; evidence toggles. |
+| `.used` | `--surface` panel, 1px `--line`, `--radius`, links in `--accent-text` | — | A skill's "used in" panel. |
+| `.copy` / `.to-top` | 44px pills, `--line-strong` border, `--icon-sm` | `.copy.is-done` (check icon, `--accent-text`) | Copy email (hidden without JS), Back to top. |
+| `.phone` / `.ui` | 11.5rem device frame (`--ink` bezel, `--screen`), peeking out of its stage; `.ui*` draws an abstract placeholder app | — | Project cards. |
 | `.legend` | a group of toggle buttons (`aria-pressed`): swatch, label, count; 40px tall | swatch shape/colour set per kind in `06-sections.css` | The career-graph legend. |
 | `.eyebrow` | mono `--fs-xs` 500 uppercase 0.14em `--muted` | `--accent` | Above section titles; `--accent` for the hero "Hello, I'm" only. |
-| `.media` | icon + title + text; the icon sits in a 40px gutter (absolute, so it works inside `<dt>`) | `--plain` (no tile; icon centred on the first line) | About facts (tiled), focus items (plain). |
 | `.lead` | `--fs-lg`, `--muted` | — | A section's opening paragraph. |
 | `.meta` | mono `--fs-meta`, tabular nums, `--muted` | — | Dates, kinds, small metadata. |
 | `.quote` | Fraunces italic `--fs-xl`, `--lh-snug`, `--ink`, curly quotes in `--accent` | — | The hero pull-quote only. |
-| `.list` | bullets as a 5px `--accent` dot on the first line's x-height; `--space-2` apart; 65ch | — | Experience bullets, education highlights. |
+| `.list` | bullets as a 5px `--accent` dot on the first line's x-height; `--space-2` apart; 65ch | — | Bulleted lists (styleguide; none on the page today). |
 | `.divider` | `<hr>`, 1px `--line`, no margin | — | Separating items (parent controls spacing). |
 | `.theme-toggle` | 40px segmented pill (3px padding) of three 32px round options; checked = `--surface` + `--ink` + 1px `--line-strong` ring; each option's `::before` makes a 36 × 40px hit area | — | Header (≥ 1024px) and mobile menu; kept in sync. Hidden without JS. |
 | `.display-name` | the hero `<h1>` (§3) | `<em>` = `--accent-text` italic | Hero only. |
@@ -961,7 +1107,7 @@ in their own shape.
   `.hero__role` (Inter 400 `--fs-xl` `--muted`, `--space-3` above) →
   `.hero__summary` (`.lead`, full YAML text, `52ch`, `--space-5` above) → CTAs
   (`.cluster`, `--space-8` above; full-width below 400px) → `.hero__social`
-  (`--space-6` above: icon buttons, then the `tel:` link in `.meta` and the
+  (`--space-6` above: icon buttons, then the
   location, after a little extra gap). Photo and quote in `.hero__aside`.
 - Layout: one column below 900px (text, then the photo at `max-width: 22rem`,
   centred; top padding is half `--section-pad`). From 900px a `.split` with
@@ -1062,7 +1208,91 @@ a pin) that becomes a right-aligned 11rem column from 1200px, bullets with an
 8px type-coloured dash and `<strong>` metrics in `--ink`, and skill tags. The
 milestone entry is quieter (dashed 36px tile, italic title).
 
-## 17. Working agreement for future sessions
+## 17. About, skills, projects, education, contact & footer (Phase 5)
+
+Reference: `design/sections-prototype.html`. Markup in the partials, CSS in
+`06-sections.css` (sections) and `05-components.css` (`.tile`, `.skill`,
+`.used`, `.copy`, `.to-top`, `.phone`, `.ui*`), motion in `09-motion.css`
+(§6 items 15–18), JS in `main.js` (skill toggles, copy, clock, year; ≈ 1.9 KB
+without comments). Every section uses the spine (§7).
+
+- **About.** Aside: only the `<h2>` "About me" (no eyebrow; the old tagline
+  is gone). Body: `p.intro` first (Inter 400 `--fs-lg`, line-height 1.7,
+  56ch, `--muted`; its one `**bold**` phrase is `<strong>` in `--ink` 500),
+  then `ul.focus` (three items: `.tile`, title, detail; side by side with
+  vertical hairlines from 760px), then `dl.facts` (2 × 2 from 760px, label
+  column 7.5rem, hairline rows).
+  **"Currently" is derived** (`Site.Facts`): the experience item whose `end`
+  is `present` gives the value (title) and detail (org), rendered first, then
+  `about.facts`. No current role → no "Currently".
+- **Skills.** `.skill-table` rows: a 36px `.tile` + the group name (`<h3>`,
+  Fraunces italic 500 `--fs-lg`) and optional mono `note`; the pills on the
+  right from 760px (13rem head column). Every pill has its icon (§9).
+  **Skill evidence** (`internal/evidence`): a skill matches a project if it
+  equals an entry of `project.stack`, and a job if it equals an entry of
+  `job.skills`, after normalising both (lower-case; drop everything but
+  letters, digits, `+` and `#`). Nothing fuzzier. Each place counts once.
+  Project evidence links to `#project-<slug>` (kind `ui.skills.project`);
+  job evidence to `#job-<slug>`, labelled "{title}, {org before the comma}",
+  kind = the employment type. **Panel label:** "{skill}, `used_in`" when
+  every place is a project; "`used_at`" when every place is a paid role;
+  "`shown_at`" otherwise (a mix, or any volunteer role: leadership shown,
+  not a tool used). Today: Kotlin, Jetpack Compose → the journal; Python,
+  TensorFlow Lite, CNN → Apple Care; Business Central, Cisco networking →
+  ICT Officer, KRB (used at); Team leadership → Tech4Good and the IEEE
+  branch (2, shown at). A skill with evidence is a `<button class="skill"
+  aria-expanded aria-controls>` with a count badge, and its `.used` panel
+  sits in the same row. **Without JS** every panel is visible inline
+  (`aria-expanded="true"`, no `hidden`); `main.js` hides them and makes the
+  buttons toggles, one open per row. The open-pill styling is `html.js`
+  only.
+- **Projects.** Two columns from 900px. A card is `.project.card.lift`
+  (+ `.card--interactive` with a link; its first link is the `.card__link`
+  stretched over the whole card, phone included). Text: kind (Fraunces
+  italic, `--accent-text`), title, summary, tags, a foot (metric: big
+  Fraunces value + label; links; or the mono `note`). Then the **stage**
+  with the phone. **Screenshot rule:** if `projects.items[].screenshot`
+  exists under `static/`, it renders as `img.phone__image` (`imgSize`,
+  `alt="{ui.projects.screenshot_alt} {title}"`, lazy, async) and the stage
+  is exposed; otherwise the `placeholder` UI (`journal` | `scanner`) draws
+  in CSS and the stage is `aria-hidden="true"`; `none` (with no screenshot)
+  renders no stage. A missing screenshot is a build warning. Screenshots:
+  portrait PNG/JPEG, ideally 1080 × 2220.
+- **Education.** `.edu`: 1.4fr / 1fr from 900px. The first item with
+  `honours` is the **degree card** (`.card.degree`: tile, title, school +
+  `Dec 2025`, "First Class Honours" in Fraunces italic `--fs-2xl`
+  `--accent-text` with its detail, the award row). Items with `grades` form
+  the quieter `.school` column (title, school + mono years, a 3-cell
+  `dl.grades`). **Languages** (`.langs`, full width under a hairline): name,
+  level and a 5-bar `.meter` (`role="img"`, `aria-label` "Level N of 5"
+  from Go). **`languages[].level` is LinkedIn's scale:** Elementary (1),
+  Limited working (2), Professional working (3), Full professional (4),
+  Native (5); anything else fails the build.
+- **Contact.** Aside: eyebrow, title, `section__lead` (`contact.body`).
+  Body: the **email as the hero** (Fraunces 500, up to 3.5rem,
+  `overflow-wrap: anywhere` so it fits at 320px) with the growing underline,
+  and the **Copy email** button (clipboard, else it selects the address and
+  says "Press Ctrl+C"; "Copied" + check for 2.2s; announced through a
+  `role="status"` live region; labels from `ui.contact` via `data-*`;
+  hidden without JS). Then `ul.channels` (`contact.links` in order: icon,
+  name, `handle`, ↗; three columns from 760px, hairline rows, 64px tall).
+  Then `p.here`: location, **local time** ("It's 15:26 here (EAT,
+  UTC+3)"; Go renders the build's time in `contact.timezone.iana` as the
+  no-JS value; `main.js` formats `Intl.DateTimeFormat` with the `data-tz`
+  zone every 30s) and availability.
+- **Footer.** Name (Fraunces), "© {year}. {ui.footer.built} {View the
+  source}." (the link is `site.source_url`; `main.js` refreshes the year),
+  then the social icon buttons and the **Back to top** pill.
+- **Deliberate differences from the prototype:** the real Lucide / Simple
+  Icons files instead of its stand-in sprite (e.g. Lucide `brain`, not a
+  chip; the Google Play logo, not a triangle); self-hosted fonts; the real
+  header and 3-state toggle; all content from YAML; tokens instead of its
+  hex values; motion in the `motion` layer without `!important`; the
+  site's `.link-arrow` keeps its 0.01em letter-spacing (shared with the
+  Phase 4 port); short paragraphs keep the site's 65ch `max-width` box
+  (no visual change).
+
+## 18. Working agreement for future sessions
 
 1. Read this file first.
 2. Propose a short plan before any large change.
@@ -1077,7 +1307,7 @@ milestone entry is quieter (dashed 36px tile, italic title).
 
 ---
 
-## 18. Open TODOs (from Kennedy)
+## 19. Open TODOs (from Kennedy)
 
 > **First push (2026-10-30), Kennedy's decision:** the history was squashed
 > into one fresh root commit so the phone number from the Phase 0–1 commits
@@ -1086,9 +1316,11 @@ milestone entry is quieter (dashed 36px tile, italic title).
 > gitignored `tmp/`, and the site shipped without a résumé until the new
 > one replaced it (same day).
 
-- [ ] Project screenshots: `static/img/projects/prayer-gratitude-journal.png`, `apple-care.png`.
-  The build warns until they exist; check the `image_alt` text when you add them.
-- [ ] Play Store URL(s) for the projects (`projects.items[].links`).
+- [ ] Project screenshots: `static/img/projects/<slug>.png`
+  (`prayer-gratitude-journal.png`, `apple-care.png`), portrait, ideally
+  1080 × 2220. The build warns and shows the placeholder UI until they exist.
+- [ ] The journal app's direct Play Store URL (its link points at the
+  developer page for now: `projects.items[0].links`).
 - [x] `static/img/picture_2.jpg` is gone from `static/` (checked 2026-10-30).
 - [x] **New résumé added** (2026-10-30): no phone number; references
   "available upon request". Any future résumé must pass

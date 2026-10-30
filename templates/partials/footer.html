@@ -1,15 +1,20 @@
+{{/* Footer: name and credit line, the social icon buttons, Back to top.
+     On the index "Back to top" goes to #top (the hero); elsewhere to #main. */}}
 {{define "footer" -}}
+{{- $top := "#main"}}{{if eq .Name "index"}}{{$top = "#top"}}{{end}}
 {{- with .Site}}
 <footer class="site-footer">
-  <div class="container site-footer__inner stack">
-    <p class="site-footer__id cluster"><span class="site-footer__name">{{.Person.FullName}}</span> <span class="site-footer__role">{{.Person.Role}}</span></p>
-    <ul class="social site-footer__social cluster" aria-label="{{.UI.SocialLabel}}">
-      <li class="social__item"><a class="social__link icon-btn" href="{{.Contact.MailtoHref}}">{{icon "mail" .Contact.Email}}</a></li>
-      {{- range .Contact.Links}}
-      <li class="social__item"><a class="social__link icon-btn" href="{{.URL}}" rel="me">{{icon .Icon .Label}}</a></li>
-      {{- end}}
-    </ul>
-    <p class="site-footer__copy meta"><small>© {{year}} {{.Person.FullName}}</small></p>
+  <div class="container site-footer__inner">
+    <div>
+      <p class="site-footer__name">{{.Person.FullName}}</p>
+      <p class="site-footer__built">© <span data-year>{{year}}</span>. {{.UI.Footer.Built}} <a href="{{.Meta.SourceURL}}">{{.UI.Footer.Source}}</a>.</p>
+    </div>
+    <div class="site-footer__end">
+      <ul class="site-footer__social" aria-label="{{.UI.SocialLabel}}">
+        {{- template "social-links" .}}
+      </ul>
+      <a class="to-top" href="{{$top}}">{{.UI.Footer.ToTop}} {{icon "arrow-up"}}</a>
+    </div>
   </div>
 </footer>
 {{- end}}

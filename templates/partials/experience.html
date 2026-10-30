@@ -55,8 +55,8 @@
             <span class="{{.Class}}"></span>
             {{- end}}
           </div>
-          <article class="job">
-            <span class="job__tile" aria-hidden="true">{{icon .Icon}}</span>
+          <article class="job"{{with .ID}} id="{{.}}"{{end}}>
+            <span class="job__tile tile" aria-hidden="true">{{icon .Icon}}</span>
             <div class="job__head">
               <h3 class="job__title">{{.Title}}</h3>
               <p class="job__org">{{.Org}}</p>

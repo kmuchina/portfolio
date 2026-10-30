@@ -18,9 +18,6 @@
       </div>
       <ul class="social hero__social cluster" aria-label="{{$ui.SocialLabel}}" data-hero style="--i: 3">
         {{- template "social-links" .}}
-        {{- if .Meta.ShowPhone}}
-        <li class="social__item social__item--phone"><a class="meta tap-target" href="{{.Contact.TelHref}}">{{icon "phone"}}{{.Contact.Phone}}</a></li>
-        {{- end}}
         <li class="social__item social__item--location">{{icon "map-pin"}}<span class="social__label">{{.Person.Location}}</span></li>
       </ul>
     </div>

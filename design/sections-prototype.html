@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 5 sections prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+/* ============ TOKENS (same values as the site + Phase 4) ============ */
+:root, [data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1220; --surface: #111A2E; --surface-2: #111B30;
+  --ink: #E6EAF2; --muted: #9AA6BD;
+  --line: #1E2940; --line-strong: #2C3A57;
+  --accent: #3B82F6; --accent-strong: #2563EB; --accent-strong-hover: #1D4ED8;
+  --accent-text: #60A5FA; --accent-soft: #172746; --on-accent: #FFFFFF;
+  --screen: #0E1526; --screen-ink: #C9D3E6;
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F7F8FA; --surface: #FFFFFF; --surface-2: #EBEFF5;
+  --ink: #0F1A2E; --muted: #4A5568;
+  --line: #E2E7EF; --line-strong: #CBD3E0;
+  --accent: #3B82F6; --accent-strong: #2563EB; --accent-strong-hover: #1D4ED8;
+  --accent-text: #1D4ED8; --accent-soft: #E8F0FE; --on-accent: #FFFFFF;
+  --screen: #F4F6FA; --screen-ink: #2B3648;
+}
+:root {
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --fs-xs: 0.75rem; --fs-sm: 0.875rem;
+  --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --fs-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --fs-xl: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --fs-2xl: clamp(1.75rem, 1.35rem + 1.8vw, 2.75rem);
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem;
+  --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --section-pad: clamp(4rem, 3rem + 5vw, 8rem);
+  --container: 1200px; --header-h: 64px;
+  --radius-sm: 6px; --radius: 12px; --radius-pill: 999px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms; --dur-slow: 600ms;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px rgb(0 0 0 / .25);
+}
+[data-theme="light"] { --shadow: 0 1px 2px rgb(15 26 46 / .06), 0 8px 24px rgb(15 26 46 / .08); }
+@media (min-width: 1024px) { :root { --header-h: 72px; } }
+
+/* ============ BASE ============ */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 var(--fs-base)/1.65 var(--font-body); font-feature-settings: "cv11", "ss01"; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: clamp(1.25rem, 4vw, 2rem); }
+.display { font-family: var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; }
+
+/* demo bar (prototype only) */
+.demo-bar { position: sticky; top: 0; z-index: 10; height: var(--header-h);
+  background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.demo-bar .container { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.brand { font: 600 var(--fs-lg)/1 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; text-decoration: none; }
+.brand em { color: var(--accent-text); font-weight: 500; }
+.theme-switch { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-pill); }
+.theme-switch button { font: 500 var(--fs-xs)/1 var(--font-body); color: var(--muted); background: none; border: 0; padding: .55rem .9rem; border-radius: var(--radius-pill); cursor: pointer; }
+.theme-switch button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+/* ============ SPINE SECTION SYSTEM (from Phase 4) ============ */
+.section { padding-block: var(--section-pad); border-top: 1px solid var(--line); background: var(--band); --band: var(--bg); }
+.section--alt { --band: var(--surface-2); }
+.section__grid { display: grid; gap: var(--space-10); }
+@media (min-width: 1024px) {
+  .section__grid { grid-template-columns: minmax(15rem, 1fr) 2.6fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .section__aside { position: sticky; top: calc(var(--header-h) + var(--space-8)); }
+}
+.eyebrow { font: 500 var(--fs-xs)/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.section__title { margin-top: var(--space-3); font: 560 var(--fs-2xl)/1.1 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; letter-spacing: -0.015em; text-wrap: balance; }
+.section__lead { margin-top: var(--space-4); color: var(--muted); max-width: 30ch; }
+.link-arrow { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-8);
+  color: var(--accent-text); font: 500 var(--fs-sm)/1 var(--font-body); text-decoration: none; }
+.link-arrow .icon { width: 16px; height: 16px; transition: transform var(--dur-fast) var(--ease-out); }
+.link-arrow:hover .icon, .link-arrow:focus-visible .icon { transform: translate(2px, -2px); }
+
+.tile { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-text); flex: none; }
+.tile .icon { width: 22px; height: 22px; }
+.tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.tags li { font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); padding: var(--space-1) var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-pill); }
+
+/* =====================================================================
+   ABOUT: a typographic statement, three focus areas, a fact sheet
+   ===================================================================== */
+#about .section__title { margin-top: 0; }
+.intro { font: 400 var(--fs-lg)/1.7 var(--font-body); color: var(--muted); max-width: 56ch; text-wrap: pretty; }
+.intro strong { color: var(--ink); font-weight: 500; }
+.focus { list-style: none; padding: 0; margin-top: clamp(2.5rem, 5vw, 3.5rem); display: grid; gap: var(--space-6); }
+@media (min-width: 760px) { .focus { grid-template-columns: repeat(3, 1fr); gap: 0; } }
+.focus li { display: grid; gap: var(--space-3); align-content: start; }
+@media (min-width: 760px) {
+  .focus li { padding-inline: var(--space-6); border-left: 1px solid var(--line); }
+  .focus li:first-child { padding-left: 0; border-left: 0; }
+}
+.focus__title { font-weight: 600; line-height: 1.3; }
+.focus__text { font-size: var(--fs-sm); color: var(--muted); line-height: 1.55; }
+
+.facts { margin-top: clamp(2.5rem, 5vw, 3.5rem); display: grid; border-top: 1px solid var(--line); }
+@media (min-width: 760px) { .facts { grid-template-columns: 1fr 1fr; column-gap: var(--space-8); } }
+.facts > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-4); padding-block: var(--space-4); border-bottom: 1px solid var(--line); }
+.facts dt { font-size: var(--fs-sm); color: var(--muted); }
+.facts dd { font-size: var(--fs-sm); font-weight: 500; line-height: 1.5; }
+.facts dd span { display: block; color: var(--muted); font-weight: 400; }
+
+/* =====================================================================
+   SKILLS: a stack table; tapping a skill reveals where it was used
+   ===================================================================== */
+.stack { display: grid; border-top: 1px solid var(--line); }
+.stack__row { display: grid; gap: var(--space-4); padding-block: var(--space-6); border-bottom: 1px solid var(--line); }
+@media (min-width: 760px) { .stack__row { grid-template-columns: 13rem 1fr; gap: var(--space-8); align-items: start; } }
+.stack__head { display: flex; gap: var(--space-3); align-items: center; }
+.stack__head .tile { width: 36px; height: 36px; border-radius: 8px; }
+.stack__head .tile .icon { width: 18px; height: 18px; }
+.stack__name { font: italic 500 var(--fs-lg)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; }
+.stack__note { display: block; font: 400 var(--fs-xs)/1.4 var(--font-mono); color: var(--muted); font-style: normal; margin-top: 2px; }
+.skill-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.skill .icon { width: 16px; height: 16px; color: var(--muted); transition: color var(--dur-fast); }
+button.skill:hover .icon, button.skill[aria-expanded="true"] .icon { color: currentColor; }
+.skill { font: 500 var(--fs-sm)/1 var(--font-body); color: var(--ink); padding: .6rem .9rem; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill); background: none; display: inline-flex; align-items: center; gap: var(--space-2); }
+button.skill { cursor: pointer; transition: border-color var(--dur-fast), background-color var(--dur-fast); }
+button.skill:hover { border-color: var(--accent-text); }
+button.skill[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--accent-text); color: var(--accent-text); }
+.skill__count { font: 500 0.6875rem/1 var(--font-mono); color: var(--accent-text); background: var(--accent-soft); padding: 3px 6px; border-radius: var(--radius-pill); }
+button.skill[aria-expanded="true"] .skill__count { background: var(--band); }
+.skill--plain { color: var(--muted); font-weight: 400; }
+.used { grid-column: 1 / -1; margin-top: var(--space-2); padding: var(--space-4) var(--space-5); border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--line); font-size: var(--fs-sm); }
+@media (min-width: 760px) { .used { grid-column: 2; } }
+.used[hidden] { display: none; }
+.used__label { color: var(--muted); }
+.used ul { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; gap: var(--space-2); }
+.used a { color: var(--accent-text); text-decoration: none; font-weight: 500; }
+.used a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.used small { color: var(--muted); font-size: var(--fs-xs); margin-left: var(--space-2); }
+
+/* =====================================================================
+   PROJECTS: cards with a phone that peeks out
+   ===================================================================== */
+.projects { display: grid; gap: var(--space-6); }
+@media (min-width: 900px) { .projects { grid-template-columns: 1fr 1fr; } }
+.project { position: relative; overflow: hidden; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line);
+  display: grid; grid-template-rows: auto 1fr; min-height: 34rem;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast) var(--ease-out); }
+.project:hover { border-color: var(--line-strong); box-shadow: var(--shadow); transform: translateY(-2px); }
+.project__text { padding: clamp(1.25rem, 1rem + 1vw, 2rem); display: grid; gap: var(--space-3); align-content: start; position: relative; z-index: 1; }
+.project__kind { font: italic 500 var(--fs-sm)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; color: var(--accent-text); }
+.project__title { font: 600 var(--fs-xl)/1.15 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; letter-spacing: -0.01em; }
+.project__summary { color: var(--muted); font-size: var(--fs-sm); line-height: 1.6; max-width: 46ch; }
+.project__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-5); margin-top: var(--space-2); }
+.metric { display: inline-flex; align-items: baseline; gap: var(--space-2); font-size: var(--fs-sm); color: var(--muted); }
+.metric strong { font: 600 var(--fs-lg)/1 var(--font-display); color: var(--ink); }
+.project__link { font: 500 var(--fs-sm)/1 var(--font-body); color: var(--accent-text); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.project__link::after { content: ""; position: absolute; inset: 0; z-index: 2; } /* whole card is the link */
+.project__link .icon { width: 16px; height: 16px; transition: transform var(--dur-fast) var(--ease-out); }
+.project:hover .project__link .icon { transform: translate(2px, -2px); }
+.project__note { font-size: var(--fs-xs); color: var(--muted); font-family: var(--font-mono); }
+
+/* the stage the phone stands on */
+.project__stage { position: relative; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; min-height: 15rem;
+  background: radial-gradient(60% 70% at 50% 100%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%); }
+.phone { width: 11.5rem; aspect-ratio: 9 / 18.5; margin-bottom: -5.5rem; border-radius: 1.75rem; padding: 7px;
+  background: var(--ink); box-shadow: 0 0 0 1px var(--line-strong), 0 24px 48px -12px rgb(0 0 0 / .45);
+  transition: transform var(--dur-slow) var(--ease-out); }
+.project:hover .phone { transform: translateY(-10px); }
+.phone__screen { height: 100%; border-radius: 1.35rem; background: var(--screen); overflow: hidden; position: relative; color: var(--screen-ink); }
+.phone__screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.phone__notch { position: absolute; top: 7px; left: 50%; translate: -50% 0; width: 34%; height: 14px; border-radius: 0 0 10px 10px; background: var(--ink); z-index: 2; }
+
+/* placeholder app UIs (until real screenshots exist) — abstract, no fake data */
+.ui { position: absolute; inset: 0; padding: 28px 12px 12px; display: grid; gap: 8px; align-content: start; font: 600 10px/1.2 var(--font-body); }
+.ui__bar { display: flex; justify-content: space-between; align-items: center; padding: 2px 2px 6px; }
+.ui__title { font: 600 13px/1 var(--font-display); }
+.ui__dot { width: 18px; height: 18px; border-radius: 50%; background: color-mix(in srgb, var(--screen-ink) 15%, transparent); }
+.ui__chips { display: flex; gap: 5px; }
+.ui__chip { height: 16px; border-radius: 8px; background: color-mix(in srgb, var(--screen-ink) 12%, transparent); flex: 1; }
+.ui__chip--on { background: var(--accent); }
+.ui__card { border-radius: 10px; padding: 9px; background: color-mix(in srgb, var(--screen-ink) 8%, transparent); display: grid; gap: 5px; }
+.ui__line { height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--screen-ink) 22%, transparent); }
+.ui__line--accent { background: var(--accent); width: 40%; }
+.ui__fab { position: absolute; right: 12px; bottom: 14px; width: 36px; height: 36px; border-radius: 12px; background: var(--accent); display: grid; place-items: center; color: white; }
+.ui__fab .icon { width: 18px; height: 18px; stroke-width: 2; }
+.ui__finder { margin-top: 4px; aspect-ratio: 1; border-radius: 12px; position: relative; display: grid; place-items: center;
+  background: color-mix(in srgb, #16a34a 16%, var(--screen)); color: #16a34a; }
+.ui__finder .icon { width: 56px; height: 56px; stroke-width: 1.25; }
+.ui__finder::before { content: ""; position: absolute; inset: 14px; border: 2px solid color-mix(in srgb, var(--screen-ink) 60%, transparent); border-radius: 8px;
+  -webkit-mask: conic-gradient(#000 0 0) top left/16px 16px no-repeat, conic-gradient(#000 0 0) top right/16px 16px no-repeat, conic-gradient(#000 0 0) bottom left/16px 16px no-repeat, conic-gradient(#000 0 0) bottom right/16px 16px no-repeat;
+          mask: conic-gradient(#000 0 0) top left/16px 16px no-repeat, conic-gradient(#000 0 0) top right/16px 16px no-repeat, conic-gradient(#000 0 0) bottom left/16px 16px no-repeat, conic-gradient(#000 0 0) bottom right/16px 16px no-repeat; }
+.ui__scan { position: absolute; left: 14px; right: 14px; top: 50%; height: 2px; background: #16a34a; box-shadow: 0 0 12px #16a34a; opacity: .8; }
+.ui__sheet { border-radius: 12px; padding: 10px; background: color-mix(in srgb, var(--screen-ink) 8%, transparent); display: grid; gap: 6px; }
+.ui__pill { justify-self: start; padding: 4px 8px; border-radius: 8px; background: color-mix(in srgb, #16a34a 22%, transparent); color: #16a34a; font-size: 9px; }
+
+/* =====================================================================
+   EDUCATION: a headline degree, a quieter school, languages
+   ===================================================================== */
+.edu { display: grid; gap: var(--space-8); }
+@media (min-width: 900px) { .edu { grid-template-columns: 1.4fr 1fr; gap: var(--space-6); } }
+.degree { padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem); border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); display: grid; gap: var(--space-4); align-content: start; }
+.degree__head { display: flex; gap: var(--space-4); align-items: center; }
+.degree__title { font: 600 var(--fs-xl)/1.15 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; }
+.degree__school { color: var(--muted); font-size: var(--fs-sm); margin-top: 2px; }
+.honours { font: italic 500 var(--fs-2xl)/1.05 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; color: var(--accent-text); letter-spacing: -0.015em; margin-top: var(--space-2); }
+.honours small { display: block; font: 400 var(--fs-sm)/1.5 var(--font-body); font-style: normal; color: var(--muted); letter-spacing: 0; margin-top: var(--space-2); }
+.award { display: flex; gap: var(--space-3); align-items: flex-start; padding-top: var(--space-4); border-top: 1px solid var(--line); font-size: var(--fs-sm); }
+.award .icon { color: var(--accent-text); margin-top: 2px; }
+.award strong { display: block; font-weight: 600; }
+.award span { color: var(--muted); }
+
+.school { padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem) 0; display: grid; gap: var(--space-4); align-content: start; }
+@media (min-width: 900px) { .school { padding: clamp(1.5rem, 1rem + 1.5vw, 2.25rem) var(--space-2); } }
+.school__title { font: 600 var(--fs-lg)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; }
+.school__meta { color: var(--muted); font-size: var(--fs-sm); }
+.school__meta time { font-family: var(--font-mono); font-size: 0.8125rem; }
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.grades div { padding: var(--space-3) var(--space-4); border-left: 1px solid var(--line); }
+.grades div:first-child { border-left: 0; }
+.grades dt { font-size: var(--fs-xs); color: var(--muted); }
+.grades dd { font: 600 var(--fs-xl)/1.1 var(--font-display); margin-top: 2px; }
+
+.langs { grid-column: 1 / -1; display: grid; gap: var(--space-4); padding-top: var(--space-6); border-top: 1px solid var(--line); }
+@media (min-width: 640px) { .langs { grid-template-columns: auto 1fr 1fr; align-items: center; column-gap: var(--space-8); } }
+.langs__label { display: flex; align-items: center; gap: var(--space-2); color: var(--muted); font-size: var(--fs-sm); }
+.lang { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--space-4); align-items: center; }
+.lang__name { font-weight: 600; }
+.lang__level { grid-column: 1; font-size: var(--fs-sm); color: var(--muted); }
+.meter { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 3px; }
+.meter i { width: 6px; height: 18px; border-radius: 2px; background: var(--line-strong); }
+.meter i.on { background: var(--accent-text); }
+
+/* =====================================================================
+   CONTACT: the email is the hero; copy it in one click
+   ===================================================================== */
+.contact-body { display: grid; gap: clamp(2rem, 4vw, 3rem); }
+.mail { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-5); }
+.mail__address { font: 500 clamp(1.5rem, 0.9rem + 3.2vw, 3.5rem)/1.1 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0;
+  letter-spacing: -0.02em; color: var(--ink); text-decoration: none; position: relative; overflow-wrap: anywhere; }
+.mail__address::after { content: ""; position: absolute; left: 0; right: 0; bottom: -0.08em; height: 2px; background: var(--accent);
+  transform: scaleX(.18); transform-origin: left; transition: transform var(--dur-slow) var(--ease-out); }
+.mail__address:hover::after, .mail__address:focus-visible::after { transform: scaleX(1); }
+.copy { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4);
+  font: 500 var(--fs-sm)/1 var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill); cursor: pointer; transition: border-color var(--dur-fast), color var(--dur-fast); }
+.copy:hover { border-color: var(--accent-text); }
+.copy .icon { width: 16px; height: 16px; }
+.copy .icon--done, .copy.is-done .icon--copy { display: none; }
+.copy.is-done .icon--done { display: block; }
+.copy.is-done { color: var(--accent-text); border-color: var(--accent-text); }
+
+.channels { list-style: none; padding: 0; display: grid; border-top: 1px solid var(--line); }
+@media (min-width: 760px) { .channels { grid-template-columns: repeat(3, 1fr); column-gap: var(--space-6); } }
+.channels a { display: grid; grid-template-columns: 20px 1fr auto; gap: var(--space-4); align-items: center; min-height: 64px;
+  padding-block: var(--space-3); border-bottom: 1px solid var(--line); text-decoration: none; }
+.channels a > .icon:first-child { color: var(--muted); transition: color var(--dur-fast); }
+.channels__name { font-weight: 600; }
+.channels__handle { display: block; color: var(--muted); font-size: var(--fs-sm); font-weight: 400; }
+.channels .go { color: var(--muted); width: 18px; height: 18px; transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast); }
+.channels a:hover .go, .channels a:focus-visible .go { transform: translate(2px, -2px); color: var(--accent-text); }
+.channels a:hover > .icon:first-child { color: var(--accent-text); }
+
+.here { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); color: var(--muted); font-size: var(--fs-sm); }
+.here span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.here .icon { width: 16px; height: 16px; }
+.here time { font-family: var(--font-mono); color: var(--ink); font-feature-settings: "tnum"; }
+
+/* =====================================================================
+   FOOTER
+   ===================================================================== */
+.site-footer { border-top: 1px solid var(--line); padding-block: var(--space-10); font-size: var(--fs-sm); color: var(--muted); }
+.site-footer .container { display: grid; gap: var(--space-6); }
+@media (min-width: 760px) { .site-footer .container { grid-template-columns: 1fr auto; align-items: center; } }
+.site-footer__name { font: 600 var(--fs-base)/1.2 var(--font-display); font-variation-settings: "SOFT" 50, "WONK" 0; color: var(--ink); }
+.site-footer__built { margin-top: var(--space-1); }
+.site-footer__built a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+.site-footer__built a:hover { text-decoration-color: var(--accent-text); }
+.site-footer__end { display: flex; align-items: center; gap: var(--space-2); }
+.icon-btn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); text-decoration: none; transition: color var(--dur-fast), background-color var(--dur-fast); }
+.icon-btn:hover { color: var(--ink); background: var(--surface); }
+.to-top { margin-left: var(--space-3); display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); color: var(--ink); text-decoration: none; font-weight: 500; }
+.to-top .icon { width: 16px; height: 16px; transition: transform var(--dur-fast) var(--ease-out); }
+.to-top:hover .icon { transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 1ms !important; }
+  .project:hover, .project:hover .phone { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ ICON SPRITE (prototype approximations; the site uses real Lucide files) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+  <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></symbol>
+</svg>
+
+<header class="demo-bar">
+  <div class="container">
+    <a class="brand" href="#">Kennedy <em>Muchina</em></a>
+    <div class="theme-switch" role="group" aria-label="Colour theme">
+      <button type="button" data-set-theme="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+    </div>
+  </div>
+</header>
+
+<!-- ==================================== ABOUT ==================================== -->
+<section class="section" id="about" aria-labelledby="about-title">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <h2 class="section__title" id="about-title">About me</h2>
+    </div>
+    <div class="section__body">
+      <p class="intro">I'm a Computer Science graduate passionate about building <strong>reliable, scalable and user-centred applications</strong>. I enjoy solving complex problems, working with great teams, and learning new technologies.</p>
+
+      <ul class="focus">
+        <li><span class="tile"><svg class="icon"><use href="#i-code"/></svg></span>
+          <span class="focus__title">Full-stack development</span>
+          <span class="focus__text">Node, Express and the web platform, from API to interface.</span></li>
+        <li><span class="tile"><svg class="icon"><use href="#i-smartphone"/></svg></span>
+          <span class="focus__title">Android development</span>
+          <span class="focus__text">Kotlin and Jetpack Compose apps, shipped on Google Play.</span></li>
+        <li><span class="tile"><svg class="icon"><use href="#i-brain"/></svg></span>
+          <span class="focus__title">Machine learning &amp; AI</span>
+          <span class="focus__text">On-device models with TensorFlow Lite.</span></li>
+      </ul>
+
+      <dl class="facts">
+        <div><dt>Currently</dt><dd>ICT &amp; Digital Innovation<span>Kenya Flower Council</span></dd></div>
+        <div><dt>Education</dt><dd>BSc Computer Science, First Class<span>Moi University, 2025</span></dd></div>
+        <div><dt>Based in</dt><dd>Nairobi, Kenya<span>Open to remote &amp; global roles</span></dd></div>
+        <div><dt>Leadership</dt><dd>IEEE branch chair, project lead<span>Team player, mentor &amp; community builder</span></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- (Experience sits here on the real page, band = alt) -->
+
+<!-- ==================================== SKILLS ==================================== -->
+<section class="section" id="skills" aria-labelledby="skills-title">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">Technical skills</p>
+      <h2 class="section__title" id="skills-title">Technologies &amp; tools</h2>
+      <p class="section__lead">Skills with a number show where I've used them. Tap one to see.</p>
+    </div>
+    <div class="section__body">
+      <div class="stack">
+
+        <div class="stack__row">
+          <div class="stack__head"><span class="tile"><svg class="icon"><use href="#i-code"/></svg></span>
+            <span class="stack__name">Programming<span class="stack__note">5,000+ lines in each</span></span></div>
+          <ul class="skill-list">
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-kotlin"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>Kotlin <span class="skill__count">1</span></button></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-compose"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>Jetpack Compose <span class="skill__count">1</span></button></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>JavaScript</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>Node.js</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>Express</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>HTML5</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>CSS3</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-code"/></svg>C++</span></li>
+          </ul>
+          <div class="used" id="used-kotlin" hidden><span class="used__label">Kotlin, used in</span>
+            <ul><li><a href="#project-prayer-gratitude-journal">Prayer &amp; Gratitude Journal</a><small>Project</small></li></ul></div>
+          <div class="used" id="used-compose" hidden><span class="used__label">Jetpack Compose, used in</span>
+            <ul><li><a href="#project-prayer-gratitude-journal">Prayer &amp; Gratitude Journal</a><small>Project</small></li></ul></div>
+        </div>
+
+        <div class="stack__row">
+          <div class="stack__head"><span class="tile"><svg class="icon"><use href="#i-brain"/></svg></span>
+            <span class="stack__name">Machine learning</span></div>
+          <ul class="skill-list">
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-python"><svg class="icon" aria-hidden="true"><use href="#i-brain"/></svg>Python <span class="skill__count">1</span></button></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-tflite"><svg class="icon" aria-hidden="true"><use href="#i-brain"/></svg>TensorFlow Lite <span class="skill__count">1</span></button></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-cnn"><svg class="icon" aria-hidden="true"><use href="#i-brain"/></svg>CNN <span class="skill__count">1</span></button></li>
+          </ul>
+          <div class="used" id="used-python" hidden><span class="used__label">Python, used in</span><ul><li><a href="#project-apple-care">Apple Care</a><small>Project</small></li></ul></div>
+          <div class="used" id="used-tflite" hidden><span class="used__label">TensorFlow Lite, used in</span><ul><li><a href="#project-apple-care">Apple Care</a><small>Project</small></li></ul></div>
+          <div class="used" id="used-cnn" hidden><span class="used__label">CNN, used in</span><ul><li><a href="#project-apple-care">Apple Care</a><small>Project</small></li></ul></div>
+        </div>
+
+        <div class="stack__row">
+          <div class="stack__head"><span class="tile"><svg class="icon"><use href="#i-wrench"/></svg></span>
+            <span class="stack__name">Tools</span></div>
+          <ul class="skill-list">
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Git &amp; GitHub</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Android Studio</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>VS Code</span></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-bc"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Business Central <span class="skill__count">1</span></button></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-cisco"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Cisco networking <span class="skill__count">1</span></button></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Slack</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg>Google Meet</span></li>
+          </ul>
+          <div class="used" id="used-bc" hidden><span class="used__label">Business Central, used at</span><ul><li><a href="#experience">ICT Officer, Kenya Roads Board</a><small>Internship</small></li></ul></div>
+          <div class="used" id="used-cisco" hidden><span class="used__label">Cisco networking, used at</span><ul><li><a href="#experience">ICT Officer, Kenya Roads Board</a><small>Internship</small></li></ul></div>
+        </div>
+
+        <div class="stack__row">
+          <div class="stack__head"><span class="tile"><svg class="icon"><use href="#i-layers"/></svg></span>
+            <span class="stack__name">Concepts</span></div>
+          <ul class="skill-list">
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>REST APIs</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>Android</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>iOS</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>Flow architecture</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>Backend</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>Full-stack</span></li>
+          </ul>
+        </div>
+
+        <div class="stack__row">
+          <div class="stack__head"><span class="tile"><svg class="icon"><use href="#i-users"/></svg></span>
+            <span class="stack__name">Leadership</span></div>
+          <ul class="skill-list">
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Project management</span></li>
+            <li><button type="button" class="skill" aria-expanded="false" aria-controls="used-lead"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Team leadership <span class="skill__count">2</span></button></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Self-directed</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Accountable</span></li>
+            <li><span class="skill skill--plain"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Analytical</span></li>
+          </ul>
+          <div class="used" id="used-lead" hidden><span class="used__label">Team leadership, shown at</span>
+            <ul><li><a href="#experience">Project Lead &amp; Tech Lead, IEEE Tech4Good</a><small>Volunteer</small></li>
+                <li><a href="#experience">Chairperson, IEEE Moi University Student Branch</a><small>Volunteer</small></li></ul></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================== PROJECTS ==================================== -->
+<section class="section section--alt" id="projects" aria-labelledby="projects-title">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">Featured projects</p>
+      <h2 class="section__title" id="projects-title">Things I've built</h2>
+      <a class="link-arrow" href="https://github.com/kmuchina">More on GitHub <svg class="icon"><use href="#i-out"/></svg></a>
+    </div>
+    <div class="section__body">
+      <div class="projects">
+
+        <article class="project" id="project-prayer-gratitude-journal">
+          <div class="project__text">
+            <p class="project__kind">Android app</p>
+            <h3 class="project__title">Prayer &amp; Gratitude Journal</h3>
+            <p class="project__summary">A minimalist Android app featuring background routine processing, automated prompt scheduling, and local offline-first data persistence.</p>
+            <ul class="tags" aria-label="Built with"><li>Kotlin</li><li>Jetpack Compose</li><li>Room</li></ul>
+            <div class="project__foot">
+              <span class="metric"><strong>50+</strong> active users</span>
+              <a class="project__link" href="https://play.google.com/store/apps/developer?id=Merat">See it on Google Play <svg class="icon"><use href="#i-out"/></svg></a>
+            </div>
+          </div>
+          <div class="project__stage" aria-hidden="true">
+            <div class="phone"><div class="phone__screen"><span class="phone__notch"></span>
+              <div class="ui">
+                <div class="ui__bar"><span class="ui__title">Today</span><span class="ui__dot"></span></div>
+                <div class="ui__chips"><span class="ui__chip ui__chip--on"></span><span class="ui__chip"></span><span class="ui__chip"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent"></span><span class="ui__line"></span><span class="ui__line" style="width:70%"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent" style="width:30%"></span><span class="ui__line"></span><span class="ui__line" style="width:55%"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent" style="width:50%"></span><span class="ui__line" style="width:85%"></span></div>
+              </div>
+              <span class="ui__fab"><svg class="icon"><use href="#i-plus"/></svg></span>
+            </div></div>
+          </div>
+        </article>
+
+        <article class="project" id="project-apple-care">
+          <div class="project__text">
+            <p class="project__kind">Machine learning mobile app</p>
+            <h3 class="project__title">Apple Care</h3>
+            <p class="project__summary">Trained and deployed a CNN model for on-device apple leaf disease classification, with inference optimised in TensorFlow Lite for real-time mobile performance.</p>
+            <ul class="tags" aria-label="Built with"><li>Python</li><li>TensorFlow Lite</li><li>CNN</li></ul>
+            <div class="project__foot">
+              <span class="project__note">Runs fully on-device</span>
+            </div>
+          </div>
+          <div class="project__stage" aria-hidden="true">
+            <div class="phone"><div class="phone__screen"><span class="phone__notch"></span>
+              <div class="ui">
+                <div class="ui__bar"><span class="ui__title">Scan a leaf</span><span class="ui__dot"></span></div>
+                <div class="ui__finder"><svg class="icon"><use href="#i-leaf"/></svg><span class="ui__scan"></span></div>
+                <div class="ui__sheet"><span class="ui__pill">Analysing</span><span class="ui__line"></span><span class="ui__line" style="width:60%"></span></div>
+              </div>
+            </div></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================== EDUCATION ==================================== -->
+<section class="section" id="education" aria-labelledby="education-title">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">Education</p>
+      <h2 class="section__title" id="education-title">Academic journey</h2>
+    </div>
+    <div class="section__body">
+      <div class="edu">
+        <article class="degree">
+          <div class="degree__head">
+            <span class="tile"><svg class="icon"><use href="#i-cap"/></svg></span>
+            <div><h3 class="degree__title">BSc Computer Science (Hons)</h3>
+              <p class="degree__school">Moi University, <time datetime="2025-12-18">Dec 2025</time></p></div>
+          </div>
+          <p class="honours">First Class Honours<small>Graduated magna cum laude, Class of 2025</small></p>
+          <div class="award"><svg class="icon"><use href="#i-award"/></svg>
+            <div><strong>Vice-Chancellor's Merit Certificate</strong><span>Best Overall Science Student in the Faculty</span></div></div>
+        </article>
+
+        <article class="school">
+          <div>
+            <h3 class="school__title">High School Diploma</h3>
+            <p class="school__meta">Njiiri High School, <time datetime="2016">2016</time>–<time datetime="2019">2019</time></p>
+          </div>
+          <dl class="grades">
+            <div><dt>Mean grade</dt><dd>A−</dd></div>
+            <div><dt>Mathematics</dt><dd>A</dd></div>
+            <div><dt>English</dt><dd>B</dd></div>
+          </dl>
+        </article>
+
+        <div class="langs">
+          <span class="langs__label"><svg class="icon"><use href="#i-globe"/></svg>Languages</span>
+          <div class="lang"><span class="lang__name">English</span><span class="lang__level">Professional working</span>
+            <span class="meter" role="img" aria-label="Level 3 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+          <div class="lang"><span class="lang__name">Kiswahili</span><span class="lang__level">Native</span>
+            <span class="meter" role="img" aria-label="Level 5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================== CONTACT ==================================== -->
+<section class="section section--alt" id="contact" aria-labelledby="contact-title">
+  <div class="container section__grid">
+    <div class="section__aside">
+      <p class="eyebrow">Contact</p>
+      <h2 class="section__title" id="contact-title">Let's build something together</h2>
+      <p class="section__lead">I'm open to full-time roles, freelance projects and collaborations. Email is the fastest way to reach me.</p>
+    </div>
+    <div class="section__body contact-body">
+      <div class="mail">
+        <a class="mail__address" href="mailto:muchina537@gmail.com">muchina537@gmail.com</a>
+        <button type="button" class="copy" data-copy="muchina537@gmail.com">
+          <svg class="icon icon--copy"><use href="#i-copy"/></svg><svg class="icon icon--done"><use href="#i-check"/></svg>
+          <span class="copy__label">Copy email</span></button>
+        <span class="sr-only" role="status" aria-live="polite" id="copy-status"></span>
+      </div>
+
+      <ul class="channels">
+        <li><a href="https://www.linkedin.com/in/kmuchina"><svg class="icon"><use href="#i-linkedin"/></svg>
+          <span><span class="channels__name">LinkedIn</span><span class="channels__handle">in/kmuchina</span></span><svg class="icon go"><use href="#i-out"/></svg></a></li>
+        <li><a href="https://github.com/kmuchina"><svg class="icon"><use href="#i-github"/></svg>
+          <span><span class="channels__name">GitHub</span><span class="channels__handle">kmuchina</span></span><svg class="icon go"><use href="#i-out"/></svg></a></li>
+        <li><a href="https://play.google.com/store/apps/developer?id=Merat"><svg class="icon"><use href="#i-play"/></svg>
+          <span><span class="channels__name">Google Play</span><span class="channels__handle">Developer page</span></span><svg class="icon go"><use href="#i-out"/></svg></a></li>
+      </ul>
+
+      <p class="here">
+        <span><svg class="icon"><use href="#i-pin"/></svg>Nairobi, Kenya</span>
+        <span><svg class="icon"><use href="#i-clock"/></svg>It's <time id="local-time" datetime="">--:--</time> here (EAT, UTC+3)</span>
+        <span><svg class="icon"><use href="#i-briefcase"/></svg>Open to remote &amp; global opportunities</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div>
+      <p class="site-footer__name">Kennedy Muchina Kinuthia</p>
+      <p class="site-footer__built">© <span id="year">2026</span>. Built with Go and hand-written CSS. <a href="https://github.com/kmuchina/portfolio">View the source</a>.</p>
+    </div>
+    <div class="site-footer__end">
+      <a class="icon-btn" href="https://www.linkedin.com/in/kmuchina" aria-label="LinkedIn"><svg class="icon"><use href="#i-linkedin"/></svg></a>
+      <a class="icon-btn" href="https://github.com/kmuchina" aria-label="GitHub"><svg class="icon"><use href="#i-github"/></svg></a>
+      <a class="icon-btn" href="https://play.google.com/store/apps/developer?id=Merat" aria-label="Google Play"><svg class="icon"><use href="#i-play"/></svg></a>
+      <a class="to-top" href="#">Back to top <svg class="icon"><use href="#i-up"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const themeBtns = document.querySelectorAll('[data-set-theme]');
+  themeBtns.forEach(b => b.addEventListener('click', () => {
+    root.dataset.theme = b.dataset.setTheme;
+    themeBtns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+
+  // Skills: a tag with evidence toggles its "used in" panel (one open per row)
+  document.querySelectorAll('button.skill').forEach(btn => btn.addEventListener('click', () => {
+    const row = btn.closest('.stack__row');
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    row.querySelectorAll('button.skill').forEach(b => {
+      b.setAttribute('aria-expanded', 'false');
+      document.getElementById(b.getAttribute('aria-controls')).hidden = true;
+    });
+    if (!open) {
+      btn.setAttribute('aria-expanded', 'true');
+      document.getElementById(btn.getAttribute('aria-controls')).hidden = false;
+    }
+  }));
+
+  // Contact: copy email, with visible + announced confirmation
+  const copy = document.querySelector('.copy');
+  const status = document.getElementById('copy-status');
+  const label = copy.querySelector('.copy__label');
+  copy.addEventListener('click', async () => {
+    const text = copy.dataset.copy;
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+      const sel = getSelection(), range = document.createRange();
+      range.selectNodeContents(document.querySelector('.mail__address'));
+      sel.removeAllRanges(); sel.addRange(range);
+    }
+    copy.classList.toggle('is-done', ok);
+    label.textContent = ok ? 'Copied' : 'Press Ctrl+C';
+    status.textContent = ok ? 'Email address copied' : 'Email address selected. Press Control C to copy.';
+    setTimeout(() => { copy.classList.remove('is-done'); label.textContent = 'Copy email'; }, 2200);
+  });
+
+  // Contact: live local time in Nairobi
+  const t = document.getElementById('local-time');
+  const tick = () => {
+    const now = new Date();
+    t.textContent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' }).format(now);
+    t.dateTime = now.toISOString();
+  };
+  tick(); setInterval(tick, 30000);
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

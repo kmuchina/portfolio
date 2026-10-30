@@ -1,5 +1,7 @@
-/* main.js — deferred. Theme toggles, header scrolled state, mobile menu and
-   scroll reveal. Progressive enhancement: the page is complete without it. */
+/* main.js — deferred. Theme toggles, header scrolled state, mobile menu,
+   career graph, skill evidence toggles, copy email, the contact clock, the
+   footer year and scroll reveal. Progressive enhancement: the page is
+   complete without it. */
 (() => {
   "use strict";
 
@@ -199,6 +201,72 @@
       new IntersectionObserver(([e]) => pulse.classList.toggle("is-paused", !e.isIntersecting)).observe(pulse);
     }
   }
+
+  /* ---- Skills: "used in" panels ------------------------------------------
+     Rendered open (no-JS readers see the evidence inline); here they close
+     and each skill button toggles its panel, one open per row. */
+  for (const row of document.querySelectorAll("[data-skill-row]")) {
+    const btns = [...row.querySelectorAll("button[aria-controls]")];
+    const show = (btn, on) => {
+      btn.setAttribute("aria-expanded", String(on));
+      document.getElementById(btn.getAttribute("aria-controls")).hidden = !on;
+    };
+    for (const btn of btns) {
+      show(btn, false);
+      btn.addEventListener("click", () => {
+        const open = btn.getAttribute("aria-expanded") === "true";
+        for (const b of btns) show(b, false);
+        if (!open) show(btn, true);
+      });
+    }
+  }
+
+  /* ---- Contact: copy email ----------------------------------------------
+     Clipboard first; if that's blocked, select the address and say how to
+     copy it. Confirmed visibly and to screen readers (role="status"). */
+  const copy = document.querySelector("[data-copy]");
+  if (copy) {
+    const label = copy.querySelector(".copy__label");
+    const status = document.querySelector("[data-copy-status]");
+    const d = copy.dataset;
+    let timer;
+    copy.addEventListener("click", async () => {
+      let ok = false;
+      try {
+        await navigator.clipboard.writeText(d.copy);
+        ok = true;
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector("[data-copy-source]"));
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+      }
+      copy.classList.toggle("is-done", ok);
+      label.textContent = ok ? d.done : d.fallback;
+      if (status) status.textContent = ok ? d.statusDone : d.statusFallback;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        copy.classList.remove("is-done");
+        label.textContent = d.label;
+        if (status) status.textContent = "";
+      }, 2200);
+    });
+  }
+
+  /* ---- Contact: live local time (the build's time is the no-JS value) --- */
+  const clock = document.querySelector("time[data-tz]");
+  if (clock && window.Intl) {
+    const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: clock.dataset.tz, hour: "2-digit", minute: "2-digit" });
+    const tick = () => {
+      const now = new Date();
+      clock.textContent = fmt.format(now);
+      clock.dateTime = now.toISOString();
+    };
+    tick();
+    setInterval(tick, 30000);
+  }
+
+  for (const el of document.querySelectorAll("[data-year]")) el.textContent = new Date().getFullYear();
 
   /* ---- Reveal ---------------------------------------------------------- */
   for (const group of document.querySelectorAll("[data-reveal-group]")) {

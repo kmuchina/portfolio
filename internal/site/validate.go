@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -22,6 +23,7 @@ var (
 	emailRe  = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	slugRe   = regexp.MustCompile(`^[a-z0-9-]+$`)
 	monthRe  = regexp.MustCompile(`^[0-9]{4}-(0[1-9]|1[0-2])$`)
+	yearRe   = regexp.MustCompile(`^[0-9]{4}$`)
 	internRe = regexp.MustCompile(`(?i)\bintern(s|ship)?\b`) // "Intern", "internship"; not "International"
 )
 
@@ -76,6 +78,24 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		{"ui.career.milestone", s.UI.Career.Milestone},
 		{"ui.career.present", s.UI.Career.Present},
 		{"ui.career.skills_label", s.UI.Career.SkillsLabel},
+		{"site.source_url", s.Meta.SourceURL},
+		{"contact.timezone.iana", s.Contact.Timezone.IANA},
+		{"contact.timezone.label", s.Contact.Timezone.Label},
+		{"ui.about.currently", s.UI.About.Currently},
+		{"ui.skills.used_in", s.UI.Skills.UsedIn},
+		{"ui.skills.used_at", s.UI.Skills.UsedAt},
+		{"ui.skills.shown_at", s.UI.Skills.ShownAt},
+		{"ui.skills.project", s.UI.Skills.Project},
+		{"ui.projects.stack_label", s.UI.Projects.StackLabel},
+		{"ui.projects.screenshot_alt", s.UI.Projects.ScreenshotAlt},
+		{"ui.contact.copy", s.UI.Contact.Copy},
+		{"ui.contact.copied", s.UI.Contact.Copied},
+		{"ui.contact.fallback", s.UI.Contact.Fallback},
+		{"ui.contact.copied_status", s.UI.Contact.CopiedStatus},
+		{"ui.contact.fallback_status", s.UI.Contact.FallbackStatus},
+		{"ui.footer.built", s.UI.Footer.Built},
+		{"ui.footer.source", s.UI.Footer.Source},
+		{"ui.footer.to_top", s.UI.Footer.ToTop},
 	}
 	for _, r := range required {
 		if strings.TrimSpace(r.value) == "" {
@@ -86,8 +106,10 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 	if s.Contact.Email != "" && !emailRe.MatchString(s.Contact.Email) {
 		add("contact.email %q is not a valid email address", s.Contact.Email)
 	}
-	if s.Meta.ShowPhone && strings.TrimSpace(s.Contact.Phone) == "" {
-		add("site.show_phone is true but contact.phone is empty")
+	if tz := s.Contact.Timezone.IANA; tz != "" {
+		if _, err := time.LoadLocation(tz); err != nil {
+			add("contact.timezone.iana %q is not a time zone: %v", tz, err)
+		}
 	}
 
 	// The retired address must not appear in any loaded field.
@@ -103,6 +125,9 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 	}
 	if s.Meta.URL != "" {
 		checkURL("site.url", s.Meta.URL)
+	}
+	if s.Meta.SourceURL != "" {
+		checkURL("site.source_url", s.Meta.SourceURL)
 	}
 
 	checkFile := func(field, rel string) {
@@ -171,13 +196,57 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 			add("%s.bullets needs at least one bullet", f)
 		}
 	}
+	jobIDs := map[string]bool{}
+	for i, j := range s.Experience.Items {
+		if id := j.ID(); jobIDs[id] {
+			add("experience.items[%d] (%s): anchor id %q is not unique (it comes from org)", i, j.Title, id)
+		} else {
+			jobIDs[id] = true
+		}
+	}
+	degrees := 0
 	for i, e := range s.Education.Items {
-		if m := e.Timeline; m != nil {
-			f := fmt.Sprintf("education.items[%d].timeline", i)
-			checkMonth(f+".date", m.Date)
-			if strings.TrimSpace(m.Title) == "" {
-				add("%s.title is required", f)
+		f := fmt.Sprintf("education.items[%d] (%s)", i, e.Degree)
+		if strings.TrimSpace(e.Degree) == "" || strings.TrimSpace(e.School) == "" {
+			add("%s: degree and school are required", f)
+		}
+		if e.Date != "" {
+			checkMonth(f+".date", e.Date)
+		}
+		if e.Start != "" || e.End != "" {
+			if !yearRe.MatchString(e.Start) || !yearRe.MatchString(e.End) {
+				add("%s: start %q and end %q must both be YYYY", f, e.Start, e.End)
+			} else if e.End < e.Start {
+				add("%s.end %s is before start %s", f, e.End, e.Start)
 			}
+		}
+		switch {
+		case e.Honours != "":
+			degrees++
+		case len(e.Grades) == 0:
+			add("%s needs honours (the degree card) or grades (the school column); otherwise it isn't shown", f)
+		}
+		for j, g := range e.Grades {
+			if strings.TrimSpace(g.Label) == "" || strings.TrimSpace(g.Value) == "" {
+				add("%s.grades[%d]: label and value are required", f, j)
+			}
+		}
+		if a := e.Award; a != nil && strings.TrimSpace(a.Title) == "" {
+			add("%s.award.title is required", f)
+		}
+		if m := e.Timeline; m != nil {
+			checkMonth(f+".timeline.date", m.Date)
+			if strings.TrimSpace(m.Title) == "" {
+				add("%s.timeline.title is required", f)
+			}
+		}
+	}
+	if degrees > 1 {
+		add("education: only the first item with honours is shown as the degree card (%d have honours)", degrees)
+	}
+	for i, l := range s.Languages {
+		if !slices.Contains(LanguageLevels, l.Level) {
+			add("languages[%d] (%s).level %q must be one of %s", i, l.Name, l.Level, strings.Join(LanguageLevels, " | "))
 		}
 	}
 	checkAction("projects.action", s.Projects.Action)
@@ -200,16 +269,45 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		checkIcon(f, l.Icon)
 	}
 	for i, it := range s.About.Focus {
-		checkIcon(fmt.Sprintf("about.focus[%d]", i), it.Icon)
+		f := fmt.Sprintf("about.focus[%d]", i)
+		if strings.TrimSpace(it.Label) == "" || it.Icon == "" {
+			add("%s: label and icon are required", f)
+		}
+		checkIcon(f, it.Icon)
 	}
 	for i, it := range s.About.Facts {
-		checkIcon(fmt.Sprintf("about.facts[%d]", i), it.Icon)
+		if strings.TrimSpace(it.Label) == "" || strings.TrimSpace(it.Value) == "" {
+			add("about.facts[%d]: label and value are required", i)
+		}
+	}
+	for i, e := range s.Education.Items {
+		checkIcon(fmt.Sprintf("education.items[%d]", i), e.Icon)
 	}
 	for i, j := range s.Experience.Items {
 		checkIcon(fmt.Sprintf("experience.items[%d]", i), j.Icon)
 	}
+	panelIDs := map[string]bool{}
 	for i, g := range s.Skills.Groups {
-		checkIcon(fmt.Sprintf("skills.groups[%d]", i), g.Icon)
+		gf := fmt.Sprintf("skills.groups[%d] (%s)", i, g.Name)
+		if strings.TrimSpace(g.Name) == "" || g.Icon == "" {
+			add("%s: name and icon are required", gf)
+		}
+		checkIcon(gf, g.Icon)
+		for j, it := range g.Items {
+			f := fmt.Sprintf("%s.items[%d] (%s)", gf, j, it.Name)
+			if strings.TrimSpace(it.Name) == "" {
+				add("%s.name is required", f)
+			}
+			if it.Icon == "" {
+				add("%s.icon is required (every skill pill has an icon)", f)
+			}
+			checkIcon(f, it.Icon)
+			if id := g.PanelID(it); panelIDs[id] {
+				add("%s: panel id %q is not unique", f, id)
+			} else {
+				panelIDs[id] = true
+			}
+		}
 	}
 
 	seen := map[string]bool{}
@@ -224,14 +322,25 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		seen[p.Slug] = true
 		for j, l := range p.Links {
 			lf := fmt.Sprintf("%s.links[%d]", f, j)
+			if strings.TrimSpace(l.Label) == "" {
+				add("%s.label is required", lf)
+			}
 			checkURL(lf+".url", l.URL)
 			checkIcon(lf, l.Icon)
 		}
-		if p.Image != "" {
-			if _, err := os.Stat(filepath.Join(staticDir, filepath.FromSlash(p.Image))); err != nil {
-				warnings = append(warnings, fmt.Sprintf("%s (%s): image %q not found; it will be omitted", f, p.Slug, p.Image))
-			} else if strings.TrimSpace(p.ImageAlt) == "" {
-				add("%s.image_alt is required when the image exists", f)
+		if m := p.Metric; m != nil && (strings.TrimSpace(m.Value) == "" || strings.TrimSpace(m.Label) == "") {
+			add("%s.metric: value and label are required", f)
+		}
+		if !slices.Contains(Placeholders, p.Placeholder) {
+			add("%s.placeholder %q must be one of %s", f, p.Placeholder, strings.Join(Placeholders, " | "))
+		}
+		if p.Screenshot != "" {
+			if _, err := os.Stat(filepath.Join(staticDir, filepath.FromSlash(p.Screenshot))); err != nil {
+				what := "the " + p.Placeholder + " placeholder shows instead"
+				if p.Placeholder == "none" {
+					what = "no phone is shown"
+				}
+				warnings = append(warnings, fmt.Sprintf("%s (%s): screenshot %q not found; %s", f, p.Slug, p.Screenshot, what))
 			}
 		}
 	}

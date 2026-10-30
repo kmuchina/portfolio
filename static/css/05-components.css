@@ -248,23 +248,16 @@
   --cluster-space: var(--space-1);
   margin-inline-start: calc((var(--tap) - var(--icon-md)) / -2);
 }
-.social__item--location,
-.social__item--phone > a {
+.social__item--location {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  /* Text follows the icon buttons after a little extra gap. */
+  padding-inline-start: var(--space-3);
+  font-size: var(--fs-sm);
   color: var(--muted);
   --icon-size: var(--icon-sm);
 }
-.social__item--location { font-size: var(--fs-sm); }
-/* Text items follow the icon buttons after a little extra gap. */
-.social__item--location,
-.social__item--phone { padding-inline-start: var(--space-3); }
-.social__item--phone > a {
-  text-decoration: none;
-  transition: var(--transition-ui);
-}
-.social__item--phone > a:hover { color: var(--ink); }
 
 /* ==========================================================================
    Tags
@@ -428,54 +421,30 @@
   text-wrap: balance;
 }
 
-/* ==========================================================================
-   Media object: icon + title + detail (about facts, focus items)
-   The icon sits in a fixed gutter (absolute) rather than a grid column, so
-   the same component works for <li> and for <dl> groups, where the icon has
-   to live inside the <dt>.
-   ========================================================================== */
-
-.media {
-  --media-icon: var(--space-10);   /* 40px tile */
-  position: relative;
-  min-block-size: var(--media-icon);
-  padding-inline-start: calc(var(--media-icon) + var(--space-3));
-  font-size: var(--fs-sm);
-  line-height: 1.5;
-}
-.media__icon {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  display: grid;
-  place-items: center;
-  inline-size: var(--media-icon);
-  block-size: var(--media-icon);
-  border-radius: var(--radius-sm);
-  background-color: var(--accent-soft);
-  color: var(--accent-text);
-  --icon-size: var(--icon-md);
-}
-.media__title {
-  display: block;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--ink);
-}
-.media__text {
-  display: block;
-  font-size: var(--fs-sm);
+/* A short line under the aside's title (skills, contact). */
+.section__lead {
+  margin-block-start: var(--space-4);
+  max-inline-size: 30ch;
   color: var(--muted);
 }
 
-/* Plain: no tile, the icon is centred on the first line. */
-.media--plain {
-  --media-icon: var(--icon-md);
-  min-block-size: 0;
-}
-.media--plain .media__icon {
-  inset-block-start: calc((1lh - var(--media-icon)) / 2);
-  background-color: transparent;
+/* ==========================================================================
+   Tile: an icon on a soft tint (about focus areas, skill groups, the degree,
+   the experience org tiles). Reads --soft / --c when a parent sets them
+   (career rows), else the accent pair. Size via --tile-size / --tile-radius
+   (and --icon-size for the glyph).
+   ========================================================================== */
+
+.tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: var(--tile-size, 44px);
+  block-size: var(--tile-size, 44px);
+  border-radius: var(--tile-radius, 10px);
+  background-color: var(--soft, var(--accent-soft));
+  color: var(--c, var(--accent-text));
+  --icon-size: 22px;
 }
 
 /* ==========================================================================
@@ -519,6 +488,289 @@ html:not(.js) .theme-toggle { display: none; }
   border-color: var(--line-strong);
   background-color: var(--surface);
   color: var(--ink);
+}
+
+/* ==========================================================================
+   Skill pills (Phase 5): every pill has a 16px icon. A skill with evidence
+   is a <button> with a count that toggles its .used panel (main.js); the
+   rest are quieter plain pills. The expanded look only applies with JS:
+   without it every panel is simply shown.
+   ========================================================================== */
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.skill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: none;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+  --icon-size: var(--icon-sm);
+}
+.skill .icon {
+  color: var(--muted);
+  transition: var(--transition-ui);
+}
+.skill--plain {
+  font-weight: 400;
+  color: var(--muted);
+}
+button.skill { transition: var(--transition-ui); }
+button.skill:hover { border-color: var(--accent-text); }
+button.skill:hover .icon { color: currentColor; }
+html.js button.skill[aria-expanded="true"] {
+  border-color: var(--accent-text);
+  background-color: var(--accent-soft);
+  color: var(--accent-text);
+}
+html.js button.skill[aria-expanded="true"] .icon { color: currentColor; }
+.skill__count {
+  padding: 3px 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-soft);
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--accent-text);
+  transition: var(--transition-ui);
+}
+html.js button.skill[aria-expanded="true"] .skill__count { background-color: var(--band, var(--bg)); }
+
+/* The "used in" panel: where a skill was used, with links. */
+.used {
+  margin-block-start: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  font-size: var(--fs-sm);
+}
+.used[hidden] { display: none; }
+.used__label { color: var(--muted); }
+.used__list {
+  display: grid;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+.used__link {
+  font-weight: 500;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.used__link:hover { text-decoration: underline; }
+.used__kind {
+  margin-inline-start: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   Pill buttons: copy email, back to top. 44px, --line-strong border.
+   ========================================================================== */
+
+.copy,
+.to-top {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink);
+  text-decoration: none;
+  transition: var(--transition-ui);
+  --icon-size: var(--icon-sm);
+}
+.to-top { font-size: inherit; }
+
+/* Copy can't work without JS, so it isn't shown. "Copied" swaps the icon. */
+html:not(.js) .copy { display: none; }
+.copy { background-color: var(--surface); }
+.copy:hover { border-color: var(--accent-text); }
+.copy__icon { display: contents; }
+.copy__icon--done,
+.copy.is-done .copy__icon--copy { display: none; }
+.copy.is-done .copy__icon--done { display: contents; }
+.copy.is-done {
+  border-color: var(--accent-text);
+  color: var(--accent-text);
+}
+
+/* ==========================================================================
+   Phone: a device frame peeking up from the bottom of a project card. The
+   screen holds a real screenshot, or a placeholder UI drawn in CSS (.ui*:
+   abstract, decorative, aria-hidden; no fake data).
+   ========================================================================== */
+
+.phone {
+  inline-size: 11.5rem;
+  aspect-ratio: 9 / 18.5;
+  margin-block-end: -5.5rem;
+  padding: 7px;
+  border-radius: 1.75rem;
+  background-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-phone);
+}
+.phone__screen {
+  position: relative;
+  block-size: 100%;
+  overflow: hidden;
+  border-radius: 1.35rem;
+  background-color: var(--screen);
+  color: var(--screen-ink);
+}
+.phone__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.phone__notch {
+  position: absolute;
+  inset-block-start: 7px;
+  inset-inline-start: 50%;
+  z-index: 2;
+  inline-size: 34%;
+  block-size: 14px;
+  border-radius: 0 0 10px 10px;
+  background-color: var(--ink);
+  translate: -50% 0;
+}
+
+.ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 28px 12px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.ui__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 2px 6px;
+}
+.ui__title {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-feature-settings: normal;
+  font-size: 13px;
+  line-height: 1;
+}
+.ui__dot {
+  inline-size: 18px;
+  block-size: 18px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--screen-ink) 15%, transparent);
+}
+.ui__chips { display: flex; gap: 5px; }
+.ui__chip {
+  flex: 1;
+  block-size: 16px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--screen-ink) 12%, transparent);
+}
+.ui__chip--on { background-color: var(--accent); }
+.ui__card,
+.ui__sheet {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--screen-ink) 8%, transparent);
+}
+.ui__sheet {
+  gap: 6px;
+  padding: 10px;
+  border-radius: 12px;
+}
+.ui__line {
+  inline-size: var(--w, 100%);
+  block-size: 6px;
+  border-radius: 3px;
+  background-color: color-mix(in srgb, var(--screen-ink) 22%, transparent);
+}
+.ui__line--accent {
+  inline-size: var(--w, 40%);
+  background-color: var(--accent);
+}
+.ui__fab {
+  position: absolute;
+  inset-inline-end: 12px;
+  inset-block-end: 14px;
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 12px;
+  background-color: var(--accent);
+  color: var(--on-accent);
+  --icon-size: 18px;
+}
+.ui__fab .icon { stroke-width: 2; }
+.ui__finder {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  margin-block-start: 4px;
+  border-radius: 12px;
+  background-color: color-mix(in srgb, var(--leaf) 16%, var(--screen));
+  color: var(--leaf);
+  --icon-size: 56px;
+}
+.ui__finder .icon { stroke-width: 1.25; }
+/* Viewfinder corners: a border masked down to its four corners. */
+.ui__finder::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 2px solid color-mix(in srgb, var(--screen-ink) 60%, transparent);
+  border-radius: 8px;
+  --corner: conic-gradient(currentColor 0 0); /* any opaque colour: it is a mask */
+  -webkit-mask:
+    var(--corner) top left / 16px 16px no-repeat, var(--corner) top right / 16px 16px no-repeat,
+    var(--corner) bottom left / 16px 16px no-repeat, var(--corner) bottom right / 16px 16px no-repeat;
+  mask:
+    var(--corner) top left / 16px 16px no-repeat, var(--corner) top right / 16px 16px no-repeat,
+    var(--corner) bottom left / 16px 16px no-repeat, var(--corner) bottom right / 16px 16px no-repeat;
+}
+.ui__scan {
+  position: absolute;
+  inset-inline: 14px;
+  inset-block-start: 50%;
+  block-size: 2px;
+  background-color: var(--leaf);
+  box-shadow: 0 0 12px var(--leaf);
+  opacity: 0.8;
+}
+.ui__pill {
+  justify-self: start;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--leaf) 22%, transparent);
+  font-size: 9px;
+  color: var(--leaf);
 }
 
 } /* @layer components */

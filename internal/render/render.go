@@ -14,19 +14,29 @@ import (
 
 	"github.com/kmuchina/portfolio/internal/assets"
 	"github.com/kmuchina/portfolio/internal/career"
+	"github.com/kmuchina/portfolio/internal/evidence"
 	"github.com/kmuchina/portfolio/internal/site"
 )
 
 // Page is the data passed to every template.
 type Page struct {
 	Site      *site.Site
-	Name      string        // page file name without .html ("index", "404")
-	Path      string        // URL path ("/", "/404.html")
-	Home      string        // prefix for in-page anchors: "" on index, "/" elsewhere
-	Canonical string        // absolute URL; empty when NoIndex
-	NoIndex   bool          // page template defines {{define "noindex"}}{{end}}
-	ThemeInit template.JS   // contents of static/js/theme-init.js, inlined in <head>
-	Career    *career.Graph // the experience graph, built from site.yaml for the current month
+	Name      string           // page file name without .html ("index", "404")
+	Path      string           // URL path ("/", "/404.html")
+	Home      string           // prefix for in-page anchors: "" on index, "/" elsewhere
+	Canonical string           // absolute URL; empty when NoIndex
+	NoIndex   bool             // page template defines {{define "noindex"}}{{end}}
+	ThemeInit template.JS      // contents of static/js/theme-init.js, inlined in <head>
+	Career    *career.Graph    // the experience graph, built from site.yaml for the current month
+	Skills    []evidence.Group // skill groups with each skill's evidence (internal/evidence)
+	LocalTime LocalTime        // build-time clock in contact.timezone (main.js takes over)
+}
+
+// LocalTime is the contact section's no-JS clock: the time of the build in
+// contact.timezone.
+type LocalTime struct {
+	Text string // "15:26"
+	ISO  string // "2026-10-30T15:26+03:00"
 }
 
 // Renderer holds everything the templates need.
@@ -96,10 +106,19 @@ func (r *Renderer) Render(s *site.Site, outDir string) ([]Output, error) {
 	}
 	sort.Strings(pages)
 
-	graph, err := careerGraph(s, time.Now())
+	now := time.Now()
+	graph, err := careerGraph(s, now)
 	if err != nil {
 		return nil, err
 	}
+	ui := s.UI.Skills
+	skills := evidence.Build(s, evidence.Labels{UsedIn: ui.UsedIn, UsedAt: ui.UsedAt, ShownAt: ui.ShownAt, Project: ui.Project})
+	loc, err := time.LoadLocation(s.Contact.Timezone.IANA)
+	if err != nil {
+		return nil, fmt.Errorf("contact.timezone.iana: %w", err)
+	}
+	local := now.In(loc)
+	clock := LocalTime{Text: local.Format("15:04"), ISO: local.Format("2006-01-02T15:04-07:00")}
 
 	var out []Output
 	for _, file := range pages {
@@ -120,6 +139,8 @@ func (r *Renderer) Render(s *site.Site, outDir string) ([]Output, error) {
 			NoIndex:   t.Lookup("noindex") != nil,
 			ThemeInit: template.JS(bytes.TrimSpace(themeInit)),
 			Career:    graph,
+			Skills:    skills,
+			LocalTime: clock,
 		}
 		if name == "index" {
 			p.Path, p.Home = "/", ""

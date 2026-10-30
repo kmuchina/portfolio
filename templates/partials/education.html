@@ -1,3 +1,6 @@
+{{/* Education: the degree card (the first item with honours), the quieter
+     school column (items with grades), then languages with a 5-bar meter
+     (LinkedIn's scale, site.LanguageLevels). */}}
 {{define "education" -}}
 {{- $site := .Site}}
 {{- with .Site.Education}}
@@ -8,32 +11,45 @@
       <h2 id="education-title" class="section__title">{{.Heading}}</h2>
     </div>
     <div class="section__body">
-      <div class="education__grid stack" data-reveal-group>
-        {{- range .Items}}
-        <article class="school stack">
-          <h3 class="school__degree">{{.Degree}}</h3>
-          <p class="school__meta meta cluster">
-            <span class="school__name">{{.School}}</span>
-            {{with .DateISO}}<time class="school__date" datetime="{{.}}">{{else}}<span class="school__date">{{end}}{{.Date}}{{if .DateISO}}</time>{{else}}</span>{{end}}
-          </p>
-          <ul class="school__highlights list">
-            {{- range .Highlights}}
-            <li>{{.}}</li>
+      <div class="edu" data-reveal-group>
+        {{- with .Degree}}
+        <article class="degree card">
+          <div class="degree__head">
+            {{- with .Icon}}
+            <span class="tile" aria-hidden="true">{{icon .}}</span>
             {{- end}}
-          </ul>
+            <div><h3 class="degree__title">{{.Degree}}</h3>
+              <p class="degree__school">{{.School}}{{if .Date}}, <time datetime="{{.Date}}">{{.DateText}}</time>{{end}}</p></div>
+          </div>
+          <p class="honours">{{.Honours}}{{with .HonoursDetail}}<small>{{.}}</small>{{end}}</p>
+          {{- with .Award}}
+          <div class="award">{{icon "award"}}
+            <div><strong>{{.Title}}</strong>{{with .Detail}}<span>{{.}}</span>{{end}}</div></div>
+          {{- end}}
+        </article>
+        {{- end}}
+        {{- range .Schools}}
+        <article class="school">
+          <div>
+            <h3 class="school__title">{{.Degree}}</h3>
+            <p class="school__meta">{{.School}}
+              {{- if .Start}}, <time datetime="{{.Start}}">{{.Start}}</time>–<time datetime="{{.End}}">{{.End}}</time>
+              {{- else if .Date}}, <time datetime="{{.Date}}">{{.DateText}}</time>{{end}}</p>
+          </div>
+          <dl class="grades">
+            {{- range .Grades}}
+            <div><dt>{{.Label}}</dt><dd>{{.Value}}</dd></div>
+            {{- end}}
+          </dl>
         </article>
         {{- end}}
         {{- with $site.Languages}}
-        <div class="languages stack">
-          <h3 class="languages__title">{{$site.UI.LanguagesHeading}}</h3>
-          <dl class="languages__list stack">
-            {{- range .}}
-            <div class="languages__item">
-              <dt class="languages__name">{{.Name}}</dt>
-              <dd class="languages__level">{{.Level}}</dd>
-            </div>
-            {{- end}}
-          </dl>
+        <div class="langs">
+          <h3 class="langs__label">{{icon "globe"}}{{$site.UI.LanguagesHeading}}</h3>
+          {{- range .}}
+          <div class="lang"><span class="lang__name">{{.Name}}</span><span class="lang__level">{{.Level}}</span>
+            <span class="meter" role="img" aria-label="{{.MeterLabel}}">{{range .MeterBars}}<i{{if .}} class="on"{{end}}></i>{{end}}</span></div>
+          {{- end}}
         </div>
         {{- end}}
       </div>

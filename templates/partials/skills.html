@@ -1,21 +1,43 @@
+{{/* Skills: a stack table. A skill with evidence (internal/evidence) is a
+     button that toggles its "used in" panel; the rest are plain pills.
+     Without JS every panel is shown inline (aria-expanded="true"); main.js
+     hides them and turns the buttons into toggles, one open per row. */}}
 {{define "skills" -}}
+{{- $groups := .Skills}}
 {{- with .Site.Skills}}
 <section id="skills" class="section skills" aria-labelledby="skills-title">
   <div class="container section__grid">
     <div class="section__aside" data-reveal>
       <p class="eyebrow">{{.Eyebrow}}</p>
       <h2 id="skills-title" class="section__title">{{.Heading}}</h2>
+      {{- with .Lead}}
+      <p class="section__lead">{{.}}</p>
+      {{- end}}
     </div>
     <div class="section__body">
-      <div class="skills__grid stack" data-reveal-group>
-        {{- range .Groups}}
-        <div class="skill-group stack">
-          <h3 class="skill-group__title cluster">{{icon .Icon}}<span>{{.Name}}</span></h3>
-          <ul class="tag-list">
-            {{- range .Items}}
-            <li class="tag">{{.}}</li>
+      <div class="skill-table" data-reveal-group>
+        {{- range $groups}}
+        <div class="skill-table__row" data-skill-row>
+          <div class="skill-table__head"><span class="tile" aria-hidden="true">{{icon .Icon}}</span>
+            <div><h3 class="skill-table__name">{{.Name}}</h3>{{with .Note}}<p class="skill-table__note">{{.}}</p>{{end}}</div></div>
+          <ul class="skill-list">
+            {{- range .Skills}}
+            {{- if .Evidence}}
+            <li><button type="button" class="skill" aria-expanded="true" aria-controls="{{.PanelID}}">{{icon .Icon}}{{.Name}} <span class="skill__count">{{len .Evidence}}</span></button></li>
+            {{- else}}
+            <li><span class="skill skill--plain">{{icon .Icon}}{{.Name}}</span></li>
+            {{- end}}
             {{- end}}
           </ul>
+          {{- range .Skills}}{{if .Evidence}}
+          <div class="used" id="{{.PanelID}}" data-used><span class="used__label">{{.Label}}</span>
+            <ul class="used__list">
+              {{- range .Evidence}}
+              <li><a class="used__link" href="{{.Href}}">{{.Label}}</a><small class="used__kind">{{.Kind}}</small></li>
+              {{- end}}
+            </ul>
+          </div>
+          {{- end}}{{end}}
         </div>
         {{- end}}
       </div>

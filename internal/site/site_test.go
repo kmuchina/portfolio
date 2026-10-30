@@ -27,17 +27,159 @@ func TestRealContentValidates(t *testing.T) {
 	}
 }
 
-func TestTelHref(t *testing.T) {
-	tests := []struct{ in, want string }{
-		{"+254 700 000 000", "tel:+254700000000"},
-		{"0700-000-000", "tel:0700000000"},
-		{" +1 (555) 010 9999 ", "tel:+15550109999"},
-		{"", "tel:"},
+func TestLanguageMeter(t *testing.T) {
+	tests := []struct {
+		level string
+		meter int
+		label string
+	}{
+		{"Elementary", 1, "Level 1 of 5"},
+		{"Limited working", 2, "Level 2 of 5"},
+		{"Professional working", 3, "Level 3 of 5"},
+		{"Full professional", 4, "Level 4 of 5"},
+		{"Native", 5, "Level 5 of 5"},
+		{"Fluent", 0, "Level 0 of 5"},
 	}
 	for _, tt := range tests {
-		if got := string((Contact{Phone: tt.in}).TelHref()); got != tt.want {
-			t.Errorf("TelHref(%q) = %q, want %q", tt.in, got, tt.want)
+		l := Language{Name: "X", Level: tt.level}
+		if l.Meter() != tt.meter || l.MeterLabel() != tt.label {
+			t.Errorf("%s: meter %d %q, want %d %q", tt.level, l.Meter(), l.MeterLabel(), tt.meter, tt.label)
 		}
+		lit := 0
+		for _, on := range l.MeterBars() {
+			if on {
+				lit++
+			}
+		}
+		if len(l.MeterBars()) != 5 || lit != tt.meter {
+			t.Errorf("%s: bars %v", tt.level, l.MeterBars())
+		}
+	}
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := s.Languages[0].Meter(); got != 3 { // English, Professional working
+		t.Errorf("English meter = %d, want 3", got)
+	}
+	s.Languages[0].Level = "Professional working proficiency"
+	if _, err := Validate(s, staticDir, iconDir); err == nil || !strings.Contains(err.Error(), "must be one of Elementary") {
+		t.Fatalf("want a language level error, got %v", err)
+	}
+}
+
+func TestFactsCurrently(t *testing.T) {
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, f := range s.Facts() {
+		got = append(got, f.Label+": "+f.Value+" / "+f.Detail)
+	}
+	want := "Currently: ICT & Digital Innovation / Kenya Flower Council | " +
+		"Education: BSc Computer Science, First Class / Moi University, 2025 | " +
+		"Based in: Nairobi, Kenya / Open to remote & global roles | " +
+		"Leadership: IEEE branch chair, project lead / Team player, mentor & community builder"
+	if strings.Join(got, " | ") != want {
+		t.Errorf("facts:\n got  %s\n want %s", strings.Join(got, " | "), want)
+	}
+	// No current role: no "Currently" fact.
+	s.Experience.Items[0].End = "2026-09"
+	if f := s.Facts(); len(f) != 3 || f[0].Label != "Education" {
+		t.Errorf("without a current role, want the 3 listed facts, got %v", f)
+	}
+}
+
+func TestJobIDs(t *testing.T) {
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, j := range s.Experience.Items {
+		got = append(got, j.ID())
+	}
+	want := "job-kenya-flower-council job-kenya-roads-board job-ieee-tech4good job-ieee-moi-university-student-branch"
+	if strings.Join(got, " ") != want {
+		t.Errorf("job ids = %v", got)
+	}
+	s.Experience.Items[1].Org = "Kenya Flower Council, Karen"
+	if _, err := Validate(s, staticDir, iconDir); err == nil || !strings.Contains(err.Error(), "is not unique") {
+		t.Fatalf("want a duplicate job id error, got %v", err)
+	}
+}
+
+func TestSlug(t *testing.T) {
+	for in, want := range map[string]string{
+		"Git & GitHub":     "git-github",
+		"IEEE Tech4Good":   "ieee-tech4good",
+		"  Node.js  ":      "node-js",
+		"Machine learning": "machine-learning",
+		"C++":              "c",
+	} {
+		if got := Slug(in); got != want {
+			t.Errorf("Slug(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestSectionRules(t *testing.T) {
+	tests := []struct {
+		name   string
+		mutate func(s *Site)
+		want   string
+	}{
+		{"skill icon missing", func(s *Site) { s.Skills.Groups[0].Items[0].Icon = "no-such-icon" }, `icon "no-such-icon"`},
+		{"skill icon empty", func(s *Site) { s.Skills.Groups[0].Items[0].Icon = "" }, "every skill pill has an icon"},
+		{"duplicate skill", func(s *Site) { s.Skills.Groups[0].Items[1].Name = "kotlin" }, "panel id"},
+		{"bad placeholder", func(s *Site) { s.Projects.Items[0].Placeholder = "phone" }, "must be one of journal | scanner | none"},
+		{"bad time zone", func(s *Site) { s.Contact.Timezone.IANA = "Africa/Atlantis" }, "is not a time zone"},
+		{"source url", func(s *Site) { s.Meta.SourceURL = "http://github.com/x" }, "site.source_url"},
+		{"education date", func(s *Site) { s.Education.Items[0].Date = "Dec 2025" }, "must be YYYY-MM"},
+		{"education years", func(s *Site) { s.Education.Items[1].End = "19" }, "must both be YYYY"},
+		{"education neither", func(s *Site) { s.Education.Items[1].Grades = nil }, "needs honours"},
+		{"metric half", func(s *Site) { s.Projects.Items[0].Metric.Label = "" }, "metric: value and label"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := Load(contentPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tt.mutate(s)
+			if _, err := Validate(s, staticDir, iconDir); err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("want error containing %q, got %v", tt.want, err)
+			}
+		})
+	}
+}
+
+func TestEducationViews(t *testing.T) {
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d := s.Education.Degree(); d == nil || d.School != "Moi University" || d.DateText() != "Dec 2025" {
+		t.Errorf("degree = %+v", d)
+	}
+	if sc := s.Education.Schools(); len(sc) != 1 || sc[0].School != "Njiiri High School" {
+		t.Errorf("schools = %+v", sc)
+	}
+}
+
+func TestMissingScreenshotWarns(t *testing.T) {
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Projects.Items[0].Screenshot = "img/projects/does-not-exist.png"
+	warnings, err := Validate(s, staticDir, iconDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(warnings) == 0 || !strings.Contains(strings.Join(warnings, "\n"), "does-not-exist.png") {
+		t.Errorf("want a screenshot warning, got %v", warnings)
 	}
 }
 

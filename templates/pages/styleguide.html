@@ -208,9 +208,9 @@
         <div class="sg-row">
           <div class="sg-label"><code>.tag-list · .tag--accent</code><span class="meta">mono --fs-xs · accent = "Current" only</span></div>
           <div class="stack">
-            {{- with index $s.Skills.Groups 0}}
+            {{- with index $s.Projects.Items 0}}
             <ul class="tag-list">
-              {{- range .Items}}<li class="tag">{{.}}</li>{{end}}
+              {{- range .Stack}}<li class="tag">{{.}}</li>{{end}}
             </ul>
             {{- end}}
             <p><span class="tag tag--accent">{{$s.UI.Current}}</span></p>
@@ -218,7 +218,7 @@
         </div>
 
         <div class="sg-row sg-row--top">
-          <div class="sg-label"><code>.card · .card--interactive</code><span class="meta">the only card style · projects &amp; about facts</span></div>
+          <div class="sg-label"><code>.card · .card--interactive</code><span class="meta">the only card style · projects &amp; the degree</span></div>
           <div class="sg-pair">
             {{- with index $s.Projects.Items 0}}
             <article class="card stack" style="--stack-space: var(--space-3)">
@@ -252,22 +252,41 @@
           {{- end}}
         </div>
 
+        <div class="sg-row">
+          <div class="sg-label"><code>.tile</code><span class="meta">44px --accent-soft tile, 22px icon · reads --soft / --c when set (experience)</span></div>
+          <div class="cluster">
+            {{- range $s.About.Focus}}<span class="tile">{{icon .Icon}}</span>{{end}}
+          </div>
+        </div>
+
         <div class="sg-row sg-row--top">
-          <div class="sg-label"><code>.media · .media--plain</code><span class="meta">40px --accent-soft tile · plain icon</span></div>
-          <div class="sg-pair">
-            <dl class="stack">
-              {{- range $s.About.Facts}}
-              <div class="media">
-                <dt class="media__title"><span class="media__icon">{{icon .Icon}}</span>{{.Title}}</dt>
-                <dd class="media__text">{{.Detail}}</dd>
-              </div>
+          <div class="sg-label"><code>.skill · .skill--plain · .used</code><span class="meta">a pill per skill, 16px icon · with evidence: a toggle + count · demo shows the open state</span></div>
+          <div class="stack">
+            {{- with index $.Skills 0}}
+            <ul class="skill-list">
+              {{- range .Skills}}
+              {{- if .Evidence}}
+              <li><button type="button" class="skill" aria-expanded="true" aria-controls="sg-{{.PanelID}}">{{icon .Icon}}{{.Name}} <span class="skill__count">{{len .Evidence}}</span></button></li>
+              {{- else}}
+              <li><span class="skill skill--plain">{{icon .Icon}}{{.Name}}</span></li>
               {{- end}}
-            </dl>
-            <ul class="stack" style="--stack-space: var(--space-3)">
-              {{- range $s.About.Focus}}
-              <li class="media media--plain"><span class="media__icon">{{icon .Icon}}</span><span class="media__title">{{.Label}}</span></li>
               {{- end}}
             </ul>
+            {{- range .Skills}}{{if .Evidence}}
+            <div class="used" id="sg-{{.PanelID}}"><span class="used__label">{{.Label}}</span>
+              <ul class="used__list">{{range .Evidence}}<li><a class="used__link" href="/{{.Href}}">{{.Label}}</a><small class="used__kind">{{.Kind}}</small></li>{{end}}</ul>
+            </div>
+            {{- break}}{{end}}{{end}}
+            {{- end}}
+          </div>
+        </div>
+
+        <div class="sg-row">
+          <div class="sg-label"><code>.copy · .to-top</code><span class="meta">44px pills · copy confirms for 2.2s · hidden without JS</span></div>
+          <div class="cluster">
+            <button type="button" class="copy"><span class="copy__icon copy__icon--copy">{{icon "copy"}}</span><span class="copy__icon copy__icon--done">{{icon "check"}}</span><span class="copy__label">{{$s.UI.Contact.Copy}}</span></button>
+            <button type="button" class="copy is-done"><span class="copy__icon copy__icon--copy">{{icon "copy"}}</span><span class="copy__icon copy__icon--done">{{icon "check"}}</span><span class="copy__label">{{$s.UI.Contact.Copied}}</span></button>
+            <a class="to-top" href="#main">{{$s.UI.Footer.ToTop}} {{icon "arrow-up"}}</a>
           </div>
         </div>
 

@@ -1,4 +1,8 @@
+{{/* Projects: cards with a phone peeking up from the bottom. A screenshot
+     under static/ replaces the CSS placeholder UI (then the stage is no
+     longer aria-hidden). With a link, the whole card is clickable. */}}
 {{define "projects" -}}
+{{- $ui := .Site.UI.Projects}}
 {{- with .Site.Projects}}
 <section id="projects" class="section section--alt projects" aria-labelledby="projects-title">
   <div class="container section__grid">
@@ -6,39 +10,61 @@
       <p class="eyebrow">{{.Eyebrow}}</p>
       <h2 id="projects-title" class="section__title">{{.Heading}}</h2>
       {{- with .Action}}
-      <a class="link-arrow section__action tap-target" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>
+      {{template "section-action" .}}
       {{- end}}
     </div>
     <div class="section__body">
-      <div class="projects__grid stack" data-reveal-group>
+      <div class="projects__grid" data-reveal-group>
         {{- range .Items}}
-        <article id="project-{{.Slug}}" class="project card">
-          {{- if and .Image (exists .Image)}}
-          {{- $size := imgSize .Image}}
-          <div class="project__media">
-            <img class="project__image" src="{{asset .Image}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{.ImageAlt}}" loading="lazy" decoding="async">
+        {{- $shot := and .Screenshot (exists .Screenshot)}}
+        {{- $stage := or $shot (ne .Placeholder "none")}}
+        <article id="project-{{.Slug}}" class="project card lift{{if .HasLinks}} card--interactive{{end}}{{if $stage}} project--staged{{end}}">
+          <div class="project__text">
+            <p class="project__kind">{{.Kind}}</p>
+            <h3 class="project__title">{{.Title}}</h3>
+            <p class="project__summary">{{.Summary}}</p>
+            <ul class="tag-list" aria-label="{{$ui.StackLabel}}">
+              {{- range .Stack}}<li class="tag">{{.}}</li>{{end -}}
+            </ul>
+            {{- if or .Metric .HasLinks .Note}}
+            <div class="project__foot">
+              {{- with .Metric}}
+              <span class="project__metric"><strong>{{.Value}}</strong> {{.Label}}</span>
+              {{- end}}
+              {{- range $i, $l := .Links}}
+              <a class="project__link{{if eq $i 0}} card__link{{end}}" href="{{.URL}}">{{with .Icon}}{{icon .}}{{end}}{{.Label}} {{icon "arrow-up-right"}}</a>
+              {{- end}}
+              {{- with .Note}}
+              <span class="project__note">{{.}}</span>
+              {{- end}}
+            </div>
+            {{- end}}
+          </div>
+          {{- if $stage}}
+          <div class="project__stage"{{if not $shot}} aria-hidden="true"{{end}}>
+            <div class="phone"><div class="phone__screen"><span class="phone__notch"></span>
+              {{- if $shot}}
+              {{- $size := imgSize .Screenshot}}
+              <img class="phone__image" src="{{asset .Screenshot}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{$ui.ScreenshotAlt}} {{.Title}}" loading="lazy" decoding="async">
+              {{- else if eq .Placeholder "journal"}}
+              <div class="ui">
+                <div class="ui__bar"><span class="ui__title">{{$ui.Journal.Title}}</span><span class="ui__dot"></span></div>
+                <div class="ui__chips"><span class="ui__chip ui__chip--on"></span><span class="ui__chip"></span><span class="ui__chip"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent"></span><span class="ui__line"></span><span class="ui__line" style="--w: 70%"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent" style="--w: 30%"></span><span class="ui__line"></span><span class="ui__line" style="--w: 55%"></span></div>
+                <div class="ui__card"><span class="ui__line ui__line--accent" style="--w: 50%"></span><span class="ui__line" style="--w: 85%"></span></div>
+              </div>
+              <span class="ui__fab">{{icon "plus"}}</span>
+              {{- else if eq .Placeholder "scanner"}}
+              <div class="ui">
+                <div class="ui__bar"><span class="ui__title">{{$ui.Scanner.Title}}</span><span class="ui__dot"></span></div>
+                <div class="ui__finder">{{icon "leaf"}}<span class="ui__scan"></span></div>
+                <div class="ui__sheet"><span class="ui__pill">{{$ui.Scanner.Status}}</span><span class="ui__line"></span><span class="ui__line" style="--w: 60%"></span></div>
+              </div>
+              {{- end}}
+            </div></div>
           </div>
           {{- end}}
-          <div class="project__body stack">
-            <p class="project__kind meta">{{.Kind}}</p>
-            <h3 class="project__title">{{.Title}}</h3>
-            <ul class="tag-list project__stack">
-              {{- range .Stack}}
-              <li class="tag">{{.}}</li>
-              {{- end}}
-            </ul>
-            <p class="project__summary">{{.Summary}}</p>
-            {{- with .Metric}}
-            <p class="project__metric meta">{{.}}</p>
-            {{- end}}
-            {{- if .HasLinks}}
-            <ul class="project__links">
-              {{- range .Links}}
-              <li><a class="project__link" href="{{.URL}}">{{with .Icon}}{{icon .}}{{end}}<span>{{.Label}}</span>{{icon "arrow-up-right"}}</a></li>
-              {{- end}}
-            </ul>
-            {{- end}}
-          </div>
         </article>
         {{- end}}
       </div>

@@ -148,6 +148,37 @@ html.js [data-reveal-group].is-visible > * {
   transform: translateX(3px);
 }
 
+/* ---- 15–18. Sections (Phase 5; design/sections-prototype.html) ----------
+   15. The project phone rises 10px when its card is hovered, over
+       --dur-slow (the card itself lifts 2px: item 3).
+   16. The contact email's 2px underline grows from 18% to full width on
+       hover/focus, over --dur-slow (the underline vocabulary, item 4).
+   17. Diagonal nudge: arrow-up-right icons (external .link-arrow, project
+       links, contact channels) move 2px right and 2px up; the footer's
+       Back to top arrow moves 2px up.
+   18. The copy button's "Copied" state holds for 2.2s (main.js); the
+       skill "used in" panel appears with no animation. */
+.project .phone { transition: var(--theme-fade), transform var(--dur-slow) var(--ease-out); }
+@media (hover: hover) {
+  .project:hover .phone { transform: translateY(-10px); }
+}
+.mail__address::after { transition: var(--theme-fade), transform var(--dur-slow) var(--ease-out); }
+.mail__address:hover::after,
+.mail__address:focus-visible::after { transform: scaleX(1); }
+
+.project__link .icon,
+.to-top .icon { transition: var(--transition-ui); }
+.link-arrow--external:hover .icon,
+.link-arrow--external:focus-visible .icon,
+.project:hover .project__link .icon,
+.project__link:focus-visible .icon,
+.channels__link:hover .channels__go .icon,
+.channels__link:focus-visible .channels__go .icon {
+  transform: translate(2px, -2px);
+}
+.to-top:hover .icon,
+.to-top:focus-visible .icon { transform: translateY(-2px); }
+
 /* ---- Mobile menu ---------------------------------------------------------
    The panel fades in and drops 8px; the backdrop fades in. */
 @keyframes menu-in {
@@ -275,9 +306,21 @@ html.js [data-reveal-group].is-visible > * {
   .card--interactive:hover,
   .press:active,
   .link-arrow:hover .icon,
-  .link-arrow:focus-visible .icon {
+  .link-arrow:focus-visible .icon,
+  .project:hover .phone,
+  .link-arrow--external:hover .icon,
+  .link-arrow--external:focus-visible .icon,
+  .project:hover .project__link .icon,
+  .project__link:focus-visible .icon,
+  .channels__link:hover .channels__go .icon,
+  .channels__link:focus-visible .channels__go .icon,
+  .to-top:hover .icon,
+  .to-top:focus-visible .icon {
     transform: none;
   }
+
+  /* The email underline: no growth; it switches to full width at once. */
+  .mail__address::after { transition: var(--theme-fade); }
 
   .underline-grow::after,
   .link::after {

@@ -4,7 +4,12 @@
 |---|---|---|
 | All UI icons | lucide-static 1.65.0 | ISC (`lucide-ISC.txt`; portions MIT via Feather) |
 | `linkedin` | lucide-static 0.577.0 (the last release before Lucide removed its brand icons) | ISC (`lucide-0.577-ISC.txt`) |
-| `github`, `googleplay` | simple-icons 16.36.0 | CC0 1.0 (`simple-icons-CC0.md`; see `simple-icons-DISCLAIMER.md` on trademarks) |
+| `github`, `googleplay`, and the skill logos `kotlin`, `jetpackcompose`, `javascript`, `nodedotjs`, `express`, `html5`, `css`, `cplusplus`, `python`, `tensorflow`, `git`, `androidstudio`, `cisco`, `googlemeet`, `android`, `ios` | simple-icons 16.36.0 | CC0 1.0 (`simple-icons-CC0.md`; see `simple-icons-DISCLAIMER.md` on trademarks) |
+
+Simple Icons 16.36.0 no longer has `visualstudiocode`, `dynamics365` or `slack`
+(removed at the trademark holders' request). Those skills use the Lucide
+icons `code-xml`, `building-2` and `message-square` instead; older Simple Icons
+releases are deliberately not used to bring them back.
 
 The files are normalised: one line each, `viewBox` kept, and no `width`/`height`,
 `class` or `stroke-width`, since stroke width comes from CSS (`.icon`). Lucide
