@@ -172,7 +172,7 @@ projects:
       kind: "Android app"
       stack: ["Kotlin", "Jetpack Compose", "Room"]
       summary: "A minimalist Android app featuring background routine processing, automated prompt scheduling, and local offline-first data persistence."
-      metric: { value: "50+", label: "active users" }
+      metric: { value: "100+", label: "active users" }
       links:
         - { label: "See it on Google Play", url: "https://play.google.com/store/apps/developer?id=Merat" }   # TODO: the app's own Play Store URL
       screenshot: "img/projects/prayer-gratitude-journal.png"   # optional; the placeholder UI shows until it exists
