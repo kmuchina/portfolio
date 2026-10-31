@@ -1771,9 +1771,20 @@ for (const [name, init] of Object.entries(features)) {
   | TBT | 2,150 ms | 160 / 140 ms |
   | First-load weight | 1,535 KB | 456 KB (fonts 376 KB) |
 
-  Not yet met: Performance, LCP, TBT and the 450 KB weight. The fonts are
-  82% of the weight and gate the text LCP (the `<h1>` on phones). The font
-  subset (above) saves 23 KB: Fontsource's files were already latin-only.
+  **Font subset effect** (Lighthouse 12.8 mobile, 5 interleaved runs each,
+  the same build served with gzip before/after the subset, a quiet machine):
+  LCP 3.76 → **3.47 s** (median; runs within ±0.03 s), FCP 2.26 → 2.11 s,
+  first load 490 → 458 KB (JPEG locally; WebP live). Live after the subset:
+  median LCP **3.60 s**, Performance 80, first load **424 KB** (fonts 342 KB),
+  Accessibility / Best Practices / SEO 100. On a busy machine Lighthouse's
+  CPU-scaled numbers (TBT, Performance) swing widely: measure with the
+  machine idle and take the median of 5.
+
+  Not yet met: Performance ≥ 95, LCP < 2.0 s, TBT < 100 ms. The fonts
+  (342 KB) still gate the text LCP (the `<h1>` on phones). The next levers
+  would trade design for speed (pinning Fraunces' SOFT/WONK axes, dropping
+  the italic file, or `font-display: optional`); none is taken without
+  Kennedy's decision.
 
 ### Print (`10-print.css`, layer `print`)
 Light palette whatever the theme (the token copy, §4); no header, menu,
