@@ -1627,7 +1627,12 @@ for (const [name, init] of Object.entries(features)) {
   history before the first push (see the note above).
 - [x] Mockup, profile photo (`img/profile.jpg`, 3327×4160, 1.1 MB; since
   Phase 7 only its resized variants ship) and résumé PDF added.
-- [ ] Optional: subset the fonts with fonttools, keeping every axis (§21).
+- [ ] Subset the fonts with fonttools, keeping every axis (§21): the main
+  remaining performance lever (Performance 83–88, LCP 3.1–3.5 s live).
+- [ ] The 1200w hero WebP is 125.4 KB (budget 120 KB) at q80 `-m 6`.
+  Kennedy to choose: accept it, lower the quality of that width only, or
+  tighten the hero `sizes` to `(min-width: 900px) min(40vw, 26rem), 22rem`
+  (the photo column is capped at 26rem, so 2× desktops would fetch 960w).
 - [x] The résumé PDF now shows muchina537@gmail.com (checked with `pdftotext` in Phase 1).
 
 ---
@@ -1660,10 +1665,10 @@ for (const [name, init] of Object.entries(features)) {
 
   | Width | JPEG | WebP (live, CI's cwebp) |
   |---|---|---|
-  | 480 | 32.6 KB | WEBP480 |
-  | 720 | 70.5 KB | WEBP720 |
-  | 960 | 123.3 KB | WEBP960 |
-  | 1200 | 199.9 KB | WEBP1200 |
+  | 480 | 32.6 KB | 16.3 KB |
+  | 720 | 70.5 KB | 37.9 KB |
+  | 960 | 123.3 KB | 74.2 KB |
+  | 1200 | 199.9 KB | 125.4 KB (5.4 KB over budget; open, §20) |
 
 ### SEO and sharing (all from `site.yaml`: `site:` + `seo:`)
 - `<title>` = `site.title` ("Kennedy Muchina Kinuthia, Software Engineer");
@@ -1719,6 +1724,22 @@ for (const [name, init] of Object.entries(features)) {
 - **Targets** (Lighthouse mobile): Performance ≥ 95, Accessibility,
   Best Practices, SEO 100; LCP < 2.0 s, CLS < 0.05, TBT < 100 ms; first
   load < 450 KB.
+- **Measured on the live site** (Lighthouse 12.8, mobile, 2026-10-31):
+
+  | | Before (Phase 6) | After (Phase 7, two runs) |
+  |---|---|---|
+  | Performance | 40 | 83 / 88 |
+  | Accessibility | 96 | 100 |
+  | Best Practices | 100 | 100 |
+  | SEO | 100 | 100 |
+  | LCP | 9.4 s | 3.1 / 3.5 s |
+  | CLS | 0 | 0.001 |
+  | TBT | 2,150 ms | 160 / 140 ms |
+  | First-load weight | 1,535 KB | 456 KB (fonts 376 KB) |
+
+  Not yet met: Performance, LCP, TBT and the 450 KB weight. The fonts are
+  82% of the weight and gate the text LCP (the `<h1>` on phones); the
+  subsetting above is the next step.
 
 ### Print (`10-print.css`, layer `print`)
 Light palette whatever the theme (the token copy, §4); no header, menu,
