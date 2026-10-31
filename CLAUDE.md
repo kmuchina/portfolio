@@ -149,9 +149,15 @@ Line heights: `--lh-tight: 1.05`, `--lh-snug: 1.2`, `--lh-body: 1.65`.
 | `jetbrains-mono-var.woff2` | JetBrains Mono normal (wght 100–800) |
 | `*-OFL.txt` | SIL Open Font License 1.1 texts (keep them) |
 
-Sizes (Phase 7): Fraunces 118 KB, Fraunces italic 146 KB, Inter 71 KB,
-JetBrains Mono 40 KB. Not subset: fonttools wasn't available in Phase 7
-(see §21 for the subsetting recipe, which must keep every axis).
+The `.woff2` files are subset (§21); `@font-face` `unicode-range` is still
+Fontsource's latin range, which is harmless (a listed character the file
+lacks falls back per glyph).
+
+**Subset (2026-10-31)** to a fixed unicode range with every axis kept
+(§21 has the exact command): Fraunces 111.6 KB, Fraunces italic 137.7 KB,
+Inter 58.2 KB, JetBrains Mono 35.9 KB (from 118.2 / 146.2 / 71.2 / 39.5 KB).
+A character outside the range renders in the fallback font: re-run the
+subset from the original Fontsource files if new copy needs one.
 
 `@font-face` rules live in `01-fonts.css` (`font-display: swap`, latin
 `unicode-range`). **The layout (`partials/head.html`) preloads only Fraunces normal and Inter:**
@@ -1627,8 +1633,7 @@ for (const [name, init] of Object.entries(features)) {
   history before the first push (see the note above).
 - [x] Mockup, profile photo (`img/profile.jpg`, 3327×4160, 1.1 MB; since
   Phase 7 only its resized variants ship) and résumé PDF added.
-- [ ] Subset the fonts with fonttools, keeping every axis (§21): the main
-  remaining performance lever (Performance 83–88, LCP 3.1–3.5 s live).
+- [x] Fonts subset with fonttools, every axis kept (2026-10-31, §21).
 - [ ] The 1200w hero WebP is 125.4 KB (budget 120 KB) at q80 `-m 6`.
   Kennedy to choose: accept it, lower the quality of that width only, or
   tighten the hero `sizes` to `(min-width: 900px) min(40vw, 26rem), 22rem`
@@ -1714,11 +1719,40 @@ for (const [name, init] of Object.entries(features)) {
 - **CLS:** every image has `width`/`height`; the fallback stacks lay out the
   hero identically to the web fonts at 412px (checked: same boxes), so no
   `size-adjust` overrides are needed.
-- **Fonts** are the largest remaining cost (≈ 375 KB, all four load on the
-  first screen). Subsetting needs `pyftsubset` (fonttools), which wasn't
-  available: `pyftsubset fraunces-var.woff2 --unicodes="U+0000-00FF,U+2013,
-  U+2014,U+2018,U+2019,U+201C,U+201D,U+2026,U+2191,U+2192,U+2197,U+2212"
-  --layout-features='*' --flavor=woff2` keeps every axis.
+- **Fonts are subset** (2026-10-31, Kennedy's request) with fonttools
+  4.68 + brotli, run once by hand: **local tools, not project
+  dependencies** (never in `go.mod`, CI or the build). Every variable axis
+  is kept (Fraunces opsz, wght, SOFT, WONK; Inter opsz, wght; JetBrains Mono
+  wght), every OpenType feature that still has glyphs, and all name-table
+  entries (copyright, licence). **Unicode range** (a range, not the current
+  text, so future copy still renders):
+
+  `U+0020-007E, U+00A0-00FF, U+2013-2014, U+2018-201D, U+2022, U+2026, U+2032-2033, U+2212`
+
+  (ASCII, Latin-1 incl. é and ©, en/em dashes, curly quotes, bullet,
+  ellipsis, primes, the minus in "A−".) Not covered: `→` (only in the dev
+  styleguide's text; it falls back) and combining marks (so Inter lost
+  `ccmp`/`mark`/`mkmk`; the site uses precomposed letters). **Re-run** from
+  the **original** Fontsource v5.3.0 files (never re-subset a subset: glyphs
+  already dropped can't come back). The originals are the latin, all-axes
+  `woff2` files of `@fontsource-variable/{fraunces,inter,jetbrains-mono}`
+  5.3.0 (`npm pack` into a scratch folder; the sizes were 121,016 /
+  149,720 / 72,920 / 40,404 bytes); Kennedy's machine kept a copy in
+  `tmp/fonts-original/` (gitignored).
+  If `pip install --user` is refused (PEP 668), use a throwaway venv:
+
+  ```sh
+  python3 -m venv /tmp/ftvenv && /tmp/ftvenv/bin/pip install fonttools brotli
+  R="U+0020-007E,U+00A0-00FF,U+2013-2014,U+2018-201D,U+2022,U+2026,U+2032-2033,U+2212"
+  for f in fraunces-var fraunces-var-italic inter-var jetbrains-mono-var; do
+    /tmp/ftvenv/bin/pyftsubset tmp/fonts-original/$f.woff2 --unicodes="$R" \
+      --layout-features='*' --name-IDs='*' --flavor=woff2 \
+      --output-file=static/fonts/$f.woff2
+  done
+  ```
+  Add new code points to `R` (and this line) when needed. Verified in
+  Phase 7: full-page screenshots of `/` and the 404 (1440 + 375px, dark +
+  light) pixel-identical before and after; every web font `loaded`.
 - **`main.js`** syncs `theme-color` on the next animation frame (a
   synchronous `getComputedStyle` at load forced a 144 ms style pass).
 - **Targets** (Lighthouse mobile): Performance ≥ 95, Accessibility,
@@ -1738,8 +1772,8 @@ for (const [name, init] of Object.entries(features)) {
   | First-load weight | 1,535 KB | 456 KB (fonts 376 KB) |
 
   Not yet met: Performance, LCP, TBT and the 450 KB weight. The fonts are
-  82% of the weight and gate the text LCP (the `<h1>` on phones); the
-  subsetting above is the next step.
+  82% of the weight and gate the text LCP (the `<h1>` on phones). The font
+  subset (above) saves 23 KB: Fontsource's files were already latin-only.
 
 ### Print (`10-print.css`, layer `print`)
 Light palette whatever the theme (the token copy, §4); no header, menu,
