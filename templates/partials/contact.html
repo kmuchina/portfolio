@@ -1,4 +1,5 @@
-{{/* Contact: the email is the hero, with a copy button (JS only); channel
+{{/* Contact: the email is the hero, with a copy button (JS only; it reports
+     through the page's live region, #sr-status in layout.html); channel
      rows; the "here" line with a live local time. The time rendered here is
      the build's, in contact.timezone (the no-JS fallback); main.js keeps it
      current from data-tz. No phone number, anywhere. */}}
@@ -8,25 +9,24 @@
 {{- $ui := .UI.Contact}}
 <section id="contact" class="section section--alt contact" aria-labelledby="contact-title">
   <div class="container section__grid">
-    <div class="section__aside" data-reveal>
+    <div class="section__aside">
       <p class="eyebrow">{{.Contact.Eyebrow}}</p>
       <h2 id="contact-title" class="section__title">{{.Contact.Heading}}</h2>
       {{- with .Contact.Body}}
       <p class="section__lead">{{.}}</p>
       {{- end}}
     </div>
-    <div class="section__body contact-body" data-reveal-group>
+    <div class="section__body contact-body">
       <div class="mail">
         <a class="mail__address" href="{{.Contact.MailtoHref}}" data-copy-source>{{.Contact.Email}}</a>
         <button type="button" class="copy" data-copy="{{.Contact.Email}}" data-label="{{$ui.Copy}}" data-done="{{$ui.Copied}}" data-fallback="{{$ui.Fallback}}" data-status-done="{{$ui.CopiedStatus}}" data-status-fallback="{{$ui.FallbackStatus}}">
           <span class="copy__icon copy__icon--copy">{{icon "copy"}}</span><span class="copy__icon copy__icon--done">{{icon "check"}}</span>
           <span class="copy__label">{{$ui.Copy}}</span></button>
-        <span class="sr-only" role="status" data-copy-status></span>
       </div>
 
       <ul class="channels">
         {{- range .Contact.Links}}
-        <li><a class="channels__link" href="{{.URL}}" rel="me"><span class="channels__icon">{{icon .Icon}}</span>
+        <li><a class="channels__link" href="{{.URL}}" rel="me noopener"><span class="channels__icon">{{icon .Icon}}</span>
           <span><span class="channels__name">{{.Label}}</span>{{with .Handle}}<span class="channels__handle">{{.}}</span>{{end}}</span><span class="channels__go">{{icon "arrow-up-right"}}</span></a></li>
         {{- end}}
       </ul>

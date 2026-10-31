@@ -13,10 +13,15 @@
 {{/* 1px marker at the very top: main.js watches it to toggle .site-header--scrolled. */}}
 <div class="scroll-sentinel" aria-hidden="true" data-scroll-sentinel></div>
 {{template "nav" .}}
-<main id="main">
+<main id="main" tabindex="-1">
 {{template "main" .}}
 </main>
 {{template "footer" .}}
+{{/* The page's one polite live region: main.js announces copy-email results,
+     legend filters and theme changes here. The theme wording rides along. */}}
+{{- with .Site.UI.Theme}}
+<div id="sr-status" class="sr-only" role="status" data-status data-dark="{{.AnnounceDark}}" data-light="{{.AnnounceLight}}" data-system="{{.AnnounceSystem}}" data-dark-name="{{.Dark}}" data-light-name="{{.Light}}"></div>
+{{- end}}
 </body>
 </html>
 {{end}}

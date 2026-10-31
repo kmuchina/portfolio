@@ -1,13 +1,16 @@
 {{/* Skills: a stack table. A skill with evidence (internal/evidence) is a
      button that toggles its "used in" panel; the rest are plain pills.
      Without JS every panel is shown inline (aria-expanded="true"); main.js
-     hides them and turns the buttons into toggles, one open per row. */}}
+     hides them and turns the buttons into toggles, one open per row (Esc
+     closes). The button's name carries the count in a visually hidden span
+     ("Kotlin, used in 1 place"), not aria-label, so the visible text stays
+     the start of the name for voice control. */}}
 {{define "skills" -}}
 {{- $groups := .Skills}}
 {{- with .Site.Skills}}
 <section id="skills" class="section skills" aria-labelledby="skills-title">
   <div class="container section__grid">
-    <div class="section__aside" data-reveal>
+    <div class="section__aside">
       <p class="eyebrow">{{.Eyebrow}}</p>
       <h2 id="skills-title" class="section__title">{{.Heading}}</h2>
       {{- with .Lead}}
@@ -15,7 +18,7 @@
       {{- end}}
     </div>
     <div class="section__body">
-      <div class="skill-table" data-reveal-group>
+      <div class="skill-table">
         {{- range $groups}}
         <div class="skill-table__row" data-skill-row>
           <div class="skill-table__head"><span class="tile" aria-hidden="true">{{icon .Icon}}</span>
@@ -23,7 +26,7 @@
           <ul class="skill-list">
             {{- range .Skills}}
             {{- if .Evidence}}
-            <li><button type="button" class="skill" aria-expanded="true" aria-controls="{{.PanelID}}">{{icon .Icon}}{{.Name}} <span class="skill__count">{{len .Evidence}}</span></button></li>
+            <li><button type="button" class="skill" aria-expanded="true" aria-controls="{{.PanelID}}">{{icon .Icon}}{{.Name}}<span class="sr-only">, {{.Count}}</span> <span class="skill__count" aria-hidden="true">{{len .Evidence}}</span></button></li>
             {{- else}}
             <li><span class="skill skill--plain">{{icon .Icon}}{{.Name}}</span></li>
             {{- end}}

@@ -236,6 +236,10 @@ ui:
     dark: "Dark"
     system: "System"
     light: "Light"
+    announce_dark: "Dark theme"       # said by the live region on a theme change
+    announce_light: "Light theme"
+    announce_system: "System theme, currently {theme}"   # {theme}: dark | light
+  pdf: "(PDF)"              # visually hidden suffix of links to a PDF
   cta_projects: "View my projects"
   cta_resume: "Download résumé"
   current: "Current"
@@ -248,6 +252,9 @@ ui:
     milestone: "Milestone"
     present: "Present"
     skills_label: "Skills used"
+    showing_all: "Showing all roles"          # said by the live region on a legend change
+    showing: "Showing {kind} roles"           # {kind}: the employment type, lower-cased
+    showing_milestones: "Showing milestones"
   about:
     currently: "Currently"  # the derived first fact (the role whose end is "present")
   skills:                   # evidence panels: "{skill}, used in|used at|shown at"
@@ -255,6 +262,8 @@ ui:
     used_at: "used at"      # every place is a paid role
     shown_at: "shown at"    # a mix, or a volunteer role
     project: "Project"      # kind label of project evidence
+    place: "place"          # a skill button's hidden count: "Kotlin, used in 1 place"
+    places: "places"
   projects:
     stack_label: "Built with"
     screenshot_alt: "Screenshot of"   # + the project title

@@ -1,8 +1,17 @@
 /* ==========================================================================
    09-motion.css — the complete motion vocabulary (CLAUDE.md § Motion)
-   Only opacity and transform move. Colour properties may cross-fade at
-   --dur-fast. Nothing loops. This is the top layer, so the reduced-motion
-   block at the end beats every component without !important.
+   Motion is spent in two places: the hero entrance and the career graph.
+   Everything else answers the reader (hover, press, a click, a toggle).
+     Ambient:        hero entrance · graph drawing (+ node ignite) · the
+                     current-role pulse (the one loop)
+     User-triggered: graph hover focus + legend · hover/press feedback
+                     (lift, phone rise, underlines, arrow nudges, press) ·
+                     theme cross-fade · menu · copy confirmation · nav
+                     indicator · arrival highlight · smooth anchor scroll
+   Only opacity and transform move (the graph's clip-path/stroke-dashoffset
+   drawing is the one amendment). Colour properties may cross-fade at
+   --dur-fast. No scroll reveals. This is the top layer, so the
+   reduced-motion block at the end beats every component without !important.
    ========================================================================== */
 
 @layer motion {
@@ -50,29 +59,6 @@ html.js [data-hero] {
 html.js [data-hero-photo] {
   animation: hero-photo-in var(--dur-slow) var(--ease-out) both;
   animation-delay: var(--stagger);
-}
-
-/* ---- 2. Scroll reveal ------------------------------------------------------
-   Hidden only under html.js (set by theme-init.js), so content is never
-   hidden without JS. main.js adds .is-visible once, then unobserves, and
-   sets --i on each [data-reveal-group] child for the stagger.
-   A one-shot keyframe animation (fill: backwards), not a transition: once
-   it ends it leaves no trace, so a revealed card's own hover transitions
-   are untouched. */
-@keyframes reveal {
-  from {
-    opacity: 0;
-    transform: translateY(var(--reveal-distance));
-  }
-}
-html.js [data-reveal]:not(.is-visible),
-html.js [data-reveal-group]:not(.is-visible) > * {
-  opacity: 0;
-}
-html.js [data-reveal].is-visible,
-html.js [data-reveal-group].is-visible > * {
-  animation: reveal var(--dur-slow) var(--ease-out) backwards;
-  animation-delay: calc(var(--i, 0) * var(--stagger));
 }
 
 /* ---- 3. Card hover lift --------------------------------------------------
@@ -130,11 +116,45 @@ html.js [data-reveal-group].is-visible > * {
 }
 .underline-grow:hover::after,
 .underline-grow:focus-visible::after,
-.underline-grow[aria-current="true"]::after,
 .link:hover::after,
 .link:focus-visible::after {
   transform: scaleX(1);
 }
+
+/* ---- Nav indicator (Phase 6, user-triggered by scrolling) -----------------
+   The scrollspy bar (06-sections.css) slides and resizes to the current
+   link: transform only, over --dur-slow. It fades in and out at
+   --dur-fast. .is-placing (main.js, first appearance only) drops the
+   transform transition so the bar appears in place instead of sliding in
+   from the left edge. */
+.nav__indicator {
+  transition:
+    var(--theme-fade),
+    transform var(--dur-slow) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+.nav__indicator.is-placing { transition: var(--theme-fade), opacity var(--dur-fast) var(--ease-out); }
+
+/* ---- Arrival highlight (Phase 6, user-triggered by a deep link) ----------
+   main.js adds .is-arriving to the :target once the jump settles, then
+   removes it. A project gets a 2px --accent ring (on ::before, outside
+   the border) that holds, then fades out: 1.2s in all. A job's row takes
+   the "focus follows the reader" state for 1.6s (06-sections.css). */
+@keyframes arrive-ring {
+  0%, 40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.project::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  opacity: 0;
+  pointer-events: none;
+}
+.project:target.is-arriving::before { animation: arrive-ring 1.2s var(--ease-out) both; }
 
 /* ---- 5. Button press ---------------------------------------------------- */
 .press { transition: var(--transition-ui); }
@@ -278,15 +298,6 @@ html.js [data-reveal-group].is-visible > * {
    colour changes remain. Selectors repeat the ones above so they win on
    source order at equal specificity. */
 @media (prefers-reduced-motion: reduce) {
-  html.js [data-reveal]:not(.is-visible),
-  html.js [data-reveal-group]:not(.is-visible) > * {
-    opacity: 1;
-  }
-  html.js [data-reveal].is-visible,
-  html.js [data-reveal-group].is-visible > * {
-    animation: none;
-  }
-
   html.js [data-hero],
   html.js [data-hero-photo],
   .menu[open],
@@ -322,6 +333,16 @@ html.js [data-reveal-group].is-visible > * {
   /* The email underline: no growth; it switches to full width at once. */
   .mail__address::after { transition: var(--theme-fade); }
 
+  /* Nav indicator: jumps to the current link, appears/disappears at once. */
+  .nav__indicator,
+  .nav__indicator.is-placing { transition: var(--theme-fade); }
+
+  /* Arrival ring: on for as long as .is-arriving is set, no fade. */
+  .project:target.is-arriving::before {
+    animation: none;
+    opacity: 1;
+  }
+
   .underline-grow::after,
   .link::after {
     transform: none;
@@ -330,7 +351,6 @@ html.js [data-reveal-group].is-visible > * {
   }
   .underline-grow:hover::after,
   .underline-grow:focus-visible::after,
-  .underline-grow[aria-current="true"]::after,
   .link:hover::after,
   .link:focus-visible::after {
     opacity: 1;

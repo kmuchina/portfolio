@@ -13,7 +13,7 @@
       <div class="hero__actions cluster" data-hero style="--i: 3">
         <a class="btn btn--primary press" href="#projects">{{icon "arrow-up-right"}}<span class="btn__label">{{$ui.CTAProjects}}</span></a>
         {{- with .Person.ResumePDF}}
-        <a class="btn btn--ghost press" href="{{asset .}}" download>{{icon "download"}}<span class="btn__label">{{$ui.CTAResume}}</span></a>
+        <a class="btn btn--ghost press" href="{{asset .}}" download>{{icon "download"}}<span class="btn__label">{{$ui.CTAResume}}<span class="sr-only"> {{$ui.PDF}}</span></span></a>
         {{- end}}
       </div>
       <ul class="social hero__social cluster" aria-label="{{$ui.SocialLabel}}" data-hero style="--i: 3">

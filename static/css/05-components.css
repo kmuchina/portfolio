@@ -1,7 +1,7 @@
 /* ==========================================================================
    05-components.css — the design system's reusable building blocks
    Tokens only: no colour literals, no unexplained numbers. Mobile-first.
-   Motion behaviour (lift, press, underline, arrow nudge, reveal) lives in
+   Motion behaviour (lift, press, underline, arrow nudges, highlights) lives in
    09-motion.css; components here only declare `transition: var(--transition-ui)`.
    Catalogue and usage rules: CLAUDE.md § Components.
    ========================================================================== */

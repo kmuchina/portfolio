@@ -112,7 +112,10 @@ func (r *Renderer) Render(s *site.Site, outDir string) ([]Output, error) {
 		return nil, err
 	}
 	ui := s.UI.Skills
-	skills := evidence.Build(s, evidence.Labels{UsedIn: ui.UsedIn, UsedAt: ui.UsedAt, ShownAt: ui.ShownAt, Project: ui.Project})
+	skills := evidence.Build(s, evidence.Labels{
+		UsedIn: ui.UsedIn, UsedAt: ui.UsedAt, ShownAt: ui.ShownAt, Project: ui.Project,
+		Place: ui.Place, Places: ui.Places,
+	})
 	loc, err := time.LoadLocation(s.Contact.Timezone.IANA)
 	if err != nil {
 		return nil, fmt.Errorf("contact.timezone.iana: %w", err)

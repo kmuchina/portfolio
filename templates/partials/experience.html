@@ -9,7 +9,7 @@
 <section id="experience" class="section section--alt experience" aria-labelledby="experience-title">
   <div class="container section__grid">
 
-    <div class="section__aside" data-reveal>
+    <div class="section__aside">
       <p class="eyebrow">{{.Eyebrow}}</p>
       <h2 id="experience-title" class="section__title">{{.Heading}}</h2>
       {{- with $g.Summary}}{{if .Roles}}
@@ -23,7 +23,7 @@
       <div class="legend" role="group" aria-label="{{$ui.Career.LegendLabel}}">
         <p class="legend__label">{{$ui.Career.Highlight}}</p>
         {{- range $i, $l := $g.Legend}}
-        <button type="button" class="legend__item" data-filter="{{.Filter}}" data-lane="{{.Lane}}" aria-pressed="{{if eq $i 0}}true{{else}}false{{end}}">
+        <button type="button" class="legend__item" data-filter="{{.Filter}}" data-lane="{{.Lane}}" aria-pressed="{{if eq $i 0}}true{{else}}false{{end}}" data-announce="{{.Announce}}">
           {{- if eq .Filter "all"}}<span class="legend__swatch legend__swatch--all" aria-hidden="true"></span>
           {{- else}}<span class="legend__swatch legend__swatch--{{.Filter}}" aria-hidden="true"><span class="{{.NodeClass}}"></span></span>
           {{- end}}{{.Label}}<span class="legend__count">{{.Count}}</span>
@@ -32,7 +32,7 @@
       </div>
       {{- with .Action}}
 
-      <a class="link-arrow section__action tap-target" href="{{if .IsExternal}}{{.URL}}{{else}}{{asset .AssetPath}}{{end}}">{{.Label}}{{icon "arrow-right"}}</a>
+      {{template "section-action" (dict "Action" . "PDF" $ui.PDF)}}
       {{- end}}
     </div>
 

@@ -10,6 +10,7 @@
 package evidence
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 
@@ -31,6 +32,7 @@ type Skill struct {
 	PanelID  string
 	Evidence []Item
 	Label    string // "Kotlin, used in"; "" without evidence
+	Count    string // "used in 2 places": the button's visually hidden count
 }
 
 // Group is a skill group with its skills resolved.
@@ -42,6 +44,7 @@ type Group struct {
 // Labels words the panel label; see Verb.
 type Labels struct {
 	UsedIn, UsedAt, ShownAt, Project string
+	Place, Places                    string // "place" / "places" (Skill.Count)
 }
 
 // Normalize is the matching key of a skill name.
@@ -97,7 +100,13 @@ func Build(s *site.Site, l Labels) []Group {
 				}
 			}
 			if len(sk.Evidence) > 0 {
-				sk.Label = it.Name + ", " + Verb(sk.Evidence, l)
+				verb, n := Verb(sk.Evidence, l), len(sk.Evidence)
+				sk.Label = it.Name + ", " + verb
+				noun := l.Places
+				if n == 1 {
+					noun = l.Place
+				}
+				sk.Count = fmt.Sprintf("%s %d %s", verb, n, noun)
 			}
 			out.Skills = append(out.Skills, sk)
 		}

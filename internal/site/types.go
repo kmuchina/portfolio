@@ -93,6 +93,9 @@ func (a Action) IsExternal() bool { return strings.Contains(a.URL, "://") }
 // leading slash ("/Kennedy_Muchina_Resume.pdf" → "Kennedy_Muchina_Resume.pdf").
 func (a Action) AssetPath() string { return strings.TrimPrefix(a.URL, "/") }
 
+// IsPDF reports whether the action links to a PDF (it gets a hidden "(PDF)").
+func (a Action) IsPDF() bool { return strings.HasSuffix(strings.ToLower(a.URL), ".pdf") }
+
 type About struct {
 	Eyebrow string      `yaml:"eyebrow"` // optional: none is rendered when empty
 	Heading string      `yaml:"heading"`
@@ -204,7 +207,7 @@ type Project struct {
 	Kind        string   `yaml:"kind"`
 	Stack       []string `yaml:"stack"`
 	Summary     string   `yaml:"summary"`
-	Metric      *Metric  `yaml:"metric"` // optional: "50+" "active users"
+	Metric      *Metric  `yaml:"metric"` // optional: "100+" "active users"
 	Note        string   `yaml:"note"`   // optional mono line when there's no metric/link
 	Links       []Link   `yaml:"links"`
 	Screenshot  string   `yaml:"screenshot"`  // optional, under static/; the placeholder shows until it exists
@@ -336,6 +339,7 @@ type UI struct {
 	Nav              []NavItem `yaml:"nav"`
 	Menu             MenuUI    `yaml:"menu"`
 	Theme            ThemeUI   `yaml:"theme"`
+	PDF              string    `yaml:"pdf"` // visually hidden suffix of links to a PDF: "(PDF)"
 	CTAProjects      string    `yaml:"cta_projects"`
 	CTAResume        string    `yaml:"cta_resume"`
 	Current          string    `yaml:"current"`
@@ -361,6 +365,8 @@ type SkillsUI struct {
 	UsedAt  string `yaml:"used_at"`  // all evidence is paid work
 	ShownAt string `yaml:"shown_at"` // mixed, or includes volunteer roles
 	Project string `yaml:"project"`  // kind label of project evidence
+	Place   string `yaml:"place"`    // a skill button's hidden count: "used in 1 place"
+	Places  string `yaml:"places"`   // "used in 2 places"
 }
 
 // ProjectUI labels the project cards.
@@ -406,6 +412,10 @@ type CareerUI struct {
 	Milestone   string `yaml:"milestone"`    // type label of milestones
 	Present     string `yaml:"present"`      // end label of an ongoing role
 	SkillsLabel string `yaml:"skills_label"` // accessible name of each tag list
+	// Announced through the page's live region when the legend filter changes.
+	ShowingAll        string `yaml:"showing_all"`        // "Showing all roles"
+	Showing           string `yaml:"showing"`            // "Showing {kind} roles" ({kind}: the type, lower-cased)
+	ShowingMilestones string `yaml:"showing_milestones"` // "Showing milestones"
 }
 
 // MenuUI labels the mobile menu dialog and its open/close buttons.
@@ -423,6 +433,11 @@ type ThemeUI struct {
 	Dark      string `yaml:"dark"`
 	System    string `yaml:"system"`
 	Light     string `yaml:"light"`
+	// Announced through the page's live region when the theme changes.
+	// {theme} in AnnounceSystem is the resolved theme's label, lower-cased.
+	AnnounceDark   string `yaml:"announce_dark"`   // "Dark theme"
+	AnnounceLight  string `yaml:"announce_light"`  // "Light theme"
+	AnnounceSystem string `yaml:"announce_system"` // "System theme, currently {theme}"
 }
 
 type NotFound struct {

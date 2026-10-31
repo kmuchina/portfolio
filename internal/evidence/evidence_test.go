@@ -7,7 +7,7 @@ import (
 	"github.com/kmuchina/portfolio/internal/site"
 )
 
-var labels = Labels{UsedIn: "used in", UsedAt: "used at", ShownAt: "shown at", Project: "Project"}
+var labels = Labels{UsedIn: "used in", UsedAt: "used at", ShownAt: "shown at", Project: "Project", Place: "place", Places: "places"}
 
 // The real content: which skills have evidence, how much, and where.
 func TestRealEvidence(t *testing.T) {
@@ -46,6 +46,14 @@ func TestRealEvidence(t *testing.T) {
 			}
 			if len(sk.Evidence) != w.count || strings.Join(where, "; ") != w.where || sk.Label != w.label {
 				t.Errorf("%s: got %d %q %q, want %d %q %q", sk.Name, len(sk.Evidence), strings.Join(where, "; "), sk.Label, w.count, w.where, w.label)
+			}
+			// The button's hidden count: the panel's verb, the number, place(s).
+			wantCount := strings.TrimPrefix(w.label, sk.Name+", ") + " 1 place"
+			if w.count == 2 {
+				wantCount = strings.TrimPrefix(w.label, sk.Name+", ") + " 2 places"
+			}
+			if sk.Count != wantCount {
+				t.Errorf("%s: count = %q, want %q", sk.Name, sk.Count, wantCount)
 			}
 			t.Logf("%-18s %d  %s", sk.Name, len(sk.Evidence), strings.Join(where, "; "))
 		}

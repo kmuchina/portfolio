@@ -21,7 +21,8 @@ type pair struct {
 }
 
 // Body-text pairs must reach 4.5:1. The large-text rows document the
-// decorative --accent (hero "Muchina" at --fs-3xl), which needs 3:1.
+// decorative --accent (hero "Muchina" at --fs-3xl), which needs 3:1, and
+// the focus-ring rows the 3:1 non-text minimum.
 var pairs = []pair{
 	{"ink", "bg", 4.5, ""},
 	{"ink", "surface", 4.5, ""},
@@ -38,6 +39,11 @@ var pairs = []pair{
 	{"on-accent", "accent-strong-hover", 4.5, ""},
 	{"accent", "bg", 3.0, "large text"},
 	{"accent", "surface-2", 3.0, "large text"},
+	// Focus ring (non-text, WCAG 1.4.11: 3:1) on both band colours and on
+	// cards/panels.
+	{"focus", "bg", 3.0, "focus ring"},
+	{"focus", "surface-2", 3.0, "focus ring"},
+	{"focus", "surface", 3.0, "focus ring"},
 	// Project phones: the placeholder UI's text sits on --screen.
 	{"screen-ink", "screen", 4.5, ""},
 	{"leaf", "screen", 4.5, ""},

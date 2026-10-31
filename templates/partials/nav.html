@@ -12,6 +12,8 @@
         <li class="nav__item"><a class="nav__link underline-grow" href="{{$home}}{{.Href}}">{{.Label}}</a></li>
         {{- end}}
       </ul>
+      {{- /* Scrollspy: one bar that slides to the current link (main.js). */}}
+      <span class="nav__indicator" aria-hidden="true" data-nav-indicator></span>
     </nav>
     {{template "theme-toggle" (dict "Theme" $ui.Theme "Label" $ui.Theme.Label)}}
     <button type="button" class="icon-btn site-header__menu-btn" aria-controls="site-menu" aria-expanded="false" aria-label="{{$ui.Menu.Open}}" data-menu-open>{{icon "menu"}}</button>

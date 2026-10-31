@@ -48,8 +48,9 @@
      var(--theme-fade). This lives in `base` so components can override it. */
   *, *::before, *::after { transition: var(--theme-fade); }
 
-  /* Anchor targets land below the sticky header, never under it. */
-  [id] { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+  /* Anchor targets (sections, article.job, article.project…) land below
+     the sticky header, never under it, with --space-6 of air. */
+  [id] { scroll-margin-top: calc(var(--header-h) + var(--space-6)); }
 
   /* ---- Text ------------------------------------------------------------- */
   p { max-width: var(--measure); text-wrap: pretty; }
@@ -101,4 +102,12 @@
     outline-offset: 3px;
   }
   :focus:not(:focus-visible) { outline: none; }
+  /* <main tabindex="-1"> takes focus from the skip link and Back to top
+     (elsewhere) so the next Tab continues inside it; a ring around the
+     whole page would say nothing. Headings that receive focus after an
+     in-page jump keep the ring (keyboard only, via :focus-visible). */
+  main:focus { outline: none; }
+  /* A heading focused by main.js on page load (a shared deep link): no ring
+     until it loses focus. The arrival highlight marks the place instead. */
+  [data-quiet-focus]:focus-visible { outline: none; }
 }

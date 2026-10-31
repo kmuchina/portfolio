@@ -72,6 +72,9 @@ html.js .site-header:not(.site-header--scrolled) {
 }
 .brand em { color: var(--accent-text); }
 
+/* position: relative makes .nav the links' offsetParent, so main.js can
+   place the scrollspy indicator from each link's offsetLeft/offsetWidth. */
+.nav { position: relative; }
 .nav__list { display: flex; }
 .nav__link {
   display: inline-block;
@@ -88,6 +91,25 @@ html.js .site-header:not(.site-header--scrolled) {
 }
 .nav__link:hover,
 .nav__link[aria-current="true"] { color: var(--ink); }
+
+/* Scrollspy indicator: one 2px bar under the current link, on the same
+   line as the hover underline. main.js sets --nav-x (px) and --nav-w (the
+   link text's width / 100: the bar is 100px wide and scaled), and .is-on
+   while a section is current. It slides (09-motion.css); hover keeps the
+   per-link underline-grow, so the bar only marks where you are. */
+.nav__indicator {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: var(--space-2);
+  inline-size: 100px;
+  block-size: 2px;
+  background-color: var(--accent);
+  transform-origin: left;
+  transform: translateX(var(--nav-x, 0px)) scaleX(var(--nav-w, 0));
+  opacity: 0;
+  pointer-events: none;
+}
+.nav__indicator.is-on { opacity: 1; }
 
 /* ---- Below 1024px ------------------------------------------------------- */
 .site-header__menu-btn { display: none; }
@@ -676,7 +698,10 @@ html:has(dialog[open]) { overflow: hidden; }
 
 /* ---- Focus follows the reader -----------------------------------------------
    The hovered/focused row's node grows; the other rows' graph cells dim.
-   Only the decorative graph dims, never text. */
+   Only the decorative graph dims, never text. A deep link to a job
+   (.job:target.is-arriving, set by main.js for ~1.6s) borrows the same
+   state. "Focused" is :focus-visible inside the row, not :focus-within,
+   so a heading focused after a mouse click releases with the highlight. */
 .seg,
 .node,
 .curve {
@@ -685,8 +710,9 @@ html:has(dialog[open]) { overflow: hidden; }
     opacity var(--dur-fast) var(--ease-out),
     scale var(--dur-fast) var(--ease-out);
 }
-.career__row:is(:hover, :focus-within) .node { scale: 1.3; }
-.career:has(.career__row:is(:hover, :focus-within)) .career__row:not(:hover, :focus-within) .career__graph { opacity: 0.35; }
+.career__row:is(:hover, :has(:focus-visible:not([data-quiet-focus])), :has(> .job:target.is-arriving)) .node { scale: 1.3; }
+.career:has(.career__row:hover, .career__row :focus-visible:not([data-quiet-focus]), .job:target.is-arriving)
+  .career__row:not(:hover, :has(:focus-visible:not([data-quiet-focus])), :has(> .job:target.is-arriving)) .career__graph { opacity: 0.35; }
 
 /* ---- Legend filter: dims, never hides --------------------------------------
    main.js sets data-lane on .career ("work" | "volunteer" | "milestone")

@@ -38,8 +38,8 @@ change**.
 | 3 | Header (sticky, scrolled state), nav, **mobile menu**, hero | ✅ done (2026-10-30) |
 | 4 | Section system ("spine" layout, bands) + experience career graph | ✅ done (2026-10-30) |
 | 5 | About, skills, projects, education, contact, footer: the sections prototype (§17) | ✅ done (2026-10-30) |
-| 6 | Scrollspy (live `aria-current`) and interaction polish | ⬜ |
-| 7 | Polish, SEO and images | ⬜ |
+| 6 | Navigation, deep links and interaction polish: scrollspy, nav indicator, deep links, motion audit, keyboard/SR (§18) | ✅ done (2026-10-31) |
+| 7 | Polish, SEO, images and performance | ⬜ next |
 | 8 | Deploy to GitHub Pages (Actions, CNAME, custom domain) | ✅ done (2026-10-30): workflow, `CNAME`, `.nojekyll`, `make ci`, Pages + DNS (§12 Deployment) |
 
 ---
@@ -198,8 +198,9 @@ There are two exceptions, because neither can read CSS variables: the initial
   dots, the `.quote` marks, the "Current" tag (`.tag--accent`) and, since
   Phase 5, skill evidence (count badge, open pill), the project kind, the
   "First Class Honours" line, the award icon, the lit meter bars, the
-  email's 2px underline and the phone stage's glow. Everything else is
-  neutral.
+  email's 2px underline and the phone stage's glow, and, since Phase 6, the
+  nav indicator bar and the arrival ring on a linked project. Everything
+  else is neutral.
 - **`--accent-strong` vs `--accent-text`:** white on `#3B82F6` is only about 3.7:1,
   so **buttons use `--accent-strong`** (with `--on-accent` text) and
   **body-size accent text uses `--accent-text`**, which changes per theme.
@@ -242,7 +243,9 @@ There are two exceptions, because neither can read CSS variables: the initial
   both button fills; **every `--type-*` on `--surface-2` and on its own
   `-soft`** (the tool resolves `var(--alias)` tokens); and (Phase 5)
   screen-ink and leaf on screen. Large-text pairs: accent on bg / surface-2
-  (≥ 3:1). The scanner's 9px "Analysing" pill sits on a `color-mix` tint of
+  (≥ 3:1). Non-text pairs (Phase 6, WCAG 1.4.11, ≥ 3:1): **`--focus` on
+  `--bg`, `--surface-2` and `--surface`**, so the focus ring reads on both
+  band colours and on cards. The scanner's 9px "Analysing" pill sits on a `color-mix` tint of
   `--leaf`; it is part of the decorative, `aria-hidden` placeholder picture.
 
 ---
@@ -275,8 +278,12 @@ There are two exceptions, because neither can read CSS variables: the initial
     to the ends.
   - On change, `main.js` saves the preference, applies `data-theme`, updates
     `aria-checked` and `tabindex`, sets `<meta name="theme-color">` to the
-    computed `--bg`, and dispatches a `themechange` event on `document`.
-  - In **system** mode it listens to `prefers-color-scheme` and re-applies live.
+    computed `--bg`, dispatches a `themechange` event on `document`, and
+    (Phase 6, user toggles only) announces the result through the live
+    region: "Dark theme", "Light theme" or "System theme, currently dark"
+    (`ui.theme.announce_*`, carried as `data-*` on `#sr-status`).
+  - In **system** mode it listens to `prefers-color-scheme` and re-applies live
+    (`data-theme` and the `theme-color` meta both follow).
   - **Cross-fade:** `main.js` adds `html.theme-fade` on the first user toggle.
     That class turns `--theme-fade` into colour transitions at `--dur-fast`, so
     the initial page load never animates.
@@ -295,9 +302,9 @@ move.** Colour properties (`color`, `background-color`, `border-color`, `fill`,
 ```css
 --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 --dur-fast: 180ms;   /* hovers, colour changes, underlines */
---dur-slow: 600ms;   /* reveals, hero entrance */
---stagger: 80ms;     /* delay between items in a group */
---reveal-distance: 16px;
+--dur-slow: 600ms;   /* hero entrance, nav indicator, phone rise */
+--stagger: 80ms;     /* delay between hero items */
+--reveal-distance: 16px;   /* the hero entrance's rise */
 --transition-ui: var(--theme-fade), color/background-color/border-color/
                  text-decoration-color/opacity/transform at --dur-fast --ease-out;
 ```
@@ -306,117 +313,150 @@ move.** Colour properties (`color`, `background-color`, `border-color`, `fill`,
 which already starts with `--theme-fade`. Because it is one shared list, no
 layer can silently drop another layer's transitioned properties.
 
-### The complete motion vocabulary (nothing beyond this, ever)
+### The complete, final motion vocabulary (Phase 6; nothing beyond this, ever)
 
-All of it is implemented in `static/css/09-motion.css` (the top cascade layer):
+**Spend motion in one place.** The site's memorable motion is the hero
+entrance and the career graph. Everything else only answers the reader.
+**Phase 6 removed the generic scroll reveals** (`data-reveal`,
+`data-reveal-group`, `@keyframes reveal` and their observer) from every
+section: they diluted both. Content is simply there.
 
-1. **Hero entrance on load (CSS only, Phase 3):** each hero text item has
-   `data-hero` and an inline `style="--i: N"` (eyebrow 0, name 1, role and
-   summary 2, CTAs, social row and quote 3). Under `html.js` they run
-   `@keyframes hero-in` (opacity 0→1, `translateY(--reveal-distance)`→0,
+*Ambient* = runs without the reader doing anything (only items 1–3).
+*User-triggered* = a direct answer to a hover, press, click, key, toggle or
+the reader's own scrolling. All of it lives in `static/css/09-motion.css`
+(the top cascade layer); the file's header repeats this list.
+
+| # | Motion | Kind |
+|---|---|---|
+| 1 | Hero entrance | ambient |
+| 2 | Career graph drawing + node ignite | ambient (follows the scroll) |
+| 3 | Current-role pulse (the one loop) | ambient |
+| 4 | Graph focus-follows-reader | user-triggered |
+| 5 | Legend filtering | user-triggered |
+| 6 | Hover/press feedback: card lift, phone rise, underlines, arrow nudges, press | user-triggered |
+| 7 | Theme cross-fade | user-triggered |
+| 8 | Mobile menu | user-triggered |
+| 9 | Copy confirmation | user-triggered |
+| 10 | Nav indicator | user-triggered |
+| 11 | Arrival highlight | user-triggered |
+| 12 | Smooth anchor scrolling | user-triggered |
+
+1. **Hero entrance on load (ambient; CSS only, Phase 3):** each hero text
+   item has `data-hero` and an inline `style="--i: N"` (eyebrow 0, name 1,
+   role and summary 2, CTAs, social row and quote 3). Under `html.js` they
+   run `@keyframes hero-in` (opacity 0→1, `translateY(--reveal-distance)`→0,
    `--dur-slow`, `--ease-out`, `animation-fill-mode: both`, delay
    `calc(var(--i) * var(--stagger))`): ≈ 840ms in total. The photo
    (`[data-hero-photo]`) runs `hero-photo-in` (opacity + scale 1.02→1) after
-   one `--stagger`. No JS, and the hero has **no** `data-reveal`.
-2. **Scroll reveal:** `[data-reveal]` elements, or the direct children of
-   `[data-reveal-group]`, are `opacity: 0` until revealed, **only under
-   `html.js`** (content is never hidden without JS). An `IntersectionObserver`
-   (threshold `0.15`, rootMargin `0px 0px -10% 0px`) adds `.is-visible` once,
-   then unobserves. That starts a one-shot `@keyframes reveal` (from
-   `opacity: 0; translateY(var(--reveal-distance))`, `--dur-slow`,
-   `animation-fill-mode: backwards`). `main.js` sets `--i` on each group child;
-   the delay is `calc(var(--i) * var(--stagger))`. **Why an animation, not a
-   transition (Phase 2):** a reveal transition on a card would also govern its
-   hover transitions (600ms plus the stagger delay). A finished animation
-   leaves no trace.
-3. **Card hover** (`.lift`, and `.card--interactive`): `translateY(-2px)`,
-   plus `--shadow` on `::after` fading in via opacity, plus the border shifting
-   to `--line-strong`. The movement only applies under `@media (hover: hover)`;
-   `:focus-within` also gets the `--line-strong` border.
-4. **Link / nav underline** (`.underline-grow`, and the `.link` component): a
-   1px pseudo-element that grows with `transform: scaleX(0 → 1)`,
-   `transform-origin: left`, on hover, focus-visible or `[aria-current]`. Use
-   it for single-line links (nav, footer, CTAs). Links in running text
-   (`.prose a`) keep the native underline, whose colour fades from faint to
-   full on hover (a pseudo-element can't follow a wrapped line).
-5. **Button press** (`.press`): `transform: scale(0.98)` on `:active`.
-6. **Theme cross-fade:** see §5. The default `*, *::before, *::after {
-   transition: var(--theme-fade) }` lives in the **base** layer (so components
-   can override it). Any element that declares its own `transition` uses
-   `var(--transition-ui)`, or lists `var(--theme-fade)` **first**.
-7. **Arrow nudge** (Phase 2): the trailing icon of `.link-arrow` moves
-   `translateX(3px)` over `--dur-fast` on hover or focus-visible.
-8. **Mobile menu** (Phase 3): the open `<dialog class="menu">` fades in and
-   drops `--space-2` (8px) at `--dur-fast`; its `::backdrop` fades in.
-9. **Smooth anchor scrolling:** `html { scroll-behavior: smooth }` in the
-   motion layer, only under `prefers-reduced-motion: no-preference`.
+   one `--stagger`. No JS.
+2. **Career graph: the line draws itself as you scroll (ambient, Phase 4).**
+   Each row's segment ink (`.seg::after`) is revealed by `clip-path: inset()`
+   and the merge curve by `stroke-dashoffset`, on a **scroll-driven
+   animation** (`view-timeline: --row` on `.career__row`; `animation-range`
+   with **px offsets**: above-segments and curves `cover 150px` → `cover
+   300px`, full segments `cover 150px` → `exit 0%`, below-segments `cover
+   300px` → `exit 0%`). The tip leads the reader at about two-thirds of the
+   viewport. `clip-path` and `stroke-dashoffset` are the amendment to
+   "only opacity and transform": they are the only way to draw a line, and
+   they follow the scroll, not a clock. **Fallback** (`@supports not
+   (animation-timeline: view())`): `main.js` adds `.is-lit` to each row
+   once (IntersectionObserver, rootMargin `0px 0px -35% 0px`) and the same
+   visuals transition once (500ms).
+   **Node ignite:** the node fill scales 0 → 1.35 → 1 as the ink reaches it
+   (scroll-driven, `cover 290px` → `cover 370px`); in the fallback it
+   transitions on **`--ease-spring`** (`cubic-bezier(0.34, 1.56, 0.64, 1)`),
+   the only overshoot easing on the site, used **only here**.
+3. **The current role breathes (ambient):** a `::before` halo on
+   `.node--current` scales 1 → 2.8 and fades .55 → 0, 2.4s, `infinite`.
+   **This is the one looping animation on the whole site.** `main.js`
+   pauses it (`.is-paused` → `animation-play-state: paused`) whenever the
+   node is off-screen.
+4. **Focus follows the reader (user):** hovering an entry, or keyboard
+   focus inside it (`:has(:focus-visible)`), grows its node (`scale: 1.3`)
+   and dims the other rows' graph cells to 35%. A deep link to a job
+   borrows this state for 1.6s (item 11). CSS only; text never dims.
+5. **Legend filtering (user):** pressing a legend button highlights one
+   kind: non-matching rows get `.is-quiet` (tile greyed, text to `--muted`,
+   still ≥ 4.5:1) and the other lane drops to 20% opacity per lane (so the
+   highlighted lane stays continuous, e.g. the volunteer lane through the
+   KRB merge). Pressing it again or "All" resets. Dims, never hides.
+6. **Hover and press feedback (user):**
+   - **Card lift** (`.lift`, `.card--interactive`): `translateY(-2px)`, plus
+     `--shadow` on `::after` fading in via opacity, plus the border shifting
+     to `--line-strong`. The movement only applies under `@media (hover:
+     hover)`; `:focus-within` also gets the `--line-strong` border.
+   - **Project phone rise** (Phase 5): hovering a project card raises its
+     phone `translateY(-10px)` over `--dur-slow` (`(hover: hover)` only).
+   - **Link underline** (`.underline-grow`, `.link`): a 1px pseudo-element
+     that grows with `transform: scaleX(0 → 1)`, `transform-origin: left`,
+     on hover or focus-visible (since Phase 6 **not** on `[aria-current]`:
+     the nav indicator, item 10, marks the current section). For single-line
+     links (nav, footer, CTAs). `.underline-grow` reads `--underline-inset`
+     (move the line in past a link's padding) and `--underline-offset`
+     (distance from the box bottom); the nav sets both. Links in running
+     text (`.prose a`) keep the native underline, whose colour fades from
+     faint to full on hover. **Email underline** (Phase 5): the contact
+     address's 2px `--accent` underline rests at `scaleX(0.18)` and grows to
+     `scaleX(1)` on hover/focus over `--dur-slow`.
+   - **Arrow nudges:** the trailing `arrow-right` of `.link-arrow` moves
+     `translateX(3px)`; `arrow-up-right` icons (`.link-arrow--external`,
+     `.project__link`, `.channels__go`) move `translate(2px, -2px)`; the
+     footer's Back to top arrow moves `translateY(-2px)`. All over
+     `--dur-fast`, on hover or focus-visible.
+   - **Button press** (`.press`): `transform: scale(0.98)` on `:active`.
+7. **Theme cross-fade (user):** see §5. The default `*, *::before, *::after
+   { transition: var(--theme-fade) }` lives in the **base** layer (so
+   components can override it). Any element that declares its own
+   `transition` uses `var(--transition-ui)`, or lists `var(--theme-fade)`
+   **first**.
+8. **Mobile menu (user, Phase 3):** the open `<dialog class="menu">` fades
+   in and drops `--space-2` (8px) at `--dur-fast`; its `::backdrop` fades in.
+9. **Copy confirmation (user, Phase 5):** the copy button shows "Copied"
+   plus a check for 2.2s (`main.js`), then resets. The skill "used in" panel
+   appears with **no** animation (it toggles `hidden`).
+10. **Nav indicator (user, Phase 6; a motion amendment):** one 2px
+    `--accent` bar under the desktop nav (`.nav__indicator`, ≥ 1024px)
+    slides and resizes to the current section's link: `transform:
+    translateX(--nav-x) scaleX(--nav-w)` over `--dur-slow` `--ease-out`
+    (a 100px bar, scaled; transform only). It fades out (`opacity`,
+    `--dur-fast`) while no section is current (over the hero) and, on its
+    first appearance, appears in place instead of sliding in from the left
+    (`.is-placing` drops the transform transition for one frame). It moves
+    because the reader scrolled, never on its own. Hover still shows the
+    per-link underline, so the bar only marks where you are.
+11. **Arrival highlight (user, Phase 6):** when a jump to a job or project
+    settles (an in-page link or a hash from outside), `main.js` adds
+    `.is-arriving` to the `:target` and removes it after **1.2s** (project)
+    or **1.6s** (job). A project gets a 2px `--accent` ring on `::before`
+    (outside the border, `outline-offset: 3px`) that holds, then fades out
+    (`@keyframes arrive-ring`, opacity). A job's row takes item 4's state
+    (node grown, other rows' graph dimmed), released when the class goes.
+12. **Smooth anchor scrolling (user):** `html { scroll-behavior: smooth }` in
+    the motion layer, only under `prefers-reduced-motion: no-preference`.
 
-`.underline-grow` reads two optional variables: `--underline-inset` (move the
-line in from the sides, e.g. past a link's padding) and `--underline-offset`
-(distance from the box bottom). The nav sets both.
+**Nothing animates `width`, `height`, `top`, `left` or `box-shadow`**, on
+scroll or otherwise (checked in Phase 6); the hover shadow is a static
+`box-shadow` on `::after` whose `opacity` fades.
 
-10. **Career graph: the line draws itself as you scroll** (Phase 4). Each
-    row's segment ink (`.seg::after`) is revealed by `clip-path: inset()`
-    and the merge curve by `stroke-dashoffset`, on a **scroll-driven
-    animation** (`view-timeline: --row` on `.career__row`; `animation-range`
-    with **px offsets**: above-segments and curves `cover 150px` → `cover
-    300px`, full segments `cover 150px` → `exit 0%`, below-segments `cover
-    300px` → `exit 0%`). The tip leads the reader at about two-thirds of the
-    viewport. `clip-path` and `stroke-dashoffset` are the amendment to
-    "only opacity and transform": they are the only way to draw a line, and
-    they follow the scroll, not a clock. **Fallback** (`@supports not
-    (animation-timeline: view())`): `main.js` adds `.is-lit` to each row
-    once (IntersectionObserver, rootMargin `0px 0px -35% 0px`) and the same
-    visuals transition once (500ms).
-11. **Node ignite:** the node fill scales 0 → 1.35 → 1 as the ink reaches it
-    (scroll-driven, `cover 290px` → `cover 370px`); in the fallback it
-    transitions on **`--ease-spring`** (`cubic-bezier(0.34, 1.56, 0.64, 1)`),
-    the only overshoot easing on the site, used **only here**.
-12. **The current role breathes:** a `::before` halo on `.node--current`
-    scales 1 → 2.8 and fades .55 → 0, 2.4s, `infinite`. **This is the one
-    looping animation on the whole site** (the single exception to "nothing
-    loops"). `main.js` pauses it (`.is-paused` → `animation-play-state:
-    paused`) whenever the node is off-screen.
-13. **Focus follows the reader:** hovering or focusing an entry
-    (`:has(:hover, :focus-within)`) grows its node (`scale: 1.3`) and dims
-    the other rows' graph cells to 35%. CSS only; text never dims.
-14. **Legend filtering:** pressing a legend button highlights one kind:
-    non-matching rows get `.is-quiet` (tile greyed, text to `--muted`,
-    still ≥ 4.5:1) and the other lane drops to 20% opacity per lane (so the
-    highlighted lane stays continuous, e.g. the volunteer lane through the
-    KRB merge). Pressing it again or "All" resets. Dims, never hides.
-
-15. **Project phone rise** (Phase 5): hovering a project card (`(hover:
-    hover)` only) lifts the card 2px (item 3, `.lift`) and raises its phone
-    `translateY(-10px)` over `--dur-slow`.
-16. **Email underline** (Phase 5, an extension of item 4): the contact
-    address's 2px `--accent` underline rests at `scaleX(0.18)` and grows to
-    `scaleX(1)` on hover/focus over `--dur-slow`.
-17. **Diagonal nudge** (Phase 5, a sibling of item 7): `arrow-up-right`
-    icons (`.link-arrow--external`, `.project__link`, `.channels__go`) move
-    `translate(2px, -2px)` over `--dur-fast`; the footer's Back to top
-    arrow moves `translateY(-2px)`.
-18. **Copy confirmation** (Phase 5): the copy button shows "Copied" plus a
-    check for 2.2s (`main.js`), then resets. The skill "used in" panel
-    appears with **no** animation (it toggles `hidden`).
-
-**Banned:** parallax, scroll-jacking, typing/typewriter text, cursor followers,
-particles, auto-playing carousels, bounce/elastic easings (`--ease-spring`
-above is the one deliberate, graph-only exception), and anything that loops
-(except item 12).
+**Banned:** scroll reveals (since Phase 6), parallax, scroll-jacking,
+typing/typewriter text, cursor followers, particles, auto-playing
+carousels, bounce/elastic easings (`--ease-spring` above is the one
+deliberate, graph-only exception), and anything that loops (except item 3).
 
 ### Reduced motion
-Under `@media (prefers-reduced-motion: reduce)`, revealed elements are visible
-immediately (`opacity: 1`, `animation: none`), the hero entrance and the menu
-animation are off, scrolling is instant, hover lifts, press scaling and
-the arrow nudges, the project phone rise and the email underline's growth
-(it switches at once) are disabled, the career graph is fully drawn and lit and
-static (no scroll drawing, no ignite, no pulse; hover and filter changes are
-instant), the underline fades in instead of growing, and
-animations are cut to 0.01ms. Only short opacity and colour changes remain.
-`main.js` skips the observer entirely and marks every target `.is-visible`.
-Because `motion` is the top layer, this block needs **no `!important`**; its
-selectors repeat the ones they cancel, so they win on source order.
+Under `@media (prefers-reduced-motion: reduce)`, the hero entrance and the
+menu animation are off, scrolling is instant (CSS and `main.js`'s own
+`scrollTo`), hover lifts, press scaling, the arrow nudges, the project
+phone rise and the email underline's growth (it switches at once) are
+disabled, the career graph is fully drawn and lit and static (no scroll
+drawing, no ignite, no pulse; hover and filter changes are instant), the
+underline fades in instead of growing, the nav indicator jumps (no slide,
+no fade), the arrival ring is simply on while `.is-arriving` is set (no
+fade), and animations are cut to 0.01ms. Only instant state changes and
+short opacity/colour changes remain. All of this is CSS, so it follows a
+**live** change of the setting (the pulse stops or resumes at once).
+Because `motion` is the top layer, this block needs **no `!important`**;
+its selectors repeat the ones they cancel, so they win on source order.
 
 ---
 
@@ -456,14 +496,15 @@ Spacing uses a 4px base (`--space-N` = N × 4px):
   don't work in media queries. (The hero also stacks its CTAs below 400px.)
 - `--header-h`: **64px**, **72px from 1024px** (tokens). The header's 1px
   border is inside it. Every `[id]` has `scroll-margin-top: calc(var(--header-h)
-  + var(--space-4))` (base layer), so anchors never land under the header.
+  + var(--space-6))` (base layer; `--space-4` before Phase 6), so anchors
+  (sections, `article.job`, `article.project`) land fully below the header.
 
 ### The spine: section system (Phase 4, `04-layout.css`)
 Every non-hero section:
 ```html
 <section id="…" class="section [section--alt] …" aria-labelledby="…-title">
   <div class="container section__grid">
-    <div class="section__aside" data-reveal>eyebrow · h2.section__title · extras · .section__action</div>
+    <div class="section__aside">eyebrow · h2.section__title · extras · .section__action</div>
     <div class="section__body">the section's content</div>
   </div>
 </section>
@@ -603,7 +644,8 @@ every icon name.
 
 - **All copy lives in `content/site.yaml`**, the single source of truth.
   Templates never hard-code text. Interface copy (skip link, nav labels,
-  button labels, theme-toggle labels, "Current", "Languages", 404 text) lives
+  button labels, theme-toggle labels, "Current", "Languages", 404 text, and
+  since Phase 6 the live-region announcements and hidden suffixes) lives
   in the **`ui:`** block. The only exception is the dev-only styleguide page.
 - The contact email is always **muchina537@gmail.com**. The build **fails** if
   `kmuchina22` appears anywhere in the content.
@@ -619,7 +661,21 @@ every icon name.
 - **Section actions (Phase 2):** `experience.action` and `projects.action` are
   optional `{ label, url }`, rendered as a `.link-arrow` in the section header.
   `url` is either an absolute `https://` URL or a file path under `static/`
-  (rendered through `{{asset}}`; `Action.IsExternal()` decides).
+  (rendered through `{{asset}}`; `Action.IsExternal()` decides). Both go
+  through the `section-action` partial (`dict "Action" … "PDF" ui.pdf`): a
+  PDF gets a visually hidden "(PDF)" (`Action.IsPDF()`).
+- **Phase 6 `ui:` keys:** `ui.pdf` ("(PDF)", the hidden suffix of the
+  résumé links; the hero button keeps `download`); `ui.theme.announce_dark`,
+  `announce_light`, `announce_system` ("System theme, currently {theme}");
+  `ui.career.showing_all`, `showing` ("Showing {kind} roles", `{kind}` =
+  the type lower-cased), `showing_milestones` (Go puts the result on each
+  legend button as `data-announce`); `ui.skills.place` / `places` (the
+  skill button's hidden count, `evidence.Skill.Count`: "used in 2 places").
+  All are required by validation.
+- **External links** (`https://` hrefs: social, channels, project links,
+  external section actions) carry `rel="noopener"` (`rel="me noopener"` on
+  profiles) and open in the same tab. Each shows an icon (a brand icon or
+  `arrow-up-right`); a build test checks the `rel` on every one.
 - **Navigation (Phase 3):** `ui.nav` (`label` + `href`) is the single list
   behind both the header nav and the mobile menu. "Home" was dropped (the
   brand links to `#top`). Validation checks every `href` against the section
@@ -677,8 +733,14 @@ every icon name.
   (the hero name; on the 404 and styleguide pages, the page title), and a
   logical heading order: an h2 per section and an h3 per item, with no skipped levels.
 - Visible focus everywhere: `outline: 2px solid var(--focus); outline-offset: 3px`
-  (`:focus-visible` in base). Never remove it.
+  (`:focus-visible` in base). Never remove it from a control. `--focus` is
+  checked at ≥ 3:1 on both bands and `--surface` (`make contrast`). The
+  only rings suppressed are on non-controls: `main:focus`, and a heading
+  focused by `main.js` on page load (`[data-quiet-focus]`, §18).
 - A skip link (`.skip-link` → `#main`) as the first focusable element.
+  `<main id="main" tabindex="-1">` takes the focus (no ring on `main`), so
+  the next Tab continues inside it: the hero's first CTA (About has no
+  links).
 - All text ≥ 4.5:1 in both themes, enforced by `make contrast`.
 - Everything works by keyboard, including the theme toggle's roving tabindex.
 - Respect `prefers-reduced-motion` (§6) and `prefers-color-scheme` in system mode.
@@ -686,7 +748,24 @@ every icon name.
   `!important`). `.tap-target` extends a small single-line link's hit area to
   `--tap` height with an invisible `::before` (only for links in a row).
 - Icon-only links and buttons (`.icon-btn`) must have an accessible name: the
-  `icon` label form or `aria-label`.
+  `icon` label form or `aria-label`. Buttons with visible text never use
+  `aria-label` (voice control needs the visible words in the name): extra
+  words go in an `.sr-only` span after the text (the skill buttons'
+  ", used in 2 places"; the résumé's " (PDF)"), and a decorative badge
+  is `aria-hidden`.
+- **Target sizes (Phase 6):** every link and button is **≥ 24 × 24px**
+  (WCAG 2.2 AA 2.5.8); inline links in running text are exempt. **Primary
+  controls are ≥ 44px** (`--tap`): buttons, icon buttons, CTAs, section
+  actions (via `.tap-target`), copy, Back to top. Known, accepted
+  exceptions, all ≥ 24px: the desktop nav links (40px tall), the
+  theme-toggle options (36 × 40 hit area), the legend buttons (40px),
+  the skill buttons (38px tall: below the 40px rule; Phase 7 to decide),
+  the "used in" links (40px) and the mobile email address (29px tall).
+- **One live region per page:** `<div id="sr-status" class="sr-only"
+  role="status">` after the footer (layout.html). `main.js`'s `announce()`
+  empties it and writes the message 50ms later, so a repeat is still read.
+  It carries the copy-email results, the legend filter ("Showing volunteer
+  roles") and theme changes. Never add a second one.
 - `:focus:not(:focus-visible)` has no outline. `.card--interactive` shows the
   ring on the card (via `:has(.card__link:focus-visible)`), not on the title link.
 - Images always have `width`/`height` attributes (via `imgSize`). The hero
@@ -803,7 +882,7 @@ templates/
   the `theme-color` meta are the only literal colours outside `00-tokens.css`.
 
 ### Page structure & anchors
-`skip-link → div.scroll-sentinel → header.site-header (brand, nav, theme toggle, menu button) → dialog.menu → main#main → footer.site-footer`
+`skip-link → div.scroll-sentinel → header.site-header (brand, nav + .nav__indicator, theme toggle, menu button) → dialog.menu → main#main[tabindex=-1] → footer.site-footer → div#sr-status`
 
 | Section | id | Heading id | Background |
 |---|---|---|---|
@@ -826,11 +905,11 @@ its *page* shows Skills before Projects. The page order wins, and the nav
 (`ui.nav`) matches it: About, Experience, Skills, Projects, Education, Contact
 (no "Home" since Phase 3: the brand does that job).
 
-**Reveal hooks:** every `.section__aside` has `data-reveal`, and so does the
-about intro. Lists and grids use `data-reveal-group` (`.focus`, `.facts`,
-`.skill-table`, `.projects__grid`, `.edu`, `.contact-body`). The career graph has **no** reveal hooks: its
-motion is the graph itself (§6 items 10–14). The hero has **no** reveal hooks: its
-entrance is CSS-only (`data-hero`, §6 item 1).
+**No reveal hooks (Phase 6).** `data-reveal` / `data-reveal-group` are gone
+from every section, with their CSS and JS; a build test fails if
+`data-reveal` appears in any output file. The hero's entrance is CSS-only
+(`data-hero`, §6 item 1); the career graph's motion is the graph itself
+(§6 items 2–5).
 
 ### CSS architecture: cascade layers (Phase 2)
 `00-tokens.css` opens with the layer order, so **the layer decides which rule
@@ -851,7 +930,7 @@ Numbered files in `static/css/` are concatenated in filename order:
 | `05-components.css` | `components` | the component catalogue (§14) and type roles |
 | `06-sections.css` | `sections` | per-section composition: header, menu, hero (§15), the career graph (§16), about … footer (§17) |
 | `08-utilities.css` | `utilities` | `.sr-only`, `.muted`, `.tnum`, `.tap-target` |
-| `09-motion.css` | `motion` | the motion vocabulary (§6), reveal, reduced motion |
+| `09-motion.css` | `motion` | the motion vocabulary (§6), reduced motion |
 
 **Which layer does a rule belong in?**
 - Styles a bare element with no class → `base` (`reset` if it only normalises the browser).
@@ -920,8 +999,14 @@ with its `<strong>`, "Currently" as the first fact, 29 skill pills each
 with an icon, 8 evidence buttons with panels (open without JS) whose links
 all resolve, 2 `aria-hidden` placeholder stages, the interactive journal
 card, the degree/grades/meter markup, the channels in order, the
-build-time Nairobi clock, the copy button and live region, the 4 job ids,
-the source link and Back to top. A second test builds with a temporary
+build-time Nairobi clock, the copy button, the 4 job ids,
+the source link and Back to top. Phase 6 adds: exactly one `role="status"`
+(`#sr-status`, with the theme wording), `<main tabindex="-1">`, one nav
+indicator, no `data-reveal` in any HTML/CSS/JS output, the skill buttons'
+hidden counts and `aria-hidden` badges (8), the legend's `data-announce`
+texts, `rel="noopener"` on every `https://` link, and two hidden "(PDF)"
+suffixes with the résumé's `download` kept. `internal/evidence` checks
+`Skill.Count`, `internal/career` the legend announcements. A second test builds with a temporary
 screenshot and checks it replaces the scanner placeholder (size, alt, no
 `aria-hidden`).
 
@@ -972,7 +1057,7 @@ when a class is genuinely missing, and update this list when you do.
 | `.scroll-sentinel` | | layout (1px marker for the scrolled header) |
 | `.site-header` | `--scrolled`, `__inner`, `__menu-btn` | nav.html |
 | `.brand` | (`<em>` = "Muchina") | nav.html |
-| `.nav` | `__list`, `__item`, `__link` (`[aria-current="true"]` = active) | nav.html |
+| `.nav` | `__list`, `__item`, `__link` (`[aria-current="true"]` = current, set by scrollspy), `__indicator` (`.is-on`, `.is-placing`; `--nav-x`, `--nav-w`) | nav.html |
 | `.menu` (`<dialog>`) | `__inner`, `__bar`, `__close`, `__list`, `__item`, `__link`, `__footer` | nav.html |
 | `.theme-toggle` | `__option` (`[aria-checked]` is the state) | theme-toggle.html |
 | `.section` | `--alt`, `__grid`, `__aside`, `__body`, `__title`, `__action` | every section (the spine) |
@@ -1003,7 +1088,7 @@ when a class is genuinely missing, and update this list when you do.
 | `.skill-list` / `.skill` | `--plain`, `__count`; `button.skill[aria-expanded]` | skills.html |
 | `.used` | `__label`, `__list`, `__link`, `__kind` | skills.html (evidence panel) |
 | `.projects` | `__grid` | projects.html |
-| `.project` | `--staged`, `__text`, `__kind`, `__title`, `__summary`, `__foot`, `__metric`, `__link`, `__note`, `__stage` | projects.html |
+| `.project` | `--staged`, `__text`, `__kind`, `__title`, `__summary`, `__foot`, `__metric`, `__link`, `__note`, `__stage`; `::before` = the arrival ring | projects.html |
 | `.phone` | `__screen`, `__notch`, `__image` | project stage |
 | `.ui` (placeholder screen) | `__bar`, `__title`, `__dot`, `__chips`, `__chip` (`--on`), `__card`, `__line` (`--accent`; width `--w`), `__fab`, `__finder`, `__scan`, `__sheet`, `__pill` | project stage |
 | `.edu` | | education.html (the grid) |
@@ -1024,6 +1109,10 @@ when a class is genuinely missing, and update this list when you do.
 | `.to-top` | | footer.html |
 | `.not-found` | `__title`, `__body`, `__action` | 404.html |
 | `.icon` | | every `{{icon}}` |
+
+State hooks set by `main.js` (Phase 6): `.is-arriving` on a `:target`
+job/project (the arrival highlight), `[data-quiet-focus]` on a heading
+focused on page load, `[data-status]` on `#sr-status` (the live region).
 
 The styleguide's own classes are prefixed `sg-` (plus `.swatch`, `.demo-*`
 and `.font-checks`), and its styles live in that page's `head-extra`.
@@ -1094,10 +1183,11 @@ in their own shape.
 - Panel: full width, `inset-block-start: var(--header-h)`, `--bg`; fills the
   viewport height below 640px. Links: Fraunces 560 `--fs-xl`, hairlines
   between them (borders on the `<li>`s, since an `<hr>` can't sit in a `<ul>`);
-  the section under the header when it opens gets `aria-current="true"`
-  (`--accent-text`). Below: the second theme toggle, the email (`.link`), the
+  the current section's link has `aria-current="true"` (`--accent-text`),
+  kept live by scrollspy (§18), so it is right the moment the menu opens. Below: the second theme toggle, the email (`.link`), the
   social `.icon-btn` row.
-- Closes on: a link click (then the link navigates), `Esc`, a backdrop click
+- Closes on: a link click (closed first, so the page can scroll again and
+  the jump lands with the right offset; checked at 375px), `Esc`, a backdrop click
   (a click whose target is the dialog and lies outside its box), or a resize
   to ≥ 1024px. Scroll lock: `html:has(dialog[open]) { overflow: hidden }`.
   Backdrop: `color-mix(in srgb, var(--bg) 60%, transparent)`.
@@ -1134,8 +1224,9 @@ in their own shape.
 
 Reference: `design/experience-prototype.html`. Markup in
 `templates/partials/experience.html`, CSS in `06-sections.css` (graph,
-entry) and `09-motion.css` (items 10–12), JS in `main.js` (legend, live
-duration, fallback observer, pulse pause; ~2.6 KB).
+entry) and `09-motion.css` (§6 items 2–5), JS in `main.js`'s `career`
+feature (legend + its announcement, the legend reset on a deep link, live
+duration, fallback observer, pulse pause).
 
 ### View model (`internal/career`)
 `Build(entries, now, labels) Graph`. "now" is passed in (tests are
@@ -1213,8 +1304,8 @@ milestone entry is quieter (dashed 36px tile, italic title).
 Reference: `design/sections-prototype.html`. Markup in the partials, CSS in
 `06-sections.css` (sections) and `05-components.css` (`.tile`, `.skill`,
 `.used`, `.copy`, `.to-top`, `.phone`, `.ui*`), motion in `09-motion.css`
-(§6 items 15–18), JS in `main.js` (skill toggles, copy, clock, year; ≈ 1.9 KB
-without comments). Every section uses the spine (§7).
+(§6 items 6 and 9), JS in `main.js`'s `skills`, `copyEmail`, `clock` and
+`footerYear` features. Every section uses the spine (§7).
 
 - **About.** Aside: only the `<h2>` "About me" (no eyebrow; the old tagline
   is gone). Body: `p.intro` first (Inter 400 `--fs-lg`, line-height 1.7,
@@ -1241,10 +1332,13 @@ without comments). Every section uses the spine (§7).
   TensorFlow Lite, CNN → Apple Care; Business Central, Cisco networking →
   ICT Officer, KRB (used at); Team leadership → Tech4Good and the IEEE
   branch (2, shown at). A skill with evidence is a `<button class="skill"
-  aria-expanded aria-controls>` with a count badge, and its `.used` panel
-  sits in the same row. **Without JS** every panel is visible inline
-  (`aria-expanded="true"`, no `hidden`); `main.js` hides them and makes the
-  buttons toggles, one open per row. The open-pill styling is `html.js`
+  aria-expanded aria-controls>` with a count badge (`aria-hidden`; the
+  name carries the count as hidden text: "Team leadership, shown at 2
+  places"), and its `.used` panel sits in the same row. **Without JS**
+  every panel is visible inline (`aria-expanded="true"`, no `hidden`);
+  `main.js` hides them and makes the buttons toggles, one open per row;
+  **Esc** inside the row closes the open panel and returns focus to its
+  button. The open-pill styling is `html.js`
   only.
 - **Projects.** Two columns from 900px. A card is `.project.card.lift`
   (+ `.card--interactive` with a link; its first link is the `.card__link`
@@ -1273,14 +1367,15 @@ without comments). Every section uses the spine (§7).
   Body: the **email as the hero** (Fraunces 500, up to 3.5rem,
   `overflow-wrap: anywhere` so it fits at 320px) with the growing underline,
   and the **Copy email** button (clipboard, else it selects the address and
-  says "Press Ctrl+C"; "Copied" + check for 2.2s; announced through a
-  `role="status"` live region; labels from `ui.contact` via `data-*`;
+  says "Press Ctrl+C", also when `navigator.clipboard` is missing on an
+  http page; "Copied" + check for 2.2s; announced through the page's live
+  region `#sr-status`; labels from `ui.contact` via `data-*`;
   hidden without JS). Then `ul.channels` (`contact.links` in order: icon,
   name, `handle`, ↗; three columns from 760px, hairline rows, 64px tall).
   Then `p.here`: location, **local time** ("It's 15:26 here (EAT,
   UTC+3)"; Go renders the build's time in `contact.timezone.iana` as the
   no-JS value; `main.js` formats `Intl.DateTimeFormat` with the `data-tz`
-  zone every 30s) and availability.
+  zone every 30s, paused while the tab is hidden) and availability.
 - **Footer.** Name (Fraunces), "© {year}. {ui.footer.built}" ("Built with
   Golang"; Kennedy, 2026-10-30: no "View the source" link; `main.js`
   refreshes the year), then the social icon buttons and the **Back to top**
@@ -1295,7 +1390,107 @@ without comments). Every section uses the spine (§7).
   (no visual change); the footer credit is "Built with Golang" with no
   source link; the grades columns grow to keep "Mean grade" on one line.
 
-## 18. Working agreement for future sessions
+## 18. Navigation, deep links & `main.js` (Phase 6)
+
+The page behaves like one piece of software: the nav knows where you are,
+every link lands exactly, motion sits only where it means something, and
+all of it works by keyboard, without JS and under reduced motion.
+
+### Scrollspy
+- **One `IntersectionObserver`** on every `main > section[id]`, rootMargin
+  **`-40% 0px -55% 0px`**: a section is current while it crosses a thin band
+  just above the middle of the viewport. The one that most recently entered
+  the band wins (if it leaves and another is still in the band, that one).
+  **No scroll listener.**
+- `aria-current="true"` goes on the matching `.nav__link` **and**
+  `.menu__link` and comes off the others. The hero (`#top`) has no link, so
+  over it nothing is current.
+- **Bottom of the page:** when `scrollY + innerHeight` is within 4px of the
+  document height, the last section (Contact) is current even if it never
+  reached the band (tall viewports). Checked in the observer callback and on
+  `scrollend`; there is no continuous scroll handler.
+- **Never touches the URL:** no hash change and no `history.replaceState`
+  while scrolling. A click on an in-page link updates the hash (the browser
+  default); nothing else does, except Back to top (below).
+- Without JS: no current state; the nav is plain anchors.
+- It emits `sectionchange` (`{id}` or `null`) for the nav indicator.
+
+### Nav indicator
+One 2px bar (`.nav__indicator`, in `<nav>` after the list; `.nav` is
+`position: relative`, the links' `offsetParent`). `main.js` sets
+`--nav-x` (the link's `offsetLeft` + its padding) and `--nav-w` (text width
+/ 100: the bar is 100px wide and scaled) and `.is-on`. Re-placed by a
+`ResizeObserver` on the nav and after `document.fonts.ready`. Below 1024px
+the nav is hidden, so the bar stays off. Motion: §6 item 10.
+
+### Deep links and landing
+Hashes work from inside the page **and** from outside (a shared
+`kmuchina.com/#job-kenya-roads-board`).
+- **Landing:** every `[id]` lands `--header-h + --space-6` below the top
+  (§7); checked for sections, jobs and projects at 1440 and 375px, and the
+  sticky asides never cover a target.
+- **Settle, then act:** after an in-page jump `main.js` waits for
+  `scrollend` (at once if nothing moved after 120ms; at most 1.5s), then:
+  - **moves focus to the target's heading**: a section's `#<id>-title`
+    (the hero's `<h1>`), an article's first `h3`, or `<main>`; it gets
+    `tabindex="-1"` on demand and `focus({ preventScroll: true })`.
+    `:focus-visible` decides the ring: a keyboard jump shows it, a mouse
+    click doesn't;
+  - **highlights a job or project once** (`.is-arriving` on the `:target`,
+    §6 item 11): project ring 1.2s, job row 1.6s, then released.
+- **Legend reset:** a link to a job that the legend filter has dimmed
+  first resets the filter to All (`arrive` event → `career`), so the target
+  is never shown dimmed. Announced ("Showing all roles").
+- **Load with a hash:** the browser jumps; after `document.fonts.ready`
+  (late fonts shift the layout) `main.js` lands it again, instantly, unless
+  the reader has already scrolled (wheel, touch, key or pointer), then
+  focuses the heading and runs the highlight. That focus is **quiet**
+  (`data-quiet-focus`, no ring until the heading is left): on load nobody
+  knows the reader's input method, and browsers treat script focus as
+  `:focus-visible` then. The quiet heading doesn't hold the graph's
+  focus state, so the job highlight still releases.
+- **Back/forward and URL-bar hashes** (`hashchange` without a click) get the
+  same settle → focus → highlight. A click and its `hashchange` are
+  handled once.
+- **Back to top** (`.to-top`, every instance): `scrollTo({ top: 0 })`
+  (instant under reduced motion), `history.replaceState` with the bare URL
+  (no hash, no new history entry), then focus the hero `<h1>` (index) or
+  `<main>` (other pages; its link is `#main`).
+- **Unknown hash** (`#nope`): nothing happens, no console errors.
+
+### `main.js` structure
+One file, no modules, no bundler. Shared at the top: `reduceMotion` (a
+`MediaQueryList`), `announce(msg)` (the live region, §11) and `emit(name,
+detail)`. Then one function per feature, run in order by a loop that
+catches and logs (`[name] error`) so one broken feature never breaks the
+rest:
+
+```js
+const features = {
+  theme, header, menu, scrollspy, navIndicator, deepLinks,
+  career, skills, copyEmail, clock, footerYear,
+};
+for (const [name, init] of Object.entries(features)) {
+  try { init({ reduceMotion, announce }); } catch (err) { console.error(`[${name}]`, err); }
+}
+```
+
+- Each `init` returns early when its elements aren't on the page (the 404
+  and styleguide run the same file).
+- Features talk through DOM events on `document`: `themechange`,
+  `sectionchange` (scrollspy → indicator), `arrive` (deep links → career).
+- **Reduced motion is CSS**, so live changes of the setting need no JS: the
+  pulse, the indicator and the highlight follow the media query at once.
+  JS reads `reduceMotion.matches` only when it scrolls.
+- **No `setInterval` except the clock**, which stops while
+  `document.hidden`. No scroll listeners (only `scrollend`).
+- Size: 11.9 KB raw / 9.3 KB code / 4.1 KB gzip before Phase 6;
+  ≈ 20.5 KB raw / 15.2 KB code / 7.1 KB gzip after (scrollspy, indicator,
+  deep links, live region; the reveal code is gone). Keep it small.
+
+---
+
+## 19. Working agreement for future sessions
 
 1. Read this file first.
 2. Propose a short plan before any large change.
@@ -1310,7 +1505,7 @@ without comments). Every section uses the spine (§7).
 
 ---
 
-## 19. Open TODOs (from Kennedy)
+## 20. Open TODOs (from Kennedy)
 
 > **First push (2026-10-30), Kennedy's decision:** the history was squashed
 > into one fresh root commit so the phone number from the Phase 0–1 commits

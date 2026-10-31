@@ -6,7 +6,10 @@ import (
 	"testing"
 )
 
-var labels = Labels{All: "All roles", Milestone: "Milestone", Present: "Present"}
+var labels = Labels{
+	All: "All roles", Milestone: "Milestone", Present: "Present",
+	ShowingAll: "Showing all roles", Showing: "Showing {kind} roles", ShowingMilestones: "Showing milestones",
+}
 
 func m(s string) Month {
 	v, err := ParseMonth(s)
@@ -140,6 +143,13 @@ func TestRealData(t *testing.T) {
 	}
 	if got := strings.Join(legend, " "); got != "All roles=5/all Internship=2/work Volunteer=2/volunteer Milestone=1/milestone" {
 		t.Errorf("legend = %s", got)
+	}
+	var says []string
+	for _, l := range g.Legend {
+		says = append(says, l.Announce)
+	}
+	if got := strings.Join(says, "; "); got != "Showing all roles; Showing internship roles; Showing volunteer roles; Showing milestones" {
+		t.Errorf("legend announcements = %s", got)
 	}
 }
 

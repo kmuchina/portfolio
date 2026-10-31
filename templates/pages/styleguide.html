@@ -60,13 +60,7 @@
     }
     .swatch .meta { font-size: var(--fs-xs); }
 
-    /* Demo boxes (motion + layout primitives) */
-    .demo-boxes {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-4);
-      margin-block-end: var(--space-6);
-    }
+    /* Demo boxes (layout primitives) */
     .demo-box {
       display: grid;
       place-items: center;
@@ -76,7 +70,6 @@
       border-radius: var(--radius-sm);
       color: var(--muted);
     }
-    .demo-boxes .demo-box { block-size: 6rem; border-radius: var(--radius); }
     .demo-frame { outline: 1px dashed var(--line); outline-offset: var(--space-2); }
 
     .font-checks { display: grid; gap: var(--space-4); }
@@ -349,16 +342,6 @@
 
         <p class="meta">Reduced motion: <strong data-reduced-motion>…</strong></p>
 
-        <div style="inline-size: 100%">
-          <div class="demo-boxes" data-reveal-group data-demo-group>
-            <div class="demo-box meta">--i: 0</div>
-            <div class="demo-box meta">--i: 1</div>
-            <div class="demo-box meta">--i: 2</div>
-            <div class="demo-box meta">--i: 3</div>
-          </div>
-          <button type="button" class="btn btn--ghost press" data-replay>Replay reveal</button>
-        </div>
-
         <p><a class="link tap-target" href="#motion-h">.link — underline grows from the left</a></p>
         <p><a class="link-arrow" href="#motion-h">.link-arrow — the arrow nudges 3px{{icon "arrow-right"}}</a></p>
         <p class="muted">Card lift and button press: see the Components section.</p>
@@ -428,16 +411,10 @@
 
       const rm = matchMedia("(prefers-reduced-motion: reduce)");
       const showRM = () => document.querySelector("[data-reduced-motion]").textContent =
-        rm.matches ? "detected — reveals, lifts, press and arrow nudge disabled" : "not detected";
+        rm.matches ? "detected — hero entrance, lifts, press, arrow nudges and the graph drawing disabled" : "not detected";
       showRM();
       rm.addEventListener("change", showRM);
 
-      document.querySelector("[data-replay]").addEventListener("click", () => {
-        const group = document.querySelector("[data-demo-group]");
-        group.classList.remove("is-visible");
-        void group.offsetWidth; // drop the finished animation so it can restart
-        group.classList.add("is-visible");
-      });
 
       document.fonts.ready.then(async () => {
         for (const el of document.querySelectorAll("[data-font-check]")) {

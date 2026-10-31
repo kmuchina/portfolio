@@ -86,6 +86,8 @@ type Labels struct {
 	All       string // legend "All roles"
 	Milestone string // type label of milestones
 	Present   string // end label of an ongoing role
+	// Legend announcements (LegendItem.Announce).
+	ShowingAll, Showing, ShowingMilestones string
 }
 
 // Seg is one line segment in a row's graph cell.
@@ -167,6 +169,9 @@ type LegendItem struct {
 	Lane   string // "all", "work", "volunteer" or "milestone": what the filter lights
 	Label  string
 	Count  int
+	// Announce is said through the live region when this filter turns on:
+	// "Showing all roles", "Showing volunteer roles", "Showing milestones".
+	Announce string
 }
 
 // NodeClass is the swatch node's class list ("" for "all").
@@ -390,7 +395,7 @@ func legend(rows []Row, l Labels) []LegendItem {
 	for _, r := range rows {
 		counts[r.Kind]++
 	}
-	items := []LegendItem{{Filter: "all", Lane: "all", Label: l.All, Count: len(rows)}}
+	items := []LegendItem{{Filter: "all", Lane: "all", Label: l.All, Count: len(rows), Announce: l.ShowingAll}}
 	for _, k := range kindOrder {
 		if counts[k] == 0 {
 			continue
@@ -407,6 +412,10 @@ func legend(rows []Row, l Labels) []LegendItem {
 				item.Label = r.TypeLabel
 				break
 			}
+		}
+		item.Announce = strings.ReplaceAll(l.Showing, "{kind}", strings.ToLower(item.Label))
+		if k == Milestone {
+			item.Announce = l.ShowingMilestones
 		}
 		items = append(items, item)
 	}

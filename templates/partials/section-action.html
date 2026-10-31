@@ -1,10 +1,14 @@
-{{/* The spine aside's action link (Data: *site.Action). A static file gets
-     arrow-right (nudges right); an external URL gets arrow-up-right
-     (.link-arrow--external, nudges up and right). */}}
+{{/* The spine aside's action link. Data: (dict "Action" *site.Action "PDF"
+     ui.pdf). A static file gets arrow-right (nudges right) and, for a PDF,
+     a visually hidden "(PDF)"; an external URL gets arrow-up-right
+     (.link-arrow--external, nudges up and right) and rel="noopener". */}}
 {{define "section-action" -}}
+{{- $pdf := .PDF}}
+{{- with .Action}}
 {{- if .IsExternal}}
-<a class="link-arrow link-arrow--external section__action tap-target" href="{{.URL}}">{{.Label}}{{icon "arrow-up-right"}}</a>
+<a class="link-arrow link-arrow--external section__action tap-target" href="{{.URL}}" rel="noopener">{{.Label}}{{icon "arrow-up-right"}}</a>
 {{- else}}
-<a class="link-arrow section__action tap-target" href="{{asset .AssetPath}}">{{.Label}}{{icon "arrow-right"}}</a>
+<a class="link-arrow section__action tap-target" href="{{asset .AssetPath}}">{{.Label}}{{if .IsPDF}}<span class="sr-only"> {{$pdf}}</span>{{end}}{{icon "arrow-right"}}</a>
+{{- end}}
 {{- end}}
 {{- end}}

@@ -170,6 +170,7 @@ func TestFullBuild(t *testing.T) {
 		t.Errorf(".nojekyll should be empty, got %d bytes", fi.Size())
 	}
 	phase5(t, html)
+	phase6(t, out, html)
 
 	if len(res.Fingerprinted) != 2 {
 		t.Errorf("want 2 fingerprinted files, got %v", res.Fingerprinted)
@@ -269,7 +270,7 @@ func phase5(t *testing.T, html string) {
 		!strings.Contains(projects, `class="project__link card__link"`) {
 		t.Error("projects: the linked card should be interactive with a stretched link")
 	}
-	if !strings.Contains(projects, `<strong>50&#43;</strong> active users`) {
+	if !strings.Contains(projects, `<strong>100&#43;</strong> active users`) {
 		t.Error("projects: metric missing")
 	}
 
@@ -295,8 +296,8 @@ func phase5(t *testing.T, html string) {
 	if !regexp.MustCompile(`<time datetime="[0-9-]{10}T[0-9:]{5}&#43;03:00" data-tz="Africa/Nairobi">[0-2][0-9]:[0-5][0-9]</time> here \(EAT, UTC&#43;3\)`).MatchString(contact) {
 		t.Error("contact: build-time Nairobi clock missing")
 	}
-	if !strings.Contains(contact, `data-copy="muchina537@gmail.com"`) || !strings.Contains(contact, `role="status"`) {
-		t.Error("contact: copy button or live region missing")
+	if !strings.Contains(contact, `data-copy="muchina537@gmail.com"`) {
+		t.Error("contact: copy button missing")
 	}
 
 	// Experience: job anchors for the evidence links.
@@ -351,5 +352,81 @@ func TestScreenshotReplacesPlaceholder(t *testing.T) {
 	}
 	if len(res.Warnings) != 1 {
 		t.Errorf("want 1 screenshot warning (the journal), got %v", res.Warnings)
+	}
+}
+
+// phase6 checks the navigation, deep-link and accessibility markup.
+func phase6(t *testing.T, out, html string) {
+	t.Helper()
+
+	// One polite live region per page (copy email, legend, theme), carrying
+	// the theme wording; <main> can take focus from the skip link.
+	if n := strings.Count(html, `role="status"`); n != 1 {
+		t.Errorf("want exactly 1 live region, got %d", n)
+	}
+	if !regexp.MustCompile(`<div id="sr-status" class="sr-only" role="status" data-status data-dark="Dark theme" data-light="Light theme" data-system="System theme, currently \{theme\}"`).MatchString(html) {
+		t.Error("#sr-status live region (with the theme announcements) missing")
+	}
+	if !strings.Contains(html, `<main id="main" tabindex="-1">`) {
+		t.Error(`<main id="main" tabindex="-1"> missing`)
+	}
+
+	// The scrollspy indicator sits in the desktop nav.
+	if n := strings.Count(html, `class="nav__indicator" aria-hidden="true" data-nav-indicator`); n != 1 {
+		t.Errorf("want 1 nav indicator, got %d", n)
+	}
+
+	// No scroll reveals left anywhere: not in the markup, CSS or JS.
+	err := filepath.WalkDir(out, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !(strings.HasSuffix(path, ".html") || strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".js")) {
+			return err
+		}
+		data, err := os.ReadFile(path)
+		if err == nil && strings.Contains(string(data), "data-reveal") {
+			t.Errorf("%s still mentions data-reveal", path)
+		}
+		return err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Skill buttons: the count is part of the name (hidden text), the badge is aria-hidden.
+	for _, want := range []string{
+		`Kotlin<span class="sr-only">, used in 1 place</span> <span class="skill__count" aria-hidden="true">1</span>`,
+		`Business Central<span class="sr-only">, used at 1 place</span>`,
+		`Team leadership<span class="sr-only">, shown at 2 places</span> <span class="skill__count" aria-hidden="true">2</span>`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("skill button name missing: %s", want)
+		}
+	}
+	if got := strings.Count(html, `<span class="skill__count" aria-hidden="true">`); got != 8 {
+		t.Errorf("want 8 aria-hidden skill counts, got %d", got)
+	}
+
+	// Legend buttons say what they show.
+	says := regexp.MustCompile(`class="legend__item"[^>]*data-announce="([^"]+)"`).FindAllStringSubmatch(html, -1)
+	var got []string
+	for _, m := range says {
+		got = append(got, m[1])
+	}
+	if strings.Join(got, "; ") != "Showing all roles; Showing internship roles; Showing volunteer roles; Showing milestones" {
+		t.Errorf("legend announcements = %v", got)
+	}
+
+	// Every link that leaves the site has rel="noopener".
+	for _, m := range regexp.MustCompile(`<a [^>]*href="https://[^"]*"[^>]*>`).FindAllString(html, -1) {
+		if !regexp.MustCompile(`rel="[^"]*\bnoopener\b`).MatchString(m) {
+			t.Errorf("external link without noopener: %s", m)
+		}
+	}
+
+	// Links to the résumé PDF say so to screen readers.
+	if n := strings.Count(html, `<span class="sr-only"> (PDF)</span>`); n != 2 {
+		t.Errorf(`want 2 hidden "(PDF)" suffixes (hero, experience), got %d`, n)
+	}
+	if !regexp.MustCompile(`<a class="btn btn--ghost press" href="/Kennedy_Muchina_Resume\.pdf" download>`).MatchString(html) {
+		t.Error("the résumé button lost its download attribute")
 	}
 }

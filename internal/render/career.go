@@ -44,6 +44,9 @@ func careerGraph(s *site.Site, now time.Time) (*career.Graph, error) {
 		})
 	}
 	ui := s.UI.Career
-	g := career.Build(entries, career.MonthOf(now), career.Labels{All: ui.All, Milestone: ui.Milestone, Present: ui.Present})
+	g := career.Build(entries, career.MonthOf(now), career.Labels{
+		All: ui.All, Milestone: ui.Milestone, Present: ui.Present,
+		ShowingAll: ui.ShowingAll, Showing: ui.Showing, ShowingMilestones: ui.ShowingMilestones,
+	})
 	return &g, nil
 }
