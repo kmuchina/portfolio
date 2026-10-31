@@ -139,6 +139,13 @@ func TestSectionRules(t *testing.T) {
 		{"education years", func(s *Site) { s.Education.Items[1].End = "19" }, "must both be YYYY"},
 		{"education neither", func(s *Site) { s.Education.Items[1].Grades = nil }, "needs honours"},
 		{"metric half", func(s *Site) { s.Projects.Items[0].Metric.Label = "" }, "metric: value and label"},
+		{"seo locale", func(s *Site) { s.SEO.Locale = "en-KE" }, "seo.locale"},
+		{"seo country", func(s *Site) { s.SEO.Address.Country = "Kenya" }, "two-letter country code"},
+		{"seo image missing", func(s *Site) { s.SEO.Image = "nope.png" }, `seo.image "nope.png" not found`},
+		{"seo image size", func(s *Site) { s.SEO.Image = "apple-touch-icon.png" }, "must be a 1200 × 630 PNG"},
+		{"seo image alt", func(s *Site) { s.SEO.ImageAlt = "" }, "seo.image_alt is required"},
+		{"seo knows_about", func(s *Site) { s.SEO.KnowsAbout = []string{"Cooking"} }, `"Cooking" is not a skills.groups name`},
+		{"404 copy", func(s *Site) { s.UI.NotFound.Experience = "" }, "ui.not_found.experience is required"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -318,5 +325,31 @@ func TestActionIsExternal(t *testing.T) {
 	}
 	if (Action{URL: "Kennedy_Muchina_Resume.pdf"}).IsExternal() {
 		t.Error("static path should not be external")
+	}
+}
+
+// The meta description should fit a search result: 150–160 characters,
+// else a warning (never a failure).
+func TestDescriptionLengthWarns(t *testing.T) {
+	s, err := Load(contentPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	warnings, err := Validate(s, staticDir, iconDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, w := range warnings {
+		if strings.Contains(w, "site.description") {
+			t.Errorf("the real description should be in range: %s", w)
+		}
+	}
+	s.Meta.Description = "Too short."
+	warnings, err = Validate(s, staticDir, iconDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(strings.Join(warnings, "\n"), "site.description is 10 characters") {
+		t.Errorf("want a description-length warning, got %v", warnings)
 	}
 }

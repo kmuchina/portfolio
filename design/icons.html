@@ -1,0 +1,41 @@
+<!doctype html>
+<!--
+  icons.html: the bitmap icons, rendered once from the favicon.svg design
+  (the "KM" monogram in --accent on --bg) with the site's own Fraunces:
+    #touch → static/apple-touch-icon.png (180 × 180; full-bleed square,
+             iOS rounds the corners itself; the monogram has padding)
+    #ico   → static/favicon.ico (32 × 32, a PNG inside an ICO container)
+  Re-render with `make og` (tools/og/render.cjs).
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Icons: kmuchina.com</title>
+<link rel="stylesheet" href="../static/css/00-tokens.css">
+<style>
+  @font-face { font-family: "Fraunces"; font-style: normal; font-weight: 100 900; src: url("../static/fonts/fraunces-var.woff2") format("woff2"); }
+  * { margin: 0; }
+  body { display: flex; gap: 40px; align-items: flex-start; padding: 40px; background: transparent; }
+  .mono {
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50, "WONK" 0;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  /* Glyphs sit a touch high in their line box; nudge to the optical centre. */
+  .mono span { translate: 0 0.04em; }
+  #touch { width: 180px; height: 180px; font-size: 78px; }
+  #ico   { width: 32px; height: 32px; font-size: 17px; border-radius: 7px; }
+</style>
+</head>
+<body>
+  <div id="touch" class="mono"><span>KM</span></div>
+  <div id="ico" class="mono"><span>KM</span></div>
+</body>
+</html>

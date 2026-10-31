@@ -49,7 +49,9 @@
         btn.setAttribute("aria-checked", String(on));
         btn.tabIndex = on ? 0 : -1;
       }
-      if (meta) meta.content = getComputedStyle(root).getPropertyValue("--bg").trim();
+      // Read --bg on the next frame, when styles are computed anyway: a
+      // synchronous getComputedStyle here forces a style pass during load.
+      if (meta) requestAnimationFrame(() => { meta.content = getComputedStyle(root).getPropertyValue("--bg").trim(); });
       emit("themechange", { pref, theme: root.dataset.theme });
     };
 
@@ -127,7 +129,7 @@
       const r = dialog.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
     });
-    matchMedia("(min-width: 1024px)").addEventListener("change", (e) => e.matches && dialog.open && dialog.close());
+    matchMedia("(min-width: 64em)").addEventListener("change", (e) => e.matches && dialog.open && dialog.close());
   }
 
   /* ---- Scrollspy: aria-current on the nav and menu links ----------------

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/kmuchina/portfolio/internal/assets"
+	"github.com/kmuchina/portfolio/internal/images"
 	"github.com/kmuchina/portfolio/internal/textfmt"
 )
 
@@ -18,6 +19,8 @@ import (
 //	asset "css/site.css"           → fingerprinted URL path; unknown key = build error
 //	icon "github" ["Label"]        → inline SVG (decorative, or labelled with role="img")
 //	imgSize "img/profile.jpg"      → assets.Size{W, H} for width/height attributes
+//	image "img/profile.jpg"        → *images.Set (srcsets, default <img>); feed it to the "picture" partial
+//	imagesrcset set.Srcset         → the whole imagesrcset="…" attribute of an image preload (see below)
 //	exists "img/projects/x.png"    → whether the file exists under static/
 //	year                           → current year (footer)
 //	join list sep                  → strings.Join
@@ -34,9 +37,23 @@ func (r *Renderer) funcs() template.FuncMap {
 		},
 		"icon":    r.icon,
 		"imgSize": r.imgSize,
+		"image": func(src string) (*images.Set, error) {
+			s, ok := r.images[src]
+			if !ok {
+				return nil, fmt.Errorf("image: %q is not a responsive image (internal/build imageSpecs)", src)
+			}
+			return s, nil
+		},
 		"exists": func(rel string) bool {
 			_, err := os.Stat(filepath.Join(r.staticDir, filepath.FromSlash(rel)))
 			return err == nil
+		},
+		// html/template reads any attribute with "src" in its name as one
+		// URL and would percent-encode a candidate list's spaces and commas;
+		// only srcset itself is known to it. The value is our own hashed
+		// paths, escaped here.
+		"imagesrcset": func(v string) template.HTMLAttr {
+			return template.HTMLAttr(`imagesrcset="` + html.EscapeString(v) + `"`)
 		},
 		"year": func() int { return time.Now().Year() },
 		"join": strings.Join,

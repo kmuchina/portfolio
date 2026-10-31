@@ -1,0 +1,12 @@
+{{/* A responsive image (internal/images): WebP <source> when the build had
+     cwebp, then the JPEG/PNG <img> with its own srcset. Call with
+       (dict "Set" (image "img/x.jpg") "Class" "…" "Alt" "…" "Sizes" "…" ["Priority" true])
+     Priority = the LCP image: fetchpriority="high", never lazy. Everything
+     else is lazy and decoded off the main thread. */}}
+{{define "picture" -}}
+{{- $s := .Set -}}
+<picture>
+  {{- with $s.WebPSrcset}}<source type="image/webp" srcset="{{.}}" sizes="{{$.Sizes}}">{{end -}}
+  <img class="{{.Class}}" src="{{$s.Default.URL}}" srcset="{{$s.Srcset}}" sizes="{{.Sizes}}" width="{{$s.Default.W}}" height="{{$s.Default.H}}" alt="{{.Alt}}"{{if .Priority}} fetchpriority="high"{{else}} loading="lazy" decoding="async"{{end}}>
+</picture>
+{{- end}}

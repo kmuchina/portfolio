@@ -6,3 +6,4 @@ node_modules/
 
 # Local-only: the mockup shows a phone number and a retired email.
 design/mockup.png
+.cache/

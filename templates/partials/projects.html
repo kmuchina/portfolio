@@ -45,8 +45,7 @@
           <div class="project__stage"{{if not $shot}} aria-hidden="true"{{end}}>
             <div class="phone"><div class="phone__screen"><span class="phone__notch"></span>
               {{- if $shot}}
-              {{- $size := imgSize .Screenshot}}
-              <img class="phone__image" src="{{asset .Screenshot}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{$ui.ScreenshotAlt}} {{.Title}}" loading="lazy" decoding="async">
+              {{template "picture" (dict "Set" (image .Screenshot) "Class" "phone__image" "Alt" (print $ui.ScreenshotAlt " " .Title) "Sizes" "11.5rem")}}
               {{- else if eq .Placeholder "journal"}}
               <div class="ui">
                 <div class="ui__bar"><span class="ui__title">{{$ui.Journal.Title}}</span><span class="ui__dot"></span></div>

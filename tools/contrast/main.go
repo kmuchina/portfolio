@@ -47,6 +47,7 @@ var pairs = []pair{
 	// Project phones: the placeholder UI's text sits on --screen.
 	{"screen-ink", "screen", 4.5, ""},
 	{"leaf", "screen", 4.5, ""},
+	{"leaf-ink", "screen", 4.5, ""},
 }
 
 // Employment-type colours (the experience section lives on --surface-2):
@@ -140,11 +141,15 @@ func resolve(blocks [][]string, theme string) map[string]string {
 		if !applies {
 			continue
 		}
+		// A later block replaces an earlier declaration of either kind: a
+		// literal overrides an inherited alias, and vice versa.
 		for _, m := range tokenRe.FindAllStringSubmatch(b[2], -1) {
 			tokens[m[1]] = strings.ToUpper(m[2])
+			delete(refs, m[1])
 		}
 		for _, m := range refRe.FindAllStringSubmatch(b[2], -1) {
 			refs[m[1]] = m[2]
+			delete(tokens, m[1])
 		}
 	}
 	// Resolve aliases (--type-internship: var(--accent-text)), a few levels deep.

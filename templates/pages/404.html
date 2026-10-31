@@ -1,12 +1,27 @@
-{{/* Served by GitHub Pages for unknown paths. Links are root-absolute. */}}
+{{/* Served by GitHub Pages for unknown paths. Links are root-absolute.
+     The spine layout, like every section; the aside holds the page's <h1>.
+     The trail is a static career-graph fragment: a lit node, then a dashed
+     gap ending in a hollow node (the graph's language for a gap). */}}
 {{define "noindex"}}{{end}}
 {{define "title"}}{{.Site.UI.NotFound.Title}} — {{.Site.Person.FullName}}{{end}}
 {{define "main" -}}
+{{- with .Site.UI.NotFound}}
 <section class="section not-found" aria-labelledby="not-found-title">
-  <div class="container stack">
-    <h1 id="not-found-title" class="not-found__title section__title">{{.Site.UI.NotFound.Title}}</h1>
-    <p class="not-found__body lead">{{.Site.UI.NotFound.Body}}</p>
-    <p class="not-found__action"><a class="btn btn--primary press" href="/">{{icon "arrow-right"}}<span class="btn__label">{{.Site.UI.NotFound.Back}}</span></a></p>
+  <div class="container section__grid">
+    <div class="section__aside">
+      <h1 id="not-found-title" class="section__title">{{.Title}}</h1>
+    </div>
+    <div class="section__body not-found__body">
+      <div class="not-found__trail" aria-hidden="true">
+        <span class="not-found__line"></span><span class="not-found__node"></span><span class="not-found__line not-found__line--gap"></span><span class="not-found__node not-found__node--open"></span>
+      </div>
+      <p class="lead">{{.Body}}</p>
+      <div class="not-found__actions cluster">
+        <a class="btn btn--primary press" href="/">{{icon "arrow-right"}}<span class="btn__label">{{.Home}}</span></a>
+        <a class="btn btn--ghost press" href="/#experience">{{icon "briefcase"}}<span class="btn__label">{{.Experience}}</span></a>
+      </div>
+    </div>
   </div>
 </section>
+{{- end}}
 {{- end}}

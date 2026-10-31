@@ -1,8 +1,18 @@
 site:
   url: "https://kmuchina.com"
-  title: "Kennedy Muchina Kinuthia — Software Engineer"
-  description: "Graduate Software Engineer in Nairobi, Kenya, building full-stack web apps, native Android apps and on-device ML."
+  title: "Kennedy Muchina Kinuthia, Software Engineer"
+  # The meta description: 150–160 characters, or the build warns.
+  description: "Kennedy Muchina Kinuthia is a Graduate Software Engineer in Nairobi, Kenya, building full-stack web apps, native Android apps on Google Play and on-device ML."
   lang: "en"
+
+# What search engines and link previews (LinkedIn, WhatsApp) read.
+seo:
+  locale: "en_KE"
+  short_name: "Kennedy M."          # the web manifest's short name
+  image: "og.png"                   # share image under static/: a 1200 × 630 PNG (make og)
+  image_alt: "Kennedy Muchina Kinuthia, Graduate Software Engineer. kmuchina.com"
+  address: { locality: "Nairobi", country: "KE" }
+  knows_about: ["Programming", "Machine learning"]   # skill groups listed as JSON-LD knowsAbout
 
 person:
   greeting: "Hello, I'm"    # hero eyebrow above the name
@@ -282,5 +292,6 @@ ui:
     to_top: "Back to top"
   not_found:
     title: "Page not found"
-    body: "The page you were looking for doesn't exist or has moved."
-    back: "Back to the homepage"
+    body: "That page doesn't exist. It may have moved when the site was rebuilt."
+    home: "Go to the homepage"
+    experience: "See my experience"

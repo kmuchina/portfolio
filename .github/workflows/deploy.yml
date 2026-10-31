@@ -26,6 +26,8 @@ jobs:
         run: |
           go vet ./...
           go test ./...
+      - name: Install cwebp (WebP images)
+        run: sudo apt-get update && sudo apt-get install -y webp
       - name: Build site
         run: go run ./cmd/build -out dist
       - name: Check output
@@ -34,6 +36,9 @@ jobs:
           test -f dist/404.html
           test -f dist/.nojekyll
           grep -qx 'kmuchina.com' dist/CNAME
+          for f in robots.txt sitemap.xml og.png favicon.svg favicon.ico apple-touch-icon.png site.webmanifest; do test -f "dist/$f"; done
+          ls dist/img/profile-*.webp
+          test ! -e dist/img/profile.jpg
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,4 +1,11 @@
 {{/* The portfolio: sections in page order. Title/description come from site.yaml. */}}
+{{/* The hero photo is the LCP image from 900px: let the browser fetch it
+     before it parses the body. Same candidates and sizes as the <picture>. */}}
+{{define "preload"}}
+{{- with image .Site.Person.Photo}}
+<link rel="preload" as="image"{{if .WebP}} type="image/webp" {{imagesrcset .WebPSrcset}}{{else}} {{imagesrcset .Srcset}}{{end}} imagesizes="(min-width: 900px) 40vw, 22rem" fetchpriority="high">
+{{- end}}
+{{- end}}
 {{define "main" -}}
 {{template "hero" .}}
 {{template "about" .}}

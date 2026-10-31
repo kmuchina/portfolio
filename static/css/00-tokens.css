@@ -8,7 +8,7 @@
    specificity. Later layers win. @font-face (01-fonts.css) is unlayered.
    ========================================================================== */
 
-@layer reset, tokens, base, layout, components, sections, utilities, motion;
+@layer reset, tokens, base, layout, components, sections, utilities, motion, print;
 
 @layer tokens {
 
@@ -53,8 +53,12 @@
   --container: 1200px;                    /* max container width, gutters included */
   --gutter: clamp(1.25rem, 4vw, 2rem);    /* container padding-inline */
   --header-h: 64px;                       /* sticky header; 72px from 1024px */
-  /* Breakpoints (mobile-first, use literally in @media): 640px · 900px · 1200px,
-     plus 1024px for the header nav (desktop links vs menu button). */
+  /* Breakpoints (mobile-first, use literally in @media), in em so a larger
+     default text size reflows to the narrower layouts (em in a media query is
+     the browser's default font size; 16px → the px values):
+     40em (640px) · 56.25em (900px) · 75em (1200px), 64em (1024px) for the
+     header nav (desktop links vs menu button), plus 25em (400px, hero CTAs)
+     and 47.5em (760px, about/skills/contact rows). */
 
   /* ---- Radii ------------------------------------------------------------ */
   --radius-sm: 6px;
@@ -94,7 +98,7 @@
   --tap: 44px;       /* minimum touch target (buttons, icon buttons) */
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 64em) {
   :root { --header-h: 72px; }
 }
 
@@ -124,6 +128,7 @@
   --screen: #0E1526;
   --screen-ink: #C9D3E6;
   --leaf: #22C55E;
+  --leaf-ink: var(--leaf);         /* text on a leaf tint (the scanner's status pill) */
   --shadow-phone: 0 24px 48px -12px rgb(0 0 0 / .45);
 
   /* Employment types: ONLY inside the experience section and its legend.
@@ -167,6 +172,7 @@
   --screen: #F4F6FA;
   --screen-ink: #2B3648;
   --leaf: #15803D;
+  --leaf-ink: #14532D;             /* --leaf is 3.2:1 on its own tint; this is 5.8:1 */
   --shadow-phone: 0 24px 48px -12px rgb(0 0 0 / .45);
 
   --type-internship: var(--accent-text);
@@ -183,6 +189,57 @@
   --type-part-time-soft: var(--surface);
   --type-milestone: var(--ink);
   --type-milestone-soft: var(--surface);
+}
+
+
+/* ---- Print: always the light theme ---------------------------------------
+   A copy of the light block above, applied under @media print whatever the
+   reader's theme (paper is white; the dark palette's light ink wouldn't
+   read). :root[data-theme] outranks both theme blocks, and tools/contrast
+   skips it (it only reads :root and [data-theme="…"] selectors). Keep it
+   identical to [data-theme="light"]: internal/assets TestPrintTokensMatchLight
+   fails if the two drift apart. */
+@media print {
+:root[data-theme] {
+  color-scheme: light;
+
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-2: #EBEFF5;
+  --ink: #0F1A2E;
+  --muted: #4A5568;
+  --line: #E2E7EF;
+  --accent: #3B82F6;
+  --accent-strong: #2563EB;
+  --accent-strong-hover: #1D4ED8;
+  --accent-text: #1D4ED8;
+  --accent-soft: #E8F0FE;
+  --on-accent: #FFFFFF;
+  --line-strong: #CBD3E0;
+  --focus: #2563EB;
+  --shadow: 0 1px 2px rgb(15 26 46 / .06), 0 8px 24px rgb(15 26 46 / .08);
+
+  --screen: #F4F6FA;
+  --screen-ink: #2B3648;
+  --leaf: #15803D;
+  --leaf-ink: #14532D;             /* --leaf is 3.2:1 on its own tint; this is 5.8:1 */
+  --shadow-phone: 0 24px 48px -12px rgb(0 0 0 / .45);
+
+  --type-internship: var(--accent-text);
+  --type-internship-soft: var(--accent-soft);
+  --type-volunteer: #047857;
+  --type-volunteer-soft: #E3F5EC;
+  --type-contract: #AD5009;              /* unused today; nudged from #B45309 (4.35:1 on --surface-2) */
+  --type-contract-soft: #FDF3E1;
+  --type-freelance: #6D28D9;             /* defined for future roles; unused today */
+  --type-freelance-soft: #F0EBFE;
+  --type-full-time: var(--ink);
+  --type-full-time-soft: var(--surface);
+  --type-part-time: var(--ink);
+  --type-part-time-soft: var(--surface);
+  --type-milestone: var(--ink);
+  --type-milestone-soft: var(--surface);
+}
 }
 
 } /* @layer tokens */

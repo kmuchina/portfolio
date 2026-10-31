@@ -4,14 +4,43 @@
 <script>{{.ThemeInit}}</script>
 <title>{{block "title" .}}{{.Site.Meta.Title}}{{end}}</title>
 <meta name="description" content="{{.Site.Meta.Description}}">
+<meta name="author" content="{{.Site.Person.FullName}}">
 {{if .NoIndex}}<meta name="robots" content="noindex">{{else}}<link rel="canonical" href="{{.Canonical}}">{{end}}
-{{/* Initial value = dark --bg (HTML can't read CSS vars); main.js syncs it. */}}
-<meta name="theme-color" content="#0B1220">
+<meta name="color-scheme" content="dark light">
+{{- /* The dark --bg, read from 00-tokens.css by the build; main.js re-syncs it to the theme. */}}
+<meta name="theme-color" content="{{.ThemeColor}}">
 <link rel="preload" href="{{asset "fonts/fraunces-var.woff2"}}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{asset "fonts/inter-var.woff2"}}" as="font" type="font/woff2" crossorigin>
+{{- block "preload" .}}{{end}}
 <link rel="stylesheet" href="{{asset "css/site.css"}}">
 <script src="{{asset "js/main.js"}}" defer></script>
+<link rel="icon" href="{{asset "favicon.ico"}}" sizes="32x32">
 <link rel="icon" href="{{asset "favicon.svg"}}" type="image/svg+xml">
-{{/* Phase 7: SEO/OG/JSON-LD */}}
+<link rel="apple-touch-icon" href="{{asset "apple-touch-icon.png"}}">
+<link rel="manifest" href="{{asset "site.webmanifest"}}">
+{{- if not .NoIndex}}
+{{- with .Site}}
+{{- $share := imgSize .SEO.Image}}
+<meta property="og:type" content="profile">
+<meta property="og:title" content="{{.Meta.Title}}">
+<meta property="og:description" content="{{.Meta.Description}}">
+<meta property="og:url" content="{{$.Canonical}}">
+<meta property="og:image" content="{{$.ShareImage}}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="{{$share.W}}">
+<meta property="og:image:height" content="{{$share.H}}">
+<meta property="og:image:alt" content="{{.SEO.ImageAlt}}">
+<meta property="og:locale" content="{{.SEO.Locale}}">
+<meta property="profile:first_name" content="{{.Person.FirstName}}">
+<meta property="profile:last_name" content="{{.Person.LastName}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{.Meta.Title}}">
+<meta name="twitter:description" content="{{.Meta.Description}}">
+<meta name="twitter:image" content="{{$.ShareImage}}">
+<meta name="twitter:image:alt" content="{{.SEO.ImageAlt}}">
+{{- end}}
+{{/* Built in Go (internal/seo, encoding/json), never hand-written. */}}
+<script type="application/ld+json">{{.JSONLD}}</script>
+{{- end}}
 {{block "head-extra" .}}{{end}}
 {{- end}}

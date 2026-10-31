@@ -1,0 +1,103 @@
+/* ==========================================================================
+   10-print.css — printing the home page gives a clean, résumé-like document
+   The top layer (`print`, after `motion`), and only under @media print.
+   Colours: the light palette, whatever the reader's theme (00-tokens.css
+   swaps it in for print). Browsers drop backgrounds by default, so nothing
+   here relies on them.
+   The career graph simplifies to a left rule: its lane colours, dashes and
+   band-coloured node rings are screen drawings, and a plain rule beside the
+   entries reads better on paper.
+   ========================================================================== */
+
+@layer print {
+@media print {
+
+  @page { margin: 16mm; }
+
+  html { scroll-behavior: auto; }
+  body { background: none; }
+
+  /* Nothing moves on paper: the hero entrance, the pulse and the scroll-drawn
+     graph all rest at their final state. */
+  *, *::before, *::after {
+    animation: none;
+    transition: none;
+  }
+
+  /* Screen-only controls and decoration. */
+  .skip-link,
+  .scroll-sentinel,
+  .site-header,
+  .menu,
+  .theme-toggle,
+  .hero__aside,
+  .hero__actions,
+  .hero__social,
+  .legend,
+  .copy,
+  .project__stage,
+  .site-footer__end,
+  .here__item:has(time),
+  a.section__action:not([href^="http"]),
+  #sr-status {
+    display: none;
+  }
+
+  /* One column, no bands, no sticky asides. */
+  .section,
+  .section--alt {
+    --band: var(--surface);
+    padding-block: 8mm 0;
+    border: 0;
+    background: none;
+  }
+  .hero { min-block-size: 0; padding-block-start: 0; }
+  .hero__inner,
+  .section__grid { display: block; }
+  .section__aside {
+    position: static;
+    margin-block-end: 5mm;
+  }
+  .section__aside { break-inside: avoid; break-after: avoid; }
+
+  /* The career graph becomes a left rule. */
+  .career {
+    border-inline-start: 2px solid var(--line-strong);
+    padding-inline-start: 6mm;
+  }
+  .career__row { grid-template-columns: minmax(0, 1fr); }
+  .career__graph { display: none; }
+
+  /* Keep each entry on one page. */
+  .job,
+  .project,
+  .degree,
+  .school,
+  .facts__item,
+  .skill-table__row { break-inside: avoid; }
+
+  /* Cards: a hairline, no lift, no shadow, and only as tall as their text
+     (the phone stage is gone). */
+  .project--staged { min-block-size: 0; }
+  .card,
+  .lift { transform: none; box-shadow: none; }
+  .lift::after,
+  .card--interactive::after { display: none; }
+
+  /* External links print their address; in-page anchors and mailto don't. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  /* Channels: one per line, the address after the handle. */
+  .channels { grid-template-columns: minmax(0, 1fr); }
+  .channels__link { grid-template-columns: 20px auto auto; justify-content: start; min-block-size: 0; }
+  .channels__go,
+  .link-arrow--external .icon,
+  .project__link .icon:last-of-type { display: none; }
+}
+} /* @layer print */

@@ -11,7 +11,7 @@
       <p class="hero__role" data-hero style="--i: 2">{{.Person.Role}}</p>
       <p class="lead hero__summary" data-hero style="--i: 2">{{.Person.Summary}}</p>
       <div class="hero__actions cluster" data-hero style="--i: 3">
-        <a class="btn btn--primary press" href="#projects">{{icon "arrow-up-right"}}<span class="btn__label">{{$ui.CTAProjects}}</span></a>
+        <a class="btn btn--primary press" href="#projects">{{icon "arrow-right"}}<span class="btn__label">{{$ui.CTAProjects}}</span></a>
         {{- with .Person.ResumePDF}}
         <a class="btn btn--ghost press" href="{{asset .}}" download>{{icon "download"}}<span class="btn__label">{{$ui.CTAResume}}<span class="sr-only"> {{$ui.PDF}}</span></span></a>
         {{- end}}
@@ -22,9 +22,9 @@
       </ul>
     </div>
     <div class="hero__aside">
-      {{- $size := imgSize .Person.Photo}}
       <div class="hero__media" data-hero-photo>
-        <img class="hero__photo" src="{{asset .Person.Photo}}" width="{{$size.W}}" height="{{$size.H}}" alt="{{.Person.PhotoAlt}}" fetchpriority="high">
+        {{- /* sizes: keep in sync with the "preload" block in pages/index.html (a build test checks). */}}
+        {{template "picture" (dict "Set" (image .Person.Photo) "Class" "hero__photo" "Alt" .Person.PhotoAlt "Sizes" "(min-width: 900px) 40vw, 22rem" "Priority" true)}}
       </div>
       <figure class="hero__quote" data-hero style="--i: 3">
         <blockquote><p class="quote">{{.Person.Quote}}</p></blockquote>

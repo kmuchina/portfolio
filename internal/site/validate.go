@@ -2,6 +2,8 @@ package site
 
 import (
 	"fmt"
+	"image"
+	_ "image/png" // DecodeConfig of the share image
 	"net/url"
 	"os"
 	"path/filepath"
@@ -9,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"gopkg.in/yaml.v3"
 )
@@ -25,6 +28,8 @@ var (
 	monthRe  = regexp.MustCompile(`^[0-9]{4}-(0[1-9]|1[0-2])$`)
 	yearRe   = regexp.MustCompile(`^[0-9]{4}$`)
 	internRe = regexp.MustCompile(`(?i)\bintern(s|ship)?\b`) // "Intern", "internship"; not "International"
+	localeRe  = regexp.MustCompile(`^[a-z]{2}_[A-Z]{2}$`)
+	countryRe = regexp.MustCompile(`^[A-Z]{2}$`)
 )
 
 // Problems is every validation failure, reported together.
@@ -103,6 +108,15 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 		{"ui.contact.fallback_status", s.UI.Contact.FallbackStatus},
 		{"ui.footer.built", s.UI.Footer.Built},
 		{"ui.footer.to_top", s.UI.Footer.ToTop},
+		{"ui.not_found.title", s.UI.NotFound.Title},
+		{"ui.not_found.body", s.UI.NotFound.Body},
+		{"ui.not_found.home", s.UI.NotFound.Home},
+		{"ui.not_found.experience", s.UI.NotFound.Experience},
+		{"seo.locale", s.SEO.Locale},
+		{"seo.short_name", s.SEO.ShortName},
+		{"seo.image_alt", s.SEO.ImageAlt},
+		{"seo.address.locality", s.SEO.Address.Locality},
+		{"seo.address.country", s.SEO.Address.Country},
 	}
 	for _, r := range required {
 		if strings.TrimSpace(r.value) == "" {
@@ -346,6 +360,35 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 				}
 				warnings = append(warnings, fmt.Sprintf("%s (%s): screenshot %q not found; %s", f, p.Slug, p.Screenshot, what))
 			}
+		}
+	}
+
+	// SEO and sharing.
+	if n := utf8.RuneCountInString(s.Meta.Description); s.Meta.Description != "" && (n < DescriptionMin || n > DescriptionMax) {
+		warnings = append(warnings, fmt.Sprintf("site.description is %d characters; search results show %d–%d in full", n, DescriptionMin, DescriptionMax))
+	}
+	if s.SEO.Locale != "" && !localeRe.MatchString(s.SEO.Locale) {
+		add("seo.locale %q must look like en_KE (language_COUNTRY)", s.SEO.Locale)
+	}
+	if c := s.SEO.Address.Country; c != "" && !countryRe.MatchString(c) {
+		add("seo.address.country %q must be a two-letter country code (KE)", c)
+	}
+	checkFile("seo.image", s.SEO.Image)
+	if s.SEO.Image != "" {
+		if f, err := os.Open(filepath.Join(staticDir, filepath.FromSlash(s.SEO.Image))); err == nil {
+			cfg, format, err := image.DecodeConfig(f)
+			f.Close()
+			if err != nil || format != "png" || cfg.Width != ShareImageW || cfg.Height != ShareImageH {
+				add("seo.image %q must be a %d × %d PNG", s.SEO.Image, ShareImageW, ShareImageH)
+			}
+		}
+	}
+	if len(s.SEO.KnowsAbout) == 0 {
+		add("seo.knows_about needs at least one skill group")
+	}
+	for i, name := range s.SEO.KnowsAbout {
+		if !slices.ContainsFunc(s.Skills.Groups, func(g SkillGroup) bool { return g.Name == name }) {
+			add("seo.knows_about[%d] %q is not a skills.groups name", i, name)
 		}
 	}
 

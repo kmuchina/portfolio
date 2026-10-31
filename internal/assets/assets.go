@@ -1,6 +1,6 @@
 // Package assets is the static pipeline: copy static/ to the output,
-// concatenate and fingerprint CSS, fingerprint main.js, and build the
-// manifest that the template `asset` func reads.
+// concatenate, minify (MinifyCSS) and fingerprint CSS, fingerprint main.js,
+// and build the manifest that the template `asset` func reads.
 package assets
 
 import (
@@ -16,6 +16,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -40,8 +42,10 @@ const (
 	themeInitJS = "js/theme-init.js" // inlined into <head> by the layout
 )
 
-// Build wipes outDir and writes the static assets into it.
-func Build(staticDir, outDir string, protect ...string) (*Result, error) {
+// Build wipes outDir and writes the static assets into it. Files in skip
+// (static-relative paths, e.g. the sources of the responsive images) are
+// not copied.
+func Build(staticDir, outDir string, skip []string, protect ...string) (*Result, error) {
 	if err := checkOut(outDir, append(protect, staticDir)...); err != nil {
 		return nil, err
 	}
@@ -74,6 +78,8 @@ func Build(staticDir, outDir string, protect ...string) (*Result, error) {
 			return nil
 		}
 		switch {
+		case slices.Contains(skip, rel):
+			return nil
 		case path.Dir(rel) == cssDir && path.Ext(rel) == ".css":
 			cssFiles = append(cssFiles, p)
 			return nil
@@ -106,11 +112,10 @@ func Build(staticDir, outDir string, protect ...string) (*Result, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Fprintf(&css, "/* ---- %s ---- */\n", filepath.Base(f))
 		css.Write(bytes.TrimSpace(data))
-		css.WriteString("\n\n")
+		css.WriteString("\n")
 	}
-	if err := res.writeHashed(outDir, "css/site.css", css.Bytes()); err != nil {
+	if err := res.writeHashed(outDir, "css/site.css", MinifyCSS(css.Bytes())); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -177,4 +182,31 @@ func checkOut(out string, protect ...string) error {
 		}
 	}
 	return nil
+}
+
+var (
+	tokenCommentRe = regexp.MustCompile(`(?s)/\*.*?\*/`)
+	tokenBlockRe   = regexp.MustCompile(`([^{}]+)\{([^{}]*)\}`)
+)
+
+// DarkColor reads a colour token of the dark (default) theme from
+// static/css/00-tokens.css, e.g. DarkColor(static, "bg") = "#0B1220", so
+// the outputs that can't read CSS variables (the theme-color meta, the web
+// manifest) never carry a second copy of a hex value.
+func DarkColor(staticDir, name string) (string, error) {
+	data, err := os.ReadFile(filepath.Join(staticDir, "css", "00-tokens.css"))
+	if err != nil {
+		return "", err
+	}
+	css := tokenCommentRe.ReplaceAllString(string(data), "")
+	valRe := regexp.MustCompile(`--` + regexp.QuoteMeta(name) + `\s*:\s*(#[0-9a-fA-F]{6})\s*;`)
+	for _, b := range tokenBlockRe.FindAllStringSubmatch(css, -1) {
+		if !strings.Contains(b[1], `[data-theme="dark"]`) {
+			continue
+		}
+		if m := valRe.FindStringSubmatch(b[2]); m != nil {
+			return m[1], nil
+		}
+	}
+	return "", fmt.Errorf("00-tokens.css: no dark-theme --%s hex value", name)
 }

@@ -12,6 +12,7 @@ import (
 // Site is the root of content/site.yaml.
 type Site struct {
 	Meta       Meta       `yaml:"site"`
+	SEO        SEO        `yaml:"seo"`
 	Person     Person     `yaml:"person"`
 	Contact    Contact    `yaml:"contact"`
 	About      About      `yaml:"about"`
@@ -30,6 +31,35 @@ type Meta struct {
 	Description string `yaml:"description"`
 	Lang        string `yaml:"lang"`
 }
+
+// SEO is the `seo:` block: what search engines and link previews read
+// (Open Graph, the Person JSON-LD, the web manifest).
+type SEO struct {
+	Locale     string   `yaml:"locale"`      // og:locale: "en_KE"
+	ShortName  string   `yaml:"short_name"`  // web manifest short_name: "Kennedy M."
+	Image      string   `yaml:"image"`       // share image under static/: a 1200 × 630 PNG
+	ImageAlt   string   `yaml:"image_alt"`   // og:image:alt
+	Address    Address  `yaml:"address"`     // JSON-LD PostalAddress
+	KnowsAbout []string `yaml:"knows_about"` // skill groups whose items become JSON-LD knowsAbout
+}
+
+// Address is a city and an ISO 3166-1 alpha-2 country code.
+type Address struct {
+	Locality string `yaml:"locality"` // "Nairobi"
+	Country  string `yaml:"country"`  // "KE"
+}
+
+// Share image size (Open Graph's recommended 1.91:1).
+const (
+	ShareImageW = 1200
+	ShareImageH = 630
+)
+
+// Description length search engines show in full (validation warns outside it).
+const (
+	DescriptionMin = 150
+	DescriptionMax = 160
+)
 
 type Person struct {
 	Greeting     string `yaml:"greeting"`
@@ -440,10 +470,12 @@ type ThemeUI struct {
 	AnnounceSystem string `yaml:"announce_system"` // "System theme, currently {theme}"
 }
 
+// NotFound is the 404 page's copy: the aside title, the body and the two buttons.
 type NotFound struct {
-	Title string `yaml:"title"`
-	Body  string `yaml:"body"`
-	Back  string `yaml:"back"`
+	Title      string `yaml:"title"`
+	Body       string `yaml:"body"`
+	Home       string `yaml:"home"`       // primary button, to /
+	Experience string `yaml:"experience"` // ghost button, to /#experience
 }
 
 // Slug lower-cases s and joins its runs of letters and digits with "-":

@@ -28,33 +28,49 @@ change**.
   `<symbol>` sprite of stand-in icons, hard-coded content and blanket
   `!important` reduced-motion rule are prototype-only and never copied.
 
-### Roadmap (8 phases)
+### Status: maintenance mode (all 8 phases done, 2026-10-31)
 
-| # | Phase | Status |
+| # | Phase | Done |
 |---|---|---|
-| 0 | Foundations: fonts, colour, motion, theming, tooling, content, this brief | ✅ done (2026-10-30) |
-| 1 | Go skeleton & data structs (typed `site.yaml`, templates, layout) | ✅ done (2026-10-30) |
-| 2 | Design system components (buttons, card, tags, section shell, icons) | ✅ done (2026-10-30) |
-| 3 | Header (sticky, scrolled state), nav, **mobile menu**, hero | ✅ done (2026-10-30) |
-| 4 | Section system ("spine" layout, bands) + experience career graph | ✅ done (2026-10-30) |
-| 5 | About, skills, projects, education, contact, footer: the sections prototype (§17) | ✅ done (2026-10-30) |
-| 6 | Navigation, deep links and interaction polish: scrollspy, nav indicator, deep links, motion audit, keyboard/SR (§18) | ✅ done (2026-10-31) |
-| 7 | Polish, SEO, images and performance | ⬜ next |
-| 8 | Deploy to GitHub Pages (Actions, CNAME, custom domain) | ✅ done (2026-10-30): workflow, `CNAME`, `.nojekyll`, `make ci`, Pages + DNS (§12 Deployment) |
+| 0 | Foundations: fonts, colour, motion, theming, tooling, content, this brief | 2026-10-30 |
+| 1 | Go skeleton & data structs | 2026-10-30 |
+| 2 | Design system components | 2026-10-30 |
+| 3 | Header, nav, mobile menu, hero | 2026-10-30 |
+| 4 | Spine layout + experience career graph | 2026-10-30 |
+| 5 | About, skills, projects, education, contact, footer (§17) | 2026-10-30 |
+| 6 | Scrollspy, nav indicator, deep links, motion audit, keyboard/SR (§18) | 2026-10-31 |
+| 7 | Polish, SEO, images, performance, print, 404, a11y audit (§21) | 2026-10-31 |
+| 8 | Deploy to GitHub Pages (§12 Deployment) | 2026-10-30 |
+
+**Rules for every future change:**
+1. Content changes (a job, a project, a skill, the résumé, the share image)
+   follow **`docs/EDITING.md`**. Most need only `content/site.yaml`.
+2. The **motion vocabulary is closed** (§6): nothing new moves.
+3. **Keep the budgets** (§21): first-load weight, image sizes, share image
+   ≤ 200 KB, one render-blocking stylesheet, no new runtime requests.
+4. **Run `make ci` (and `make contrast` after any colour change) before
+   pushing.** `main` is production: every push deploys.
+5. No new dependency without Kennedy's approval; update this file in the
+   same change as any decision.
 
 ---
 
 ## 2. Hard stack constraints (non-negotiable)
 
 - **Go** standard library + `html/template`. The **only** third-party Go
-  dependency allowed is `gopkg.in/yaml.v3`.
+  dependencies allowed are `gopkg.in/yaml.v3` and **`golang.org/x/image`**
+  (approved by Kennedy for Phase 7, 2026-10-31: `draw.CatmullRom` resizing
+  in `internal/images`; the official Go sub-repository).
 - **CSS:** hand-written vanilla CSS with custom properties. **No** Tailwind,
   Bootstrap, Sass, PostCSS or any other CSS framework or preprocessor.
 - **JS:** vanilla only, small, and progressive enhancement. **No** frameworks,
   animation libraries or jQuery. The page must be complete and readable with
   JS off.
 - **No Node toolchain** in the build. (`npm pack` was used once to fetch the
-  fonts; nothing in the build needs Node.)
+  fonts; nothing in the build needs Node.) `make og` uses Playwright to
+  re-render the committed share image and icons by hand (§21); it is never
+  part of `make build` or CI. The build's only optional external binary is
+  `cwebp` (WebP images; skipped with a warning when missing).
 - **Everything self-hosted:** fonts, icons and images. **No** runtime requests to
   Google Fonts, CDNs, analytics or any other third party.
 - Never add a dependency without asking Kennedy first.
@@ -133,6 +149,10 @@ Line heights: `--lh-tight: 1.05`, `--lh-snug: 1.2`, `--lh-body: 1.65`.
 | `jetbrains-mono-var.woff2` | JetBrains Mono normal (wght 100–800) |
 | `*-OFL.txt` | SIL Open Font License 1.1 texts (keep them) |
 
+Sizes (Phase 7): Fraunces 118 KB, Fraunces italic 146 KB, Inter 71 KB,
+JetBrains Mono 40 KB. Not subset: fonttools wasn't available in Phase 7
+(see §21 for the subsetting recipe, which must keep every axis).
+
 `@font-face` rules live in `01-fonts.css` (`font-display: swap`, latin
 `unicode-range`). **The layout (`partials/head.html`) preloads only Fraunces normal and Inter:**
 
@@ -147,9 +167,12 @@ Line heights: `--lh-tight: 1.05`, `--lh-snug: 1.2`, `--lh-body: 1.65`.
 
 One ink, one paper, one accent. **Never hard-code a colour value outside
 `static/css/00-tokens.css`.** Always use the custom properties.
-There are two exceptions, because neither can read CSS variables: the initial
-`<meta name="theme-color" content="#0B1220">` (`main.js` re-syncs it from
-`--bg`) and `static/favicon.svg`.
+There is one exception, because it can't read CSS variables:
+`static/favicon.svg`. (Since Phase 7 the `theme-color` meta and the web
+manifest's colours are read from the dark `--bg` in `00-tokens.css` by the
+build, `assets.DarkColor`; `main.js` re-syncs the meta to the theme. The
+bitmap icons and `og.png` are rendered from `design/*.html`, which link the
+tokens file.)
 
 ### Dark theme (default): `:root, [data-theme="dark"]`, `color-scheme: dark`
 
@@ -232,8 +255,15 @@ There are two exceptions, because neither can read CSS variables: the initial
 - **Project phones (Phase 5):** `--screen` / `--screen-ink` (dark `#0E1526` /
   `#C9D3E6`, light `#F4F6FA` / `#2B3648`) are the placeholder app screen and
   its ink; `--leaf` (dark `#22C55E`, light `#15803D`) is the Apple Care
-  scanner green; `--shadow-phone` is the phone's drop shadow. They appear
-  only inside `.phone`.
+  scanner green; `--leaf-ink` (Phase 7: dark `var(--leaf)`, light
+  `#14532D`) is text on a leaf tint (the "Analysing" pill, whose tint is
+  18%: light `--leaf` was 3.2:1 there); `--shadow-phone` is the phone's
+  drop shadow. They appear only inside `.phone`.
+- **Print (Phase 7):** `00-tokens.css` ends with an `@media print {
+  :root[data-theme] { … } }` block: a **copy of the light theme**, so paper
+  is always light. CSS can't apply one selector only in print, hence the
+  copy; `internal/assets` `TestPrintTokensMatchLight` fails if it drifts
+  from `[data-theme="light"]`. `tools/contrast` skips it.
 - **No `color-mix()` for text colours.** Text colours must be real tokens so
   `tools/contrast` can verify them. `color-mix()` is fine for borders and
   backgrounds that carry no text (e.g. `::selection`, the faint prose underline).
@@ -246,7 +276,10 @@ There are two exceptions, because neither can read CSS variables: the initial
   (≥ 3:1). Non-text pairs (Phase 6, WCAG 1.4.11, ≥ 3:1): **`--focus` on
   `--bg`, `--surface-2` and `--surface`**, so the focus ring reads on both
   band colours and on cards. The scanner's 9px "Analysing" pill sits on a `color-mix` tint of
-  `--leaf`; it is part of the decorative, `aria-hidden` placeholder picture.
+  `--leaf`; it is part of the decorative, `aria-hidden` placeholder picture,
+  but axe still checks it, so its text is `--leaf-ink` (Phase 7; screen
+  pair checked too) and passes in both themes. Since Phase 7 the tool lets
+  a later block's literal replace an earlier alias (and vice versa).
 
 ---
 
@@ -490,10 +523,16 @@ Spacing uses a 4px base (`--space-N` = N × 4px):
   2rem)`), so content is up to 1136px. (Phase 4: was 1120px of content; now
   matches the prototype.)
 - Radii: `--radius-sm: 6px`, `--radius: 12px`, `--radius-pill: 999px`.
-- Breakpoints are mobile-first: **640px, 900px, 1200px**, plus **1024px, the
-  nav breakpoint** (desktop links + toggle from 1024px; menu button below).
-  Use them literally in `@media (min-width: …)`, because custom properties
-  don't work in media queries. (The hero also stacks its CTAs below 400px.)
+- Breakpoints are mobile-first and **written in `em` since Phase 7**:
+  **40em (640px), 56.25em (900px), 75em (1200px)**, plus **64em (1024px),
+  the nav breakpoint** (desktop links + toggle from 64em; menu button
+  below), 25em (400px, hero CTAs) and 47.5em (760px, about/skills/contact
+  rows). `em` in a media query is the browser's default font size, so at
+  16px they equal the px values, and a reader who enlarges text (Chrome's
+  font-size setting, Firefox "Zoom text only") gets the narrower layout
+  instead of a cramped desktop one. Use them literally in `@media
+  (min-width: …)` (custom properties don't work in media queries);
+  `main.js` matches `(min-width: 64em)` too. Image `sizes` stay in px/vw.
 - `--header-h`: **64px**, **72px from 1024px** (tokens). The header's 1px
   border is inside it. Every `[id]` has `scroll-margin-top: calc(var(--header-h)
   + var(--space-6))` (base layer; `--space-4` before Phase 6), so anchors
@@ -515,10 +554,13 @@ Every non-hero section:
   a section comes close to the gap between sections.
 - **Band order:** Hero `--bg` (no border) · About `--bg` · Experience alt ·
   Skills `--bg` · Projects alt · Education `--bg` · Contact alt.
-- **From 1024px:** `.section__grid` is `minmax(15rem, 1fr) 2.6fr` with gap
+- **From 64em (1024px):** `.section__grid` is `minmax(15rem, 1fr) 2.6fr` with gap
   `clamp(2rem, 5vw, 5rem)`; `.section__aside` is sticky at `calc(var(--header-h)
-  + var(--space-8))`, so the title stays in view while the body scrolls. Below
-  1024px they stack (gap `--space-10`) and nothing is sticky.
+  + var(--space-8))`, so the title stays in view while the body scrolls,
+  **only when the window is at least 40em (640px) tall** (Phase 7): the
+  experience aside is ~450px, and on shorter windows or with enlarged text
+  a sticky aside would cover the body. Below 64em they stack (gap
+  `--space-10`) and nothing is sticky.
 - `.section__body` takes the remaining width; paragraphs still cap at 65ch.
 - The eyebrow is optional (About has none: `.section__title:first-child`
   drops its top margin). `.section__lead` is an optional `--muted` line
@@ -759,8 +801,22 @@ every icon name.
   actions (via `.tap-target`), copy, Back to top. Known, accepted
   exceptions, all ≥ 24px: the desktop nav links (40px tall), the
   theme-toggle options (36 × 40 hit area), the legend buttons (40px),
-  the skill buttons (38px tall: below the 40px rule; Phase 7 to decide),
-  the "used in" links (40px) and the mobile email address (29px tall).
+  the skill pills (40px since Phase 7: `min-block-size: 2.5rem` on every
+  `.skill`), the "used in" links (40px) and the mobile-menu email (a 20px
+  box with a 44px hit area from `.tap-target`, measured in Phase 7).
+- **Text size and zoom (Phase 7):** 200% browser zoom at 1280px reflows
+  (no horizontal scroll, nothing clipped). Enlarged default text (Chrome's
+  font-size setting, Firefox "Zoom text only") switches layouts through the
+  `em` breakpoints (§7) and turns sticky asides off. (A page-level
+  `html { font-size: 200% }` override, which no browser setting does,
+  keeps the desktop layout and scrolls sideways.)
+- **Forced colours (Phase 7):** under `forced-colors: active` the career
+  graph, legend swatches, tenure bars, bullet dashes and language meter opt
+  out (`forced-color-adjust: none`) and redraw in system colours: lines
+  `CanvasText`, lit ink and filled nodes `Highlight`, rings `Canvas`
+  (`06-sections.css`, end). Focus rings stay visible.
+- **Audit (Phase 7):** axe-core finds 0 violations on `/` and `/404.html`,
+  both themes, 375 and 1440px; Lighthouse accessibility 100.
 - **One live region per page:** `<div id="sr-status" class="sr-only"
   role="status">` after the footer (layout.html). `main.js`'s `announce()`
   empties it and writes the message 50ms later, so a repeat is still read.
@@ -768,19 +824,22 @@ every icon name.
   roles") and theme changes. Never add a second one.
 - `:focus:not(:focus-visible)` has no outline. `.card--interactive` shows the
   ring on the card (via `:has(.card__link:focus-visible)`), not on the title link.
-- Images always have `width`/`height` attributes (via `imgSize`). The hero
-  photo is eager with `fetchpriority="high"`; every other image uses `loading="lazy"`
-  and `decoding="async"`.
+- Images always have `width`/`height` attributes (from the responsive set,
+  §21). The hero photo is eager with `fetchpriority="high"`; every other
+  image uses `loading="lazy"` and `decoding="async"`.
 
 ---
 
 ## 12. Build pipeline
 
 ```
-content/site.yaml ─▶ internal/site    Load (strict) ─▶ Validate (all problems, numbered)
-static/ ───────────▶ internal/assets  wipe dist/ ─▶ copy ─▶ concat+fingerprint CSS ─▶ fingerprint main.js ─▶ manifest
-templates/ ────────▶ internal/render  layout + partials + pages/*.html ─▶ dist/<page>.html
-                     internal/build   Run(opts) orchestrates the three, then writes dist/CNAME + dist/.nojekyll;
+content/site.yaml ─▶ internal/site    Load (strict) ─▶ Validate (all problems, numbered; warnings)
+static/ ───────────▶ internal/assets  wipe dist/ ─▶ copy (not the image sources) ─▶ concat+minify+fingerprint CSS
+                                      ─▶ fingerprint main.js ─▶ manifest
+static/img sources ▶ internal/images  resize (CatmullRom) ─▶ JPEG/PNG (+ WebP via cwebp) ─▶ hashed names; .cache/images/
+                     internal/build   site.webmanifest (+ manifest entry)
+templates/ ────────▶ internal/render  layout + partials + pages/*.html ─▶ dist/<page>.html (JSON-LD from internal/seo)
+                     internal/build   Run(opts) orchestrates, then writes CNAME, .nojekyll, robots.txt, sitemap.xml;
                                       cmd/build and cmd/serve call it
 ```
 
@@ -788,9 +847,11 @@ templates/ ────────▶ internal/render  layout + partials + page
 | Package | Responsibility |
 |---|---|
 | `internal/site` | `types.go`: structs mirroring `site.yaml`, plus helpers (`Person.FullName`, `Contact.MailtoHref`, `Action.IsExternal` / `AssetPath`, `Site.Facts` (the derived "Currently"), `Job.ID`, `SkillGroup.PanelID`, `Slug`, `Education.Degree` / `Schools`, `School.DateText`, `Language.Meter` / `MeterLabel` / `MeterBars`, `Project.HasLinks`, `EmploymentTypes`, `Placeholders`, `LanguageLevels`). `load.go`: `Load`/`Parse` with `KnownFields(true)`. `validate.go`: `Validate(site, staticDir, iconDir) (warnings, error)`, which collects every problem into a numbered `Problems` error. `SectionIDs` lists the page anchors. |
-| `internal/assets` | `Build(static, out, protect…)`: wipes `out` (refusing if it contains a source dir), copies `static/`, fingerprints, and returns a `Manifest`. `ImageSize` reads JPEG/PNG dimensions with `image.DecodeConfig`. |
+| `internal/assets` | `Build(static, out, skip, protect…)`: wipes `out` (refusing if it contains a source dir or the image cache), copies `static/` except `skip` (the image sources), minifies (`MinifyCSS`) and fingerprints, and returns a `Manifest`. `ImageSize` reads JPEG/PNG dimensions; `DarkColor` reads a dark-theme colour token. |
 | `internal/render` | `render.go`: parses `layout.html` + `partials/*.html`, clones them per page, executes `"layout"`. `funcs.go`: the FuncMap. |
-| `internal/build` | `Run(Options)`, `Defaults()`, and a `Result` summary that includes warnings. Also writes the GitHub Pages files: `CNAME` (the host of `site.url`, never hard-coded) and an empty `.nojekyll`. |
+| `internal/build` | `Run(Options)`, `Defaults()`, and a `Result` summary that includes warnings. `PhotoWidths` / `ScreenshotWidths` and `imageSpecs` (which images are responsive). Writes the GitHub Pages files (`CNAME`, the host of `site.url`, never hard-coded; an empty `.nojekyll`), `robots.txt`, `sitemap.xml` and `site.webmanifest`. Options `Cache` (`.cache/images`) and `Cwebp` (looked up on PATH; empty = no WebP, one warning). |
+| `internal/images` | `Build(Options, []Spec)`: resizes each source to its widths (never upscaling), JPEG q82 for opaque images, PNG for sources with transparency, WebP q80 (`cwebp -m 6`) when available; names `img/<name>-<w>.<sha8>.<ext>`; cached by source hash + settings (`version` bumps the cache). Re-encoding strips all metadata. |
+| `internal/seo` | Pure: `NewPerson` + `JSONLD` (the Person JSON-LD), `Robots`, `Sitemap`, `Manifest`, `HomeURL`, `Abs`. |
 | `internal/career` | Pure: `Build(entries, now, labels) Graph`, the career-graph view model (§16). |
 | `internal/evidence` | Pure: `Build(site, labels) []Group`, each skill's evidence (§17). |
 | `internal/textfmt` | `Bold(s)`: the `**bold**` formatter (escape first, then `<strong>`). |
@@ -824,15 +885,27 @@ templates/ ────────▶ internal/render  layout + partials + page
   `ui.career` labels are set.
 - A missing project screenshot is only a **warning**; the placeholder UI
   renders instead.
+- **SEO (Phase 7):** `seo.locale` looks like `en_KE`; `seo.address.country`
+  is two capital letters; `seo.image` exists and is a **1200 × 630 PNG**;
+  `seo.image_alt`, `seo.short_name`, `seo.address.locality` are set;
+  every `seo.knows_about` entry is a skill group name; `ui.not_found.*` is
+  set. `site.description` outside **150–160 characters** is a warning.
+- Without `cwebp` on PATH the build warns once and ships JPEG/PNG only.
 
 ### Fingerprinting & manifest
-- `static/css/*.css` are concatenated in filename order and written as
-  `dist/css/site.<sha256[:8]>.css`. `static/js/main.js` becomes
+- `static/css/*.css` are concatenated in filename order, minified by
+  `assets.MinifyCSS` (comments out; whitespace collapsed and dropped next to
+  `{ } ; ,` and after `:`; strings and the space before `:` untouched) and
+  written as `dist/css/site.<sha256[:8]>.css`. Phase 7 pixel-compared the
+  minified and unminified builds: identical (index and 404, both themes,
+  375 and 1440px). `static/js/main.js` becomes
   `dist/js/main.<sha256[:8]>.js`. `static/js/theme-init.js` is **not**
   copied; the layout inlines it.
 - Every other static file is copied unchanged and also recorded in the manifest
-  (`"img/profile.jpg" → "/img/profile.jpg"`). Templates reference **every**
-  asset through `{{asset "…"}}`, so a missing file fails the build.
+  (`"og.png" → "/og.png"`), except the responsive-image sources
+  (`person.photo`, existing screenshots), which are **never copied**: only
+  their resized variants ship (§21). Templates reference every asset
+  through `{{asset "…"}}` or `{{image "…"}}`, so a missing file fails the build.
 - Dotfiles are skipped. `design/` is never read or copied.
 
 ### Template FuncMap (`internal/render/funcs.go`)
@@ -840,7 +913,9 @@ templates/ ────────▶ internal/render  layout + partials + page
 |---|---|
 | `asset "css/site.css"` | The fingerprinted URL path from the manifest; an unknown key is a build error. |
 | `icon name [label]` | Inline SVG (§9). |
-| `imgSize "img/profile.jpg"` | `{W, H}` for `width`/`height` attributes. |
+| `imgSize "og.png"` | `{W, H}` of a static image (the share image's `og:image:width/height`). |
+| `image "img/profile.jpg"` | the `*images.Set` of a responsive image; pass it to the `picture` partial. Unknown = build error. |
+| `imagesrcset s` | the whole `imagesrcset="…"` attribute of an image preload (html/template would URL-escape it as one URL). |
 | `exists "img/projects/x.png"` | Whether the file exists under `static/`. |
 | `year` | The current year (footer). |
 | `join list sep` | `strings.Join`. |
@@ -858,28 +933,33 @@ templates/
 │   ├── 404.html           noindex; GitHub Pages serves it for unknown paths
 │   └── styleguide.html    noindex; dev-only design-system verification page
 ├── partials/              head, skip-link, nav, theme-toggle, social-links,
-│                          section-action, hero, about, experience, skills,
-│                          projects, education, contact, footer
+│                          section-action, picture, hero, about, experience,
+│                          skills, projects, education, contact, footer
 └── icons/                 <name>.svg + LICENSES/
 ```
-- A page can define the blocks `"main"` (required), `"title"`, `"head-extra"`
-  (page-only `<style>`), and `"noindex"`. Defining `{{define "noindex"}}{{end}}`
+- A page can define the blocks `"main"` (required), `"title"`, `"preload"`
+  (the index preloads the hero image), `"head-extra"` (page-only `<style>`),
+  and `"noindex"`. Defining `{{define "noindex"}}{{end}}`
   makes the page `noindex` and omits its canonical link.
 - Template data is `render.Page`: `.Site` (`*site.Site`), `.Name`, `.Path`,
   `.Home` (`""` on the index, `"/"` elsewhere; prefix in-page anchors with it,
   as in `{{$.Home}}#about`), `.Canonical`, `.NoIndex`, `.ThemeInit` and
   `.Career` (the `*career.Graph`, built once per build for the current month),
-  `.Skills` (`[]evidence.Group`) and `.LocalTime` (`{Text, ISO}`: the build's
-  time in `contact.timezone`, the contact clock's no-JS value).
+  `.Skills` (`[]evidence.Group`), `.LocalTime` (`{Text, ISO}`: the build's
+  time in `contact.timezone`, the contact clock's no-JS value), and since
+  Phase 7 `.ThemeColor` (dark `--bg` from the tokens), `.ShareImage`
+  (absolute `og:image`) and `.JSONLD` (`template.JS`, indexable pages only).
 - **`<head>` order (`partials/head.html`):** charset → viewport → inlined
-  `theme-init.js` → `<title>` → description → canonical or robots →
-  `theme-color` → font preloads (Fraunces normal + Inter only) →
-  fingerprinted CSS → fingerprinted `main.js` (defer) → favicon →
-  `{{/* Phase 7: SEO/OG/JSON-LD */}}` → `head-extra`.
+  `theme-init.js` → `<title>` → description → author → canonical or robots →
+  `color-scheme` (`dark light`) → `theme-color` → font preloads (Fraunces
+  normal + Inter only) → `preload` block (hero image) → fingerprinted CSS
+  (the only render-blocking resource) → fingerprinted `main.js` (defer) →
+  `favicon.ico` (32px), `favicon.svg`, `apple-touch-icon.png`, manifest →
+  on indexable pages: Open Graph, Twitter, JSON-LD (§21) → `head-extra`.
 - `<html lang="{{.Site.Meta.Lang}}" data-theme="dark">`, so no-JS visitors get dark.
 - `static/favicon.svg` is a placeholder "KM" monogram. Its colours mirror
-  `--bg` and `--accent`, because SVG favicons can't read CSS variables. It and
-  the `theme-color` meta are the only literal colours outside `00-tokens.css`.
+  `--bg` and `--accent`, because SVG favicons can't read CSS variables. It
+  is the only file with literal colours outside `00-tokens.css`.
 
 ### Page structure & anchors
 `skip-link → div.scroll-sentinel → header.site-header (brand, nav + .nav__indicator, theme toggle, menu button) → dialog.menu → main#main[tabindex=-1] → footer.site-footer → div#sr-status`
@@ -916,7 +996,7 @@ from every section, with their CSS and JS; a build test fails if
 wins before specificity or file order does**:
 
 ```css
-@layer reset, tokens, base, layout, components, sections, utilities, motion;
+@layer reset, tokens, base, layout, components, sections, utilities, motion, print;
 ```
 
 Numbered files in `static/css/` are concatenated in filename order:
@@ -931,6 +1011,7 @@ Numbered files in `static/css/` are concatenated in filename order:
 | `06-sections.css` | `sections` | per-section composition: header, menu, hero (§15), the career graph (§16), about … footer (§17) |
 | `08-utilities.css` | `utilities` | `.sr-only`, `.muted`, `.tnum`, `.tap-target` |
 | `09-motion.css` | `motion` | the motion vocabulary (§6), reduced motion |
+| `10-print.css` | `print` | `@media print` only: the résumé-like printout (§21) |
 
 **Which layer does a rule belong in?**
 - Styles a bare element with no class → `base` (`reset` if it only normalises the browser).
@@ -956,6 +1037,7 @@ anywhere (none is needed, even in the reduced-motion block).
 | Vet | `make vet` | `go vet ./...` |
 | Clean | `make clean` | `rm -rf dist` |
 | CI, locally | `make ci` | vet → test → build → output check (`check-dist`) |
+| Share image + icons | `make og` | `node tools/og/render.cjs` + `go run ./tools/pngopt …` (needs Playwright; §21) |
 
 Flags for both `cmd/build` and `cmd/serve`: `-content`, `-templates`,
 `-static`, `-out`. `cmd/serve` also takes `-addr` (default `:8080`). It
@@ -1005,7 +1087,22 @@ the source link and Back to top. Phase 6 adds: exactly one `role="status"`
 indicator, no `data-reveal` in any HTML/CSS/JS output, the skill buttons'
 hidden counts and `aria-hidden` badges (8), the legend's `data-announce`
 texts, `rel="noopener"` on every `https://` link, and two hidden "(PDF)"
-suffixes with the résumé's `download` kept. `internal/evidence` checks
+suffixes with the résumé's `download` kept. Phase 7 (`phase7_test.go`)
+adds: the Pages/crawl/icon files exist; no original `profile.jpg`; every
+photo width written; the hero `<picture>` (720 fallback, fetchpriority,
+not lazy) and a preload whose `imagesizes` equals the `<img>` `sizes` and
+whose `imagesrcset` isn't URL-escaped; every head meta tag; a 150–160
+character description; one stylesheet and no blocking script; the
+JSON-LD parsed back (every key, no telephone); `robots.txt`; the sitemap
+(only `/`, today); the manifest; minified CSS; the 404's copy, buttons,
+trail, one `<h1>` and no JSON-LD. `internal/images` tests widths, no
+upscaling, stable names with and without the cache, metadata stripped,
+transparent PNG vs opaque, the build without `cwebp`, and the `cwebp` call
+(a stand-in script). `internal/seo` tests the Person, worksFor without a
+current role, `</script>` escaping, robots and sitemap. `internal/assets`
+tests `MinifyCSS` (cases + the real CSS) and the print-token copy.
+`internal/site` adds the SEO rules and the description warning.
+`internal/evidence` checks
 `Skill.Count`, `internal/career` the legend announcements. A second test builds with a temporary
 screenshot and checks it replaces the scanner placeholder (size, alt, no
 `aria-hidden`).
@@ -1018,8 +1115,10 @@ Go is installed for the user at `~/.local/go`. If `go` isn't on `PATH`, run
 - **`main` is production.** `.github/workflows/deploy.yml` runs on every push
   to `main` (and by hand via `workflow_dispatch`): checkout → `setup-go`
   (version from `go.mod`) → `go vet` + `go test` → `go run ./cmd/build -out
-  dist` → output check (`index.html`, `404.html`, `.nojekyll`, `CNAME` is
-  exactly `kmuchina.com`) → `configure-pages` → `upload-pages-artifact` →
+  dist` (after `apt-get install webp`, so CI ships WebP) → output check
+  (`index.html`, `404.html`, `.nojekyll`, `CNAME` is exactly
+  `kmuchina.com`, the crawl/icon files, `profile-*.webp`, no original
+  `profile.jpg`) → `configure-pages` → `upload-pages-artifact` →
   `deploy-pages`. Any failing step means nothing is deployed and the live
   site is unchanged. `concurrency: pages` cancels a superseded run.
 - `make ci` runs the same steps locally, in the same order.
@@ -1027,8 +1126,8 @@ Go is installed for the user at `~/.local/go`. If `go` isn't on `PATH`, run
   the workflow, so `make build` output is always Pages-ready. URLs are
   root-relative (`/css/…`, `/#about` on the 404) or absolute, which is
   correct because the site is served from the domain root.
-- **Never commit `dist/`.** It is in `.gitignore`; `git ls-files dist` must
-  be empty.
+- **Never commit `dist/` or `.cache/`.** Both are in `.gitignore`;
+  `git ls-files dist .cache` must be empty.
 - **Repo:** `kmuchina/portfolio` (`origin` = `git@github.com:kmuchina/portfolio.git`),
   public (free-plan Pages needs it). Pages source: **GitHub Actions**;
   custom domain `kmuchina.com`, verified at the account level (Settings →
@@ -1107,7 +1206,7 @@ when a class is genuinely missing, and update this list when you do.
 | `.here` | `__item` | contact.html |
 | `.site-footer` | `__inner`, `__name`, `__built`, `__end`, `__social` | footer.html |
 | `.to-top` | | footer.html |
-| `.not-found` | `__title`, `__body`, `__action` | 404.html |
+| `.not-found` | `__body`, `__trail`, `__line` (`--gap`), `__node` (`--open`), `__actions` | 404.html |
 | `.icon` | | every `{{icon}}` |
 
 State hooks set by `main.js` (Phase 6): `.is-arriving` on a `:target`
@@ -1526,6 +1625,115 @@ for (const [name, init] of Object.entries(features)) {
   with no output before it is committed.
 - [x] The phone number in the Phase 0–1 commits: resolved by squashing the
   history before the first push (see the note above).
-- [x] Mockup, profile photo (`img/profile.jpg`, 3327×4160, 1.1 MB, optimise
-  in Phase 7) and résumé PDF added.
+- [x] Mockup, profile photo (`img/profile.jpg`, 3327×4160, 1.1 MB; since
+  Phase 7 only its resized variants ship) and résumé PDF added.
+- [ ] Optional: subset the fonts with fonttools, keeping every axis (§21).
 - [x] The résumé PDF now shows muchina537@gmail.com (checked with `pdftotext` in Phase 1).
+
+---
+
+## 21. Images, SEO, performance & print (Phase 7)
+
+### Responsive images (`internal/images`, `templates/partials/picture.html`)
+- **Which images:** `person.photo` at **480, 720, 960, 1200** px wide;
+  each existing `projects[].screenshot` at **360, 540, 720**
+  (`build.PhotoWidths`, `build.ScreenshotWidths`). A width larger than the
+  source is dropped (if all are, the source width alone); nothing is upscaled.
+- **Formats:** opaque sources → **JPEG q82** (`image/jpeg`); sources with any
+  transparent pixel → **PNG** (best compression); plus **WebP q80** (`cwebp
+  -q 80 -m 6 -metadata none`, fed a lossless PNG) when `cwebp` is on PATH.
+  CI installs it (`apt-get install webp`); without it the build warns once.
+- **Names:** `img/<name>-<width>.<sha256(output)[:8]>.<ext>`; the original
+  never ships. Re-encoding drops EXIF/GPS/XMP/ICC (the source has none).
+- **Cache:** `.cache/images/<key>.<ext>`, key = sha256 of version, source
+  hash, format, size and quality. A rebuild takes ~40 ms. Bump `version`
+  in `images.go` when the encoders change.
+- **Markup:** `{{template "picture" (dict "Set" (image SRC) "Class" … "Alt" …
+  "Sizes" … ["Priority" true])}}` → `<picture>` with a WebP `<source>` and
+  the JPEG/PNG `<img srcset sizes width height>` (default `src` = the 720
+  variant). Sizes: hero `(min-width: 900px) 40vw, 22rem` (eager,
+  `fetchpriority="high"`); phone screens `11.5rem` (lazy, async). The index
+  also **preloads** the hero image (`<link rel="preload" as="image"
+  imagesrcset imagesizes fetchpriority="high">`, the same candidates and
+  sizes, WebP when it exists); a test keeps the two `sizes` equal.
+- **Budget:** largest hero WebP ≤ 120 KB, 480w ≤ 45 KB.
+
+  | Width | JPEG | WebP (live, CI's cwebp) |
+  |---|---|---|
+  | 480 | 32.6 KB | WEBP480 |
+  | 720 | 70.5 KB | WEBP720 |
+  | 960 | 123.3 KB | WEBP960 |
+  | 1200 | 199.9 KB | WEBP1200 |
+
+### SEO and sharing (all from `site.yaml`: `site:` + `seo:`)
+- `<title>` = `site.title` ("Kennedy Muchina Kinuthia, Software Engineer");
+  description 150–160 characters (validation warns); canonical
+  `https://kmuchina.com/`; `author`; `color-scheme: dark light`.
+- **Open Graph:** `og:type=profile`, title, description, url, image
+  (absolute, `seo.image`), `og:image:type/width/height` (read from the
+  PNG), `og:image:alt`, `og:locale` (`seo.locale`), `profile:first_name` /
+  `last_name`. **Twitter:** `summary_large_image` + title, description,
+  image, alt. Only on indexable pages (not the 404 or styleguide).
+- **JSON-LD** (`internal/seo`, `encoding/json`, embedded as `template.JS`;
+  `<` is escaped so it can't close the script): one `Person` with name,
+  given/additional/family name, `jobTitle`, `url`, `image` (the absolute
+  720 JPEG), `email` (`mailto:`), `address` (`seo.address`: Nairobi, KE),
+  `alumniOf` (the degree's school, `CollegeOrUniversity`), `worksFor` (the
+  `present` role's org up to its comma), `knowsAbout` (the skills of the
+  groups in `seo.knows_about`), `sameAs` (every `contact.links` URL).
+  **Never a telephone.**
+- **Share image** `static/og.png` (1200 × 630, ≤ 200 KB; 162 KB): authored
+  as `design/og.html` (dark tokens, self-hosted fonts, name with the italic
+  accent "Muchina", role, `kmuchina.com` in mono, a fragment of the career
+  graph; no photo, no slogan). **`make og`** re-renders it and the icons with
+  Playwright (`tools/og/render.cjs`; set `PLAYWRIGHT_MODULE` to an existing
+  `node_modules/playwright-core` if Playwright isn't installed globally),
+  then `tools/pngopt` recompresses the PNGs losslessly. The PNGs are
+  committed; the Go build only copies them.
+- **Icons:** `favicon.svg` (kept), `favicon.ico` (32px PNG-in-ICO) and
+  `apple-touch-icon.png` (180px, full-bleed `--bg`, padded monogram),
+  rendered from `design/icons.html`. **`site.webmanifest`** (generated):
+  name, `short_name` (`seo.short_name`, "Kennedy M."), `start_url` `/`,
+  `display: browser`, `theme_color` = `background_color` = dark `--bg`,
+  the SVG and 180px icons. **No service worker.**
+- **Crawl files** (generated): `robots.txt` (allow all, `Disallow:
+  /styleguide.html`, the sitemap URL) and `sitemap.xml` (only `/`, `lastmod`
+  = build date). The styleguide and 404 stay `noindex`.
+
+### Performance
+- **Critical path:** theme script inlined; one render-blocking stylesheet
+  (minified, ~11 KB gzipped); `main.js` deferred (20.5 KB raw / 7.2 KB
+  gzipped, not minified); fonts: only Fraunces normal + Inter preloaded,
+  `font-display: swap`. On phones the LCP element is text (the photo sits
+  below the fold under 900px); from 900px it is the hero photo.
+- **CLS:** every image has `width`/`height`; the fallback stacks lay out the
+  hero identically to the web fonts at 412px (checked: same boxes), so no
+  `size-adjust` overrides are needed.
+- **Fonts** are the largest remaining cost (≈ 375 KB, all four load on the
+  first screen). Subsetting needs `pyftsubset` (fonttools), which wasn't
+  available: `pyftsubset fraunces-var.woff2 --unicodes="U+0000-00FF,U+2013,
+  U+2014,U+2018,U+2019,U+201C,U+201D,U+2026,U+2191,U+2192,U+2197,U+2212"
+  --layout-features='*' --flavor=woff2` keeps every axis.
+- **`main.js`** syncs `theme-color` on the next animation frame (a
+  synchronous `getComputedStyle` at load forced a 144 ms style pass).
+- **Targets** (Lighthouse mobile): Performance ≥ 95, Accessibility,
+  Best Practices, SEO 100; LCP < 2.0 s, CLS < 0.05, TBT < 100 ms; first
+  load < 450 KB.
+
+### Print (`10-print.css`, layer `print`)
+Light palette whatever the theme (the token copy, §4); no header, menu,
+toggle, hero photo/CTAs/social row, legend, copy button, phone stages,
+local time or footer icons; one column, no bands, no sticky asides;
+**the career graph simplifies to a 2px left rule** (cleaner on paper than
+the lane colours, dashes and band-coloured node rings); no animation;
+external links print their URL after the text (not anchors or `mailto:`);
+`@page { margin: 16mm }`; jobs, projects, the degree, school, facts and
+skill rows never split; asides stay with their sections. Eight A4 pages.
+
+### 404 (`templates/pages/404.html`)
+The spine: aside `<h1>` "Page not found"; body: a static trail (a lit
+line and node, then the graph's dashed gap ending in a hollow node),
+"That page doesn't exist. It may have moved when the site was rebuilt.",
+"Go to the homepage" (primary, `/`) and "See my experience" (ghost,
+`/#experience`). No top border (first band), `min-block-size: min(70svh,
+40rem)`. `noindex`, no OG/JSON-LD. Copy in `ui.not_found`.

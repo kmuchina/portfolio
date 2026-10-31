@@ -133,8 +133,8 @@ func TestFullBuild(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		decl := strings.Index(string(css), "@layer reset, tokens, base, layout, components, sections, utilities, motion;")
-		first := strings.Index(string(css), "@layer tokens {")
+		decl := strings.Index(string(css), "@layer reset,tokens,base,layout,components,sections,utilities,motion,print;")
+		first := strings.Index(string(css), "@layer tokens{")
 		if decl < 0 || first < 0 || decl > first {
 			t.Error("@layer order declaration must come before the first layer block")
 		}
@@ -171,6 +171,7 @@ func TestFullBuild(t *testing.T) {
 	}
 	phase5(t, html)
 	phase6(t, out, html)
+	phase7(t, out, html)
 
 	if len(res.Fingerprinted) != 2 {
 		t.Errorf("want 2 fingerprinted files, got %v", res.Fingerprinted)
@@ -182,8 +183,12 @@ func TestFullBuild(t *testing.T) {
 func noPhoneNumber(t *testing.T, out string) {
 	t.Helper()
 	err := filepath.WalkDir(out, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || strings.HasSuffix(path, ".woff2") || strings.HasSuffix(path, ".jpg") {
+		if err != nil || d.IsDir() {
 			return err
+		}
+		switch filepath.Ext(path) {
+		case ".woff2", ".jpg", ".png", ".webp", ".ico": // binary: random bytes could match
+			return nil
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -341,8 +346,17 @@ func TestScreenshotReplacesPlaceholder(t *testing.T) {
 		t.Fatal(err)
 	}
 	html := string(data)
-	if !regexp.MustCompile(`<div class="project__stage">\s*<div class="phone"><div class="phone__screen"><span class="phone__notch"></span>\s*<img class="phone__image" src="/img/projects/apple-care.png" width="108" height="222" alt="Screenshot of Apple Care" loading="lazy" decoding="async">`).MatchString(html) {
-		t.Error("the screenshot should replace the scanner placeholder, with its size and alt")
+	// 108px wide: narrower than every screenshot width, so one file at its
+	// own size (never upscaled); fully transparent, so it stays a PNG.
+	m := regexp.MustCompile(`<div class="project__stage">\s*<div class="phone"><div class="phone__screen"><span class="phone__notch"></span>\s*<picture><img class="phone__image" src="(/img/projects/apple-care-108\.[0-9a-f]{8}\.png)" srcset="/img/projects/apple-care-108\.[0-9a-f]{8}\.png 108w" sizes="11\.5rem" width="108" height="222" alt="Screenshot of Apple Care" loading="lazy" decoding="async">\s*</picture>`).FindStringSubmatch(html)
+	if m == nil {
+		i := strings.Index(html, `id="project-apple-care"`)
+		t.Errorf("the screenshot should replace the scanner placeholder, as a lazy <picture> with its size and alt:\n%.1500s", html[max(i, 0):])
+	} else if _, err := os.Stat(filepath.Join(out, filepath.FromSlash(m[1]))); err != nil {
+		t.Errorf("screenshot variant not written: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(out, "img", "projects", "apple-care.png")); err == nil {
+		t.Error("the source screenshot should not be copied")
 	}
 	if strings.Contains(html, `class="ui__finder"`) {
 		t.Error("the scanner placeholder should be gone")
@@ -350,8 +364,14 @@ func TestScreenshotReplacesPlaceholder(t *testing.T) {
 	if strings.Count(html, `<div class="project__stage" aria-hidden="true">`) != 1 {
 		t.Error("only the journal placeholder stage stays aria-hidden")
 	}
-	if len(res.Warnings) != 1 {
-		t.Errorf("want 1 screenshot warning (the journal), got %v", res.Warnings)
+	var shots []string
+	for _, w := range res.Warnings {
+		if strings.Contains(w, "screenshot") {
+			shots = append(shots, w)
+		}
+	}
+	if len(shots) != 1 {
+		t.Errorf("want 1 screenshot warning (the journal), got %v", shots)
 	}
 }
 

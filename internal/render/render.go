@@ -15,6 +15,8 @@ import (
 	"github.com/kmuchina/portfolio/internal/assets"
 	"github.com/kmuchina/portfolio/internal/career"
 	"github.com/kmuchina/portfolio/internal/evidence"
+	"github.com/kmuchina/portfolio/internal/images"
+	"github.com/kmuchina/portfolio/internal/seo"
 	"github.com/kmuchina/portfolio/internal/site"
 )
 
@@ -30,6 +32,10 @@ type Page struct {
 	Career    *career.Graph    // the experience graph, built from site.yaml for the current month
 	Skills    []evidence.Group // skill groups with each skill's evidence (internal/evidence)
 	LocalTime LocalTime        // build-time clock in contact.timezone (main.js takes over)
+
+	ThemeColor string      // the dark --bg, read from 00-tokens.css (main.js re-syncs it)
+	ShareImage string      // absolute URL of seo.image (og:image)
+	JSONLD     template.JS // the Person JSON-LD (encoding/json); indexable pages only
 }
 
 // LocalTime is the contact section's no-JS clock: the time of the build in
@@ -46,16 +52,19 @@ type Renderer struct {
 	manifest     assets.Manifest
 	icons        map[string]string
 	sizes        map[string]assets.Size
+	images       map[string]*images.Set
 }
 
-// New loads the icon SVGs and prepares a renderer.
-func New(templatesDir, staticDir string, manifest assets.Manifest) (*Renderer, error) {
+// New loads the icon SVGs and prepares a renderer. imgs are the responsive
+// image sets (internal/images), keyed by their static path.
+func New(templatesDir, staticDir string, manifest assets.Manifest, imgs map[string]*images.Set) (*Renderer, error) {
 	r := &Renderer{
 		templatesDir: templatesDir,
 		staticDir:    staticDir,
 		manifest:     manifest,
 		icons:        map[string]string{},
 		sizes:        map[string]assets.Size{},
+		images:       imgs,
 	}
 	files, err := filepath.Glob(filepath.Join(templatesDir, "icons", "*.svg"))
 	if err != nil {
@@ -123,6 +132,23 @@ func (r *Renderer) Render(s *site.Site, outDir string) ([]Output, error) {
 	local := now.In(loc)
 	clock := LocalTime{Text: local.Format("15:04"), ISO: local.Format("2006-01-02T15:04-07:00")}
 
+	themeColor, err := assets.DarkColor(r.staticDir, "bg")
+	if err != nil {
+		return nil, err
+	}
+	shareImage, ok := r.manifest[s.SEO.Image]
+	if !ok {
+		return nil, fmt.Errorf("seo.image %q is not in the asset manifest", s.SEO.Image)
+	}
+	photo, ok := r.images[s.Person.Photo]
+	if !ok {
+		return nil, fmt.Errorf("person.photo %q has no responsive images", s.Person.Photo)
+	}
+	jsonld, err := seo.JSONLD(seo.NewPerson(s, seo.Abs(s.Meta.URL, photo.Default.URL)))
+	if err != nil {
+		return nil, err
+	}
+
 	var out []Output
 	for _, file := range pages {
 		t, err := base.Clone()
@@ -144,12 +170,16 @@ func (r *Renderer) Render(s *site.Site, outDir string) ([]Output, error) {
 			Career:    graph,
 			Skills:    skills,
 			LocalTime: clock,
+
+			ThemeColor: themeColor,
+			ShareImage: seo.Abs(s.Meta.URL, shareImage),
 		}
 		if name == "index" {
 			p.Path, p.Home = "/", ""
 		}
 		if !p.NoIndex {
 			p.Canonical = strings.TrimRight(s.Meta.URL, "/") + p.Path
+			p.JSONLD = template.JS(jsonld)
 		}
 
 		var buf bytes.Buffer

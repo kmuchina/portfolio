@@ -137,7 +137,7 @@ html:not(.js) .nav__list {
 }
 
 /* ---- From 1024px: one row, brand | links | toggle ------------------------ */
-@media (min-width: 1024px) {
+@media (min-width: 64em) {
   html.js .site-header__menu-btn { display: none; }
   html.js .site-header .nav { display: block; }
   html.js .site-header .theme-toggle { display: inline-flex; }
@@ -177,7 +177,7 @@ html:has(dialog[open]) { overflow: hidden; }
   overscroll-behavior: contain;
 }
 .menu::backdrop { background-color: color-mix(in srgb, var(--bg) 60%, transparent); }
-@media (min-width: 640px) {
+@media (min-width: 40em) {
   .menu {
     block-size: auto;
     max-block-size: calc(100dvh - var(--header-h));
@@ -243,7 +243,7 @@ html:has(dialog[open]) { overflow: hidden; }
 .hero__actions { margin-block-start: var(--space-8); }
 /* Narrow phones: the two CTAs stack full-width. */
 .hero__actions > .btn { flex: 1 1 100%; }
-@media (min-width: 400px) {
+@media (min-width: 25em) {
   .hero__actions > .btn { flex: 0 0 auto; }
 }
 .hero__social { margin-block-start: var(--space-6); }
@@ -310,7 +310,7 @@ html:has(dialog[open]) { overflow: hidden; }
 }
 
 /* ---- ≥ 900px: two columns, filling the first screen --------------------- */
-@media (min-width: 900px) {
+@media (min-width: 56.25em) {
   .hero {
     display: grid;
     align-items: center;
@@ -325,7 +325,7 @@ html:has(dialog[open]) { overflow: hidden; }
 }
 
 /* ---- ≥ 1200px: more air between the columns ----------------------------- */
-@media (min-width: 1200px) {
+@media (min-width: 75em) {
   .hero__inner { column-gap: var(--space-20); }
 }
 
@@ -384,7 +384,7 @@ html:has(dialog[open]) { overflow: hidden; }
   --x1: 37px;
   --node-y: 22px;
 }
-@media (min-width: 640px) {
+@media (min-width: 40em) {
   .career {
     --gw: 68px;
     --x0: 20px;
@@ -525,10 +525,10 @@ html:has(dialog[open]) { overflow: hidden; }
   padding-block-end: clamp(3rem, 5vw, 4.5rem);
 }
 .career__row:last-child .job { padding-block-end: 0; }
-@media (min-width: 640px) {
+@media (min-width: 40em) {
   .job { grid-template-areas: "tile head" ". meta" ". body"; }
 }
-@media (min-width: 1200px) {
+@media (min-width: 75em) {
   .job {
     grid-template-columns: 44px minmax(0, 1fr) 11rem;
     grid-template-areas: "tile head meta" ". body meta";
@@ -580,7 +580,7 @@ html:has(dialog[open]) { overflow: hidden; }
   gap: var(--space-2) var(--space-5);
   margin-top: var(--space-4);
 }
-@media (min-width: 1200px) {
+@media (min-width: 75em) {
   .job__meta {
     flex-direction: column;
     align-items: flex-end;
@@ -641,7 +641,7 @@ html:has(dialog[open]) { overflow: hidden; }
   color: var(--muted);
   --icon-size: 15px;
 }
-@media (min-width: 1200px) {
+@media (min-width: 75em) {
   .job__place { flex-direction: row-reverse; }
 }
 
@@ -804,7 +804,7 @@ html:has(dialog[open]) { overflow: hidden; }
   line-height: 1.55;
   color: var(--muted);
 }
-@media (min-width: 760px) {
+@media (min-width: 47.5em) {
   .focus {
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
@@ -824,7 +824,7 @@ html:has(dialog[open]) { overflow: hidden; }
   margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
   border-block-start: 1px solid var(--line);
 }
-@media (min-width: 760px) {
+@media (min-width: 47.5em) {
   .facts {
     grid-template-columns: 1fr 1fr;
     column-gap: var(--space-8);
@@ -889,7 +889,7 @@ html:has(dialog[open]) { overflow: hidden; }
   color: var(--muted);
 }
 .skill-table__row .used { grid-column: 1 / -1; }
-@media (min-width: 760px) {
+@media (min-width: 47.5em) {
   .skill-table__row {
     grid-template-columns: 13rem 1fr;
     align-items: start;
@@ -903,7 +903,7 @@ html:has(dialog[open]) { overflow: hidden; }
   display: grid;
   gap: var(--space-6);
 }
-@media (min-width: 900px) {
+@media (min-width: 56.25em) {
   .projects__grid { grid-template-columns: 1fr 1fr; }
 }
 .project {
@@ -995,7 +995,7 @@ html:has(dialog[open]) { overflow: hidden; }
   display: grid;
   gap: var(--space-8);
 }
-@media (min-width: 900px) {
+@media (min-width: 56.25em) {
   .edu {
     grid-template-columns: 1.4fr 1fr;
     gap: var(--space-6);
@@ -1069,7 +1069,7 @@ html:has(dialog[open]) { overflow: hidden; }
   gap: var(--space-4);
   padding-block: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
 }
-@media (min-width: 900px) {
+@media (min-width: 56.25em) {
   .school { padding-inline: var(--space-2); }
 }
 .school__title {
@@ -1118,7 +1118,7 @@ html:has(dialog[open]) { overflow: hidden; }
   padding-block-start: var(--space-6);
   border-block-start: 1px solid var(--line);
 }
-@media (min-width: 640px) {
+@media (min-width: 40em) {
   .langs {
     grid-template-columns: auto 1fr 1fr;
     align-items: center;
@@ -1199,7 +1199,7 @@ html:has(dialog[open]) { overflow: hidden; }
   display: grid;
   border-block-start: 1px solid var(--line);
 }
-@media (min-width: 760px) {
+@media (min-width: 47.5em) {
   .channels {
     grid-template-columns: repeat(3, 1fr);
     column-gap: var(--space-6);
@@ -1266,7 +1266,7 @@ html:has(dialog[open]) { overflow: hidden; }
   display: grid;
   gap: var(--space-6);
 }
-@media (min-width: 760px) {
+@media (min-width: 47.5em) {
   .site-footer__inner {
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -1291,7 +1291,74 @@ html:has(dialog[open]) { overflow: hidden; }
 }
 .site-footer .to-top { margin-inline-start: var(--space-3); }
 
-/* ---- 404 ------------------------------------------------------------------ */
-.not-found__action { margin-block-start: var(--space-4); }
+/* ---- 404 ------------------------------------------------------------------
+   The spine with one band (no top border: it's the first band, like the
+   hero), tall enough that the footer sits low. The trail is static: a lit
+   lane-0 line and node, then the graph's dashed gap (5px dash, 6px gap)
+   ending in a hollow node. */
+.not-found {
+  border-block-start: 0;
+  min-block-size: min(70svh, 40rem);
+}
+.not-found__trail {
+  display: flex;
+  align-items: center;
+  margin-block-end: var(--space-8);
+  color: var(--accent);
+}
+.not-found__line {
+  inline-size: var(--space-12);
+  block-size: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.not-found__line--gap {
+  inline-size: var(--space-24);
+  color: var(--line-strong);
+  background: repeating-linear-gradient(to right, currentColor 0 5px, transparent 5px 11px);
+}
+.not-found__node {
+  flex: none;
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px var(--band);
+}
+.not-found__node--open {
+  inline-size: 14px;
+  block-size: 14px;
+  background: var(--band);
+  box-shadow: inset 0 0 0 2px var(--line-strong);
+}
+.not-found__actions { margin-block-start: var(--space-8); }
+
+/* ---- Forced colours (Windows High Contrast) -------------------------------
+   The career graph, its legend swatches, tenure bars, bullet dashes and the
+   language meter are drawn with backgrounds and box-shadows, which forced
+   colours remove. Opt those drawings out and redraw them in system colours:
+   resting lines in CanvasText, the lit ink and filled nodes in Highlight,
+   node rings in Canvas. Lanes stay distinct by node shape. */
+@media (forced-colors: active) {
+  :is(.seg, .node, .curve, .legend__swatch, .tenure-bar, .meter, .job__bullets li::before) { forced-color-adjust: none; }
+  .seg::before { background-color: CanvasText; }
+  .seg::after { background-color: Highlight; }
+  .seg--dashed::before { background: repeating-linear-gradient(to bottom, CanvasText 0 5px, transparent 5px 11px); }
+  .seg--dashed::after { background: repeating-linear-gradient(to bottom, Highlight 0 5px, transparent 5px 11px); }
+  .node {
+    background-color: Canvas;
+    box-shadow: 0 0 0 3px Canvas, inset 0 0 0 2px CanvasText;
+  }
+  .node::after,
+  .node--current::before { background-color: Highlight; }
+  .curve .rest { stroke: CanvasText; }
+  .curve .ink { stroke: Highlight; }
+  .legend__swatch--all { color: CanvasText; }
+  .tenure-bar { background-color: Canvas; outline: 1px solid CanvasText; }
+  .tenure-bar span,
+  .job__bullets li::before { background-color: CanvasText; }
+  .meter i { background-color: Canvas; outline: 1px solid CanvasText; outline-offset: -1px; }
+  .meter i.on { background-color: Highlight; outline-color: Highlight; }
+}
 
 } /* @layer sections */

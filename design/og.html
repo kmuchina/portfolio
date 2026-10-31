@@ -1,0 +1,146 @@
+<!doctype html>
+<!--
+  og.html: the share image (static/og.png, 1200 × 630), the picture LinkedIn,
+  WhatsApp, X and Slack show when someone shares kmuchina.com.
+  Dark theme, the site's own tokens and fonts. No photo (it stays crisp as a
+  thumbnail) and no slogans: the name, the role, the domain and a fragment
+  of the career graph.
+
+  Re-render with `make og` (tools/og/render.cjs, needs Playwright). The PNG is
+  committed; the Go build only copies it.
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<title>Share image: kmuchina.com</title>
+<link rel="stylesheet" href="../static/css/00-tokens.css">
+<style>
+  @font-face { font-family: "Fraunces"; font-style: normal; font-weight: 100 900; src: url("../static/fonts/fraunces-var.woff2") format("woff2"); }
+  @font-face { font-family: "Fraunces"; font-style: italic; font-weight: 100 900; src: url("../static/fonts/fraunces-var-italic.woff2") format("woff2"); }
+  @font-face { font-family: "Inter"; font-style: normal; font-weight: 100 900; src: url("../static/fonts/inter-var.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 100 800; src: url("../static/fonts/jetbrains-mono-var.woff2") format("woff2"); }
+
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* The hero glow: a radial --accent at ≤ 8%, eased stops. */
+  body::before {
+    content: "";
+    position: absolute;
+    inset: -200px -120px auto auto;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(closest-side,
+      color-mix(in srgb, var(--accent) 8%, transparent),
+      color-mix(in srgb, var(--accent) 4%, transparent) 45%,
+      color-mix(in srgb, var(--accent) 1%, transparent) 75%,
+      transparent);
+  }
+  .text {
+    position: absolute;
+    left: 88px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 760px;
+  }
+  .name {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50, "WONK" 0;
+    font-weight: 600;
+    font-size: 96px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .name em { font-style: italic; color: var(--accent-text); }
+  .role {
+    margin-top: 28px;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--muted);
+    font-optical-sizing: none;
+  }
+  .domain {
+    position: absolute;
+    left: 88px;
+    bottom: 72px;
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .domain::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    vertical-align: 2px;
+  }
+
+  /* A fragment of the career graph, drawn at 2.5× the site's geometry. */
+  .graph { position: absolute; top: 0; right: 96px; width: 220px; height: 630px; }
+  .graph .rest { stroke: var(--line-strong); }
+  .graph .l0 { stroke: var(--type-internship); }
+  .graph .l1 { stroke: var(--type-volunteer); }
+  .graph line, .graph path { fill: none; stroke-width: 5; stroke-linecap: round; }
+  .graph .dash { stroke-dasharray: 12 15; stroke-linecap: butt; }
+  .graph .band { fill: var(--bg); }
+  .graph .fill0 { fill: var(--type-internship); }
+  .graph .fill1 { fill: var(--type-volunteer); }
+  .graph .halo { fill: var(--type-internship); opacity: 0.18; }
+  .graph .ring { fill: var(--bg); stroke: var(--line-strong); stroke-width: 5; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <p class="name">Kennedy <em>Muchina</em><br>Kinuthia</p>
+    <p class="role">Graduate Software Engineer</p>
+  </div>
+  <p class="domain">kmuchina.com</p>
+
+  <svg class="graph" viewBox="0 0 220 630" aria-hidden="true">
+    <defs>
+      <!-- The stub above the current role fades in; the volunteer lane fades out below. -->
+      <linearGradient id="fade-top" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="110">
+        <stop offset="0" stop-color="white" stop-opacity="0"/>
+        <stop offset="1" stop-color="white" stop-opacity="1"/>
+      </linearGradient>
+      <linearGradient id="fade-bottom" gradientUnits="userSpaceOnUse" x1="0" y1="540" x2="0" y2="630">
+        <stop offset="0" stop-color="white" stop-opacity="1"/>
+        <stop offset="1" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+      <mask id="m-top" maskUnits="userSpaceOnUse" x="0" y="0" width="220" height="630"><rect width="220" height="630" fill="url(#fade-top)"/></mask>
+      <mask id="m-bottom" maskUnits="userSpaceOnUse" x="0" y="0" width="220" height="630"><rect width="220" height="630" fill="url(#fade-bottom)"/></mask>
+    </defs>
+    <!-- As on the site: current role → (gap) → graduated → (gap) → KRB,
+         where the volunteer lane (Tech4Good) merges in. Lane 0 at x 50, lane 1 at x 150. -->
+    <line class="l0" x1="50" y1="0" x2="50" y2="120" mask="url(#m-top)"/>
+    <line class="l0 dash" x1="50" y1="150" x2="50" y2="252"/>
+    <line class="l0 dash" x1="50" y1="290" x2="50" y2="410"/>
+    <path class="l1" d="M50 350 C 50 400, 150 380, 150 430"/>
+    <line class="l1" x1="150" y1="430" x2="150" y2="630" mask="url(#m-bottom)"/>
+    <circle class="halo" cx="50" cy="120" r="38"/>
+    <circle class="band" cx="50" cy="120" r="27"/>
+    <circle class="fill0" cx="50" cy="120" r="20"/>
+    <circle class="ring" cx="50" cy="270" r="15"/>
+    <circle class="fill0" cx="50" cy="270" r="7"/>
+    <circle class="band" cx="50" cy="430" r="23"/>
+    <circle class="fill0" cx="50" cy="430" r="15"/>
+    <rect class="band" x="131" y="521" width="38" height="38" rx="5" transform="rotate(45 150 540)"/>
+    <rect class="fill1" x="137" y="527" width="26" height="26" rx="4" transform="rotate(45 150 540)"/>
+  </svg>
+</body>
+</html>
