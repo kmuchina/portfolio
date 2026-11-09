@@ -78,6 +78,7 @@ experience:
       end: "present"
       bullets:
         - "Owned **end-to-end delivery** of a new certification digital platform for the Audit & Certification Department, authoring the SRS, designing the UI/UX, and shipping a **functional MVP** under the supervision of the Head of IT & Data."
+        - "Data migration from a legacy audit platform to a new, improved modern version."
         - "Supporting **AV and PA systems** for events, conferences and meetings."
       skills: ["Product Ownership", "SDLC", "Product & UX", "AWS", "Project Management"]
 
@@ -89,10 +90,9 @@ experience:
       start: "2024-05"
       end: "2025-01"
       bullets:
-        - "Enhanced software reliability by testing internal programs against specifications, identifying and documenting bugs."
-        - "Administered and optimised LAN infrastructure (Cisco switches & routers), achieving **99% network uptime** across the organisation."
-        - "Maintained the corporate website, **Microsoft Business Central** portals, and custom **GIS applications**."
-        - "Worked with **PricewaterhouseCoopers (PwC)** under a contract with KRB to audit the KeNHA, KURA & KeRRA road agencies."
+        - "Maintained high availability local network infrastructure across Cisco switches and routers, maintaining 99% system uptime across corporate facilities."
+        - "Exectuted QA testing for internal enterprise applications and maintained enterprise management portals and custom GIS mapping platforms."
+        - "Collaborated with external auditors from PricewaterhouseCoopers (PwC) during high stakes technical compliance audits of national road agencies (KeNHA, KURA & KeRRA)."
       skills: ["Networking", "Technical Auditing", "Team Player", "Software testing"]
 
     - title: "Project Lead & Tech Lead"
@@ -103,8 +103,9 @@ experience:
       start: "2024-02"
       end: "2024-12"
       bullets:
-        - "Secured a **KES 472,785 (USD 3,665)** grant by authoring a winning technical proposal; managed end-to-end delivery of a **5 kW solar installation** for a non-profit organisation."
-        - "Led a multidisciplinary engineering team through design, procurement and deployment while training **20+ students** in solar systems and technical safety."
+        - "Authored a winning technical grant proposal securing **KES 472,785 (USD 3665)** in funding for community solar infrastructure."
+        - "Managed budget allocation, system design, procurement, and physical execution for a **5kW solar installation** for the non-profit partner."
+        - "Led and availed mentorship for a multidisciplinary team of 20+ engineering students through hardware deployment and technical safety protocols."
       skills: ["Grant Writing", "Team Leadership", "Project Management", "Accountable", "Community Leader"]
 
     - title: "Chairperson"
@@ -115,8 +116,8 @@ experience:
       start: "2023-07"
       end: "2024-07"
       bullets:
-        - "Coordinated and delivered **15+ technical workshops** and hackathons in Web, Mobile, IoT and Cloud for an audience of **300+ developers**."
-        - "Led the campus team to **regional victory in IEEEXtreme 17.0**, with the highest active team participation in IEEE Region 8 (Africa, Europe & Middle East)."
+        - "Directed chapter operations and organized **15+ technical workshops and hackathons** covering mobile application development, IoT, and cloud architecture for over 300 engineering students."
+        - "Spearheaded competitive programming initiatives that led the chapter to a **regional recognition in IEEExtreme 17.0**, achieving the highest number of participants across IEEE Region 8 (Africa, Europe, and Middle East)."
       skills: ["Community building", "Event leadership", "Team leadership", "Competitive programming"]
 
 skills:
@@ -181,7 +182,7 @@ projects:
       title: "Prayer & Gratitude Journal"
       kind: "Android app"
       stack: ["Kotlin","Android Studio", "Jetpack Compose", "Room", "Flow Architecture", "Android"]
-      summary: "A minimalist Android app featuring background routine processing, automated prompt scheduling, and local offline-first data persistence."
+      summary: "A native Android application built entirely with Kotlin and Jetpack Compose, designed around reactive architecture principles."
       metric: { value: "100+", label: "active users" }
       links:
         - { label: "See it on Google Play", url: "https://play.google.com/store/apps/developer?id=Merat" }   # TODO: the app's own Play Store URL
@@ -191,7 +192,7 @@ projects:
       title: "Apple Care"
       kind: "Machine learning mobile app"
       stack: ["Python", "TensorFlow Lite", "CNN"]
-      summary: "Trained and deployed a CNN model for on-device apple leaf disease classification, with inference optimised in TensorFlow Lite for real-time mobile performance."
+      summary: "An end-to-end computer vision Android application for real-time apple plant disease classification in low connectivity agricultural environments."
       links:
         - { label: "View Source Code", url: "https://github.com/kmuchina/apple-care" } 
       note: "Runs fully on-device"
