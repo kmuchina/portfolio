@@ -90,9 +90,9 @@ experience:
       start: "2024-05"
       end: "2025-01"
       bullets:
-        - "Maintained high availability local network infrastructure across Cisco switches and routers, maintaining 99% system uptime across corporate facilities."
-        - "Exectuted QA testing for internal enterprise applications and maintained enterprise management portals and custom GIS mapping platforms."
-        - "Collaborated with external auditors from PricewaterhouseCoopers (PwC) during high stakes technical compliance audits of national road agencies (KeNHA, KURA & KeRRA)."
+        - "Maintained high availability local network infrastructure across Cisco switches and routers, maintaining **99% system uptime** across corporate facilities."
+        - "Executed **QA testing** for internal enterprise applications and maintained enterprise management portals and custom GIS mapping platforms."
+        - "Collaborated with external auditors from PricewaterhouseCoopers (PwC) during high stakes **technical compliance audits** of national road agencies (KeNHA, KURA & KeRRA)."
       skills: ["Networking", "Technical Auditing", "Team Player", "Software testing"]
 
     - title: "Project Lead & Tech Lead"
@@ -105,7 +105,7 @@ experience:
       bullets:
         - "Authored a winning technical grant proposal securing **KES 472,785 (USD 3665)** in funding for community solar infrastructure."
         - "Managed budget allocation, system design, procurement, and physical execution for a **5kW solar installation** for the non-profit partner."
-        - "Led and availed mentorship for a multidisciplinary team of 20+ engineering students through hardware deployment and technical safety protocols."
+        - "Led and availed mentorship for a multidisciplinary team of **20+ engineering students** through hardware deployment and technical safety protocols."
       skills: ["Grant Writing", "Team Leadership", "Project Management", "Accountable", "Community Leader"]
 
     - title: "Chairperson"
