@@ -63,7 +63,7 @@ about:
 
 experience:
   eyebrow: "Experience"
-  heading: "Where I've worked"
+  heading: "Where I've Built & Delivered"
   action: { label: "View full résumé", url: "/Kennedy_Muchina_Resume.pdf" }
   # Rendered as the career graph (internal/career). Dates are YYYY-MM; end may be
   # "present". type: Internship | Volunteer | Contract | Freelance | Full-time |
@@ -79,7 +79,7 @@ experience:
       bullets:
         - "Owned **end-to-end delivery** of a new certification digital platform for the Audit & Certification Department, authoring the SRS, designing the UI/UX, and shipping a **functional MVP** under the supervision of the Head of IT & Data."
         - "Supporting **AV and PA systems** for events, conferences and meetings."
-      skills: ["SRS", "UI/UX design", "MVP delivery", "AV/PA systems"]
+      skills: ["Product Ownership", "SDLC", "Product & UX", "AWS", "Project Management"]
 
     - title: "ICT Officer"
       org: "Kenya Roads Board, Ministry of Roads & Transport"
@@ -93,7 +93,7 @@ experience:
         - "Administered and optimised LAN infrastructure (Cisco switches & routers), achieving **99% network uptime** across the organisation."
         - "Maintained the corporate website, **Microsoft Business Central** portals, and custom **GIS applications**."
         - "Worked with **PricewaterhouseCoopers (PwC)** under a contract with KRB to audit the KeNHA, KURA & KeRRA road agencies."
-      skills: ["Cisco networking", "Business Central", "GIS", "Software testing"]
+      skills: ["Networking", "Technical Auditing", "Team Player", "Software testing"]
 
     - title: "Project Lead & Tech Lead"
       org: "IEEE Tech4Good"
@@ -105,7 +105,7 @@ experience:
       bullets:
         - "Secured a **KES 472,785 (USD 3,665)** grant by authoring a winning technical proposal; managed end-to-end delivery of a **5 kW solar installation** for a non-profit organisation."
         - "Led a multidisciplinary engineering team through design, procurement and deployment while training **20+ students** in solar systems and technical safety."
-      skills: ["Grant writing", "Solar PV", "Team leadership"]
+      skills: ["Grant Writing", "Team Leadership", "Project Management", "Accountable", "Community Leader"]
 
     - title: "Chairperson"
       org: "IEEE Moi University Student Branch"
@@ -180,7 +180,7 @@ projects:
     - slug: "prayer-gratitude-journal"
       title: "Prayer & Gratitude Journal"
       kind: "Android app"
-      stack: ["Kotlin", "Jetpack Compose", "Room"]
+      stack: ["Kotlin","Android Studio", "Jetpack Compose", "Room", "Flow Architecture", "Android"]
       summary: "A minimalist Android app featuring background routine processing, automated prompt scheduling, and local offline-first data persistence."
       metric: { value: "100+", label: "active users" }
       links:
