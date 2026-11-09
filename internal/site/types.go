@@ -237,6 +237,7 @@ type Project struct {
 	Kind        string   `yaml:"kind"`
 	Stack       []string `yaml:"stack"`
 	Summary     string   `yaml:"summary"`
+	Points      []string `yaml:"points"` // optional, 3–4 talking points; **bold** allowed
 	Metric      *Metric  `yaml:"metric"` // optional: "100+" "active users"
 	Note        string   `yaml:"note"`   // optional mono line when there's no metric/link
 	Links       []Link   `yaml:"links"`

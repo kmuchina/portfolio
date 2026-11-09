@@ -24,6 +24,13 @@
             <p class="project__kind">{{.Kind}}</p>
             <h3 class="project__title">{{.Title}}</h3>
             <p class="project__summary">{{.Summary}}</p>
+            {{- with .Points}}
+            <ul class="list project__points">
+              {{- range .}}
+              <li>{{bold .}}</li>
+              {{- end}}
+            </ul>
+            {{- end}}
             <ul class="tag-list" aria-label="{{$ui.StackLabel}}">
               {{- range .Stack}}<li class="tag">{{.}}</li>{{end -}}
             </ul>

@@ -937,6 +937,17 @@ html:has(dialog[open]) { overflow: hidden; }
   line-height: 1.6;
   color: var(--muted);
 }
+/* Talking points: .list dots, quieter than the summary's lead role. */
+.project__points {
+  max-inline-size: 52ch;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.project__points strong {
+  font-weight: 600;
+  color: var(--ink);
+}
 .project__foot {
   display: flex;
   flex-wrap: wrap;

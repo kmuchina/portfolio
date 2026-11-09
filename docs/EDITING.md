@@ -73,6 +73,10 @@ Projects live under `projects: items:`.
       kind: "Android app"
       stack: ["Kotlin", "Jetpack Compose", "Room"]
       summary: "One or two sentences on what it does and what was hard."
+      points:                                             # optional: 3 or 4 talking points; **bold** allowed
+        - "**Architecture:** how it's put together."
+        - "**Feature:** what's unusual about it."
+        - "**Trade-off:** what you gave up, and why."
       metric: { value: "500+", label: "downloads" }       # optional
       links:                                              # optional; the first link makes the whole card clickable
         - { label: "See it on Google Play", url: "https://play.google.com/store/apps/details?id=…" }

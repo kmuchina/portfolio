@@ -761,7 +761,8 @@ every icon name.
   `{label, value, detail}`; `skills.lead`, `skills.groups[].note`,
   `skills.groups[].items[]` `{name, icon}`; projects `metric: {value,
   label}`, `note`, `screenshot`, `placeholder` (`journal | scanner |
-  none`), no more `image` / `image_alt`; education `date` (`YYYY-MM`) or
+  none`), optional `points[]` (3 or 4 talking points, `**bold**`
+  lead-ins such as "Architecture:"; added 2026-11-09), no more `image` / `image_alt`; education `date` (`YYYY-MM`) or
   `start` / `end` (`YYYY`), `icon`, `honours`, `honours_detail`, `award:
   {title, detail}`, `grades[]` `{label, value}` (no more `highlights`);
   `languages[].level` from LinkedIn's scale; `contact.timezone: {iana,
@@ -1056,7 +1057,7 @@ language meter mapping (all five levels, an unknown level fails), the
 derived "Currently" fact (and its absence without a current role), the job
 ids and their uniqueness, `Slug`, the degree/school split, the screenshot
 warning, a table of Phase 5 rules (missing/empty skill icon, duplicate
-skill, bad placeholder, bad time zone, non-https source URL, education
+skill, bad placeholder, project points (3 or 4, none empty), bad time zone, non-https source URL, education
 dates and years, an item with neither honours nor grades, a half metric),
 checks that an unknown field or the retired email fails,
 that problems are collected, that a bad section `action` fails (missing file,
@@ -1193,7 +1194,7 @@ when a class is genuinely missing, and update this list when you do.
 | `.skill-list` / `.skill` | `--plain`, `__count`; `button.skill[aria-expanded]` | skills.html |
 | `.used` | `__label`, `__list`, `__link`, `__kind` | skills.html (evidence panel) |
 | `.projects` | `__grid` | projects.html |
-| `.project` | `--staged`, `__text`, `__kind`, `__title`, `__summary`, `__foot`, `__metric`, `__link`, `__note`, `__stage`; `::before` = the arrival ring | projects.html |
+| `.project` | `--staged`, `__text`, `__kind`, `__title`, `__summary`, `__points` (a `.list`), `__foot`, `__metric`, `__link`, `__note`, `__stage`; `::before` = the arrival ring | projects.html |
 | `.phone` | `__screen`, `__notch`, `__image` | project stage |
 | `.ui` (placeholder screen) | `__bar`, `__title`, `__dot`, `__chips`, `__chip` (`--on`), `__card`, `__line` (`--accent`; width `--w`), `__fab`, `__finder`, `__scan`, `__sheet`, `__pill` | project stage |
 | `.edu` | | education.html (the grid) |
@@ -1249,7 +1250,7 @@ content from `site.yaml`, on `/styleguide.html` (Components section).
 | `.lead` | `--fs-lg`, `--muted` | — | A section's opening paragraph. |
 | `.meta` | mono `--fs-meta`, tabular nums, `--muted` | — | Dates, kinds, small metadata. |
 | `.quote` | Fraunces italic `--fs-xl`, `--lh-snug`, `--ink`, curly quotes in `--accent` | — | The hero pull-quote only. |
-| `.list` | bullets as a 5px `--accent` dot on the first line's x-height; `--space-2` apart; 65ch | — | Bulleted lists (styleguide; none on the page today). |
+| `.list` | bullets as a 5px `--accent` dot on the first line's x-height; `--space-2` apart; 65ch | — | Bulleted lists: the project talking points (`.project__points`). |
 | `.divider` | `<hr>`, 1px `--line`, no margin | — | Separating items (parent controls spacing). |
 | `.theme-toggle` | 40px segmented pill (3px padding) of three 32px round options; checked = `--surface` + `--ink` + 1px `--line-strong` ring; each option's `::before` makes a 36 × 40px hit area | — | Header (≥ 1024px) and mobile menu; kept in sync. Hidden without JS. |
 | `.display-name` | the hero `<h1>` (§3) | `<em>` = `--accent-text` italic | Hero only. |
@@ -1448,7 +1449,9 @@ Reference: `design/sections-prototype.html`. Markup in the partials, CSS in
 - **Projects.** Two columns from 900px. A card is `.project.card.lift`
   (+ `.card--interactive` with a link; its first link is the `.card__link`
   stretched over the whole card, phone included). Text: kind (Fraunces
-  italic, `--accent-text`), title, summary, tags, a foot (metric: big
+  italic, `--accent-text`), title, summary, the optional talking points
+  (`ul.list.project__points`, `--fs-sm` `--muted`, bold lead-ins in
+  `--ink` 600), tags, a foot (metric: big
   Fraunces value + label; links; or the mono `note`). Then the **stage**
   with the phone. **Screenshot rule:** if `projects.items[].screenshot`
   exists under `static/`, it renders as `img.phone__image` (`imgSize`,

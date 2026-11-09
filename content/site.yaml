@@ -183,6 +183,10 @@ projects:
       kind: "Android app"
       stack: ["Kotlin","Android Studio", "Jetpack Compose", "Room", "Flow Architecture", "Android"]
       summary: "A native Android application built entirely with Kotlin and Jetpack Compose, designed around reactive architecture principles."
+      points:   # 3–4; **bold** lead-ins. DRAFT: check each claim against the app's code.
+        - "**Architecture:** Implemented offline-first local persistence with Room DB and dynamic state management via Flow/Coroutines."
+        - "Architected background prompt scheduling using WorkManager to guarantee reliable execution without compromising battery performance."
+        - "**Philosophy:** state flows one way, from database to screen. The UI never holds a private copy that can drift out of date."
       metric: { value: "100+", label: "active users" }
       links:
         - { label: "See it on Google Play", url: "https://play.google.com/store/apps/developer?id=Merat" }   # TODO: the app's own Play Store URL
@@ -193,6 +197,9 @@ projects:
       kind: "Machine learning mobile app"
       stack: ["Python", "TensorFlow Lite", "CNN"]
       summary: "An end-to-end computer vision Android application for real-time apple plant disease classification in low connectivity agricultural environments."
+      points:   # 3–4; **bold** lead-ins. From the apple-care source (CameraViewModel, AppleDiseaseClassifier).
+        - "Trained a Convolutional Neural Network (CNN) in Python and optimized the model via TensorFlow Lite for lightweight, on-device mobile execution."
+        - "Achieved zero-latency, offline inference directly on mid-range Android hardware by removing remote server dependencies."
       links:
         - { label: "View Source Code", url: "https://github.com/kmuchina/apple-care" } 
       note: "Runs fully on-device"

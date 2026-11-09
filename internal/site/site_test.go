@@ -138,6 +138,8 @@ func TestSectionRules(t *testing.T) {
 		{"education date", func(s *Site) { s.Education.Items[0].Date = "Dec 2025" }, "must be YYYY-MM"},
 		{"education years", func(s *Site) { s.Education.Items[1].End = "19" }, "must both be YYYY"},
 		{"education neither", func(s *Site) { s.Education.Items[1].Grades = nil }, "needs honours"},
+		{"too few points", func(s *Site) { s.Projects.Items[0].Points = []string{"a", "b"} }, "want 3 or 4 points, got 2"},
+		{"empty point", func(s *Site) { s.Projects.Items[0].Points = []string{"a", " ", "c"} }, "points[1] is empty"},
 		{"metric half", func(s *Site) { s.Projects.Items[0].Metric.Label = "" }, "metric: value and label"},
 		{"seo locale", func(s *Site) { s.SEO.Locale = "en-KE" }, "seo.locale"},
 		{"seo country", func(s *Site) { s.SEO.Address.Country = "Kenya" }, "two-letter country code"},

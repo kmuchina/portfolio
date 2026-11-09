@@ -346,6 +346,14 @@ func Validate(s *Site, staticDir, iconDir string) (warnings []string, err error)
 			checkURL(lf+".url", l.URL)
 			checkIcon(lf, l.Icon)
 		}
+		if n := len(p.Points); n > 0 && (n < 3 || n > 4) {
+			add("%s.points: want 3 or 4 points, got %d", f, n)
+		}
+		for j, pt := range p.Points {
+			if strings.TrimSpace(pt) == "" {
+				add("%s.points[%d] is empty", f, j)
+			}
+		}
 		if m := p.Metric; m != nil && (strings.TrimSpace(m.Value) == "" || strings.TrimSpace(m.Label) == "") {
 			add("%s.metric: value and label are required", f)
 		}

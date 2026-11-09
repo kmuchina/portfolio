@@ -275,6 +275,12 @@ func phase5(t *testing.T, html string) {
 		!strings.Contains(projects, `class="project__link card__link"`) {
 		t.Error("projects: the linked card should be interactive with a stretched link")
 	}
+	if n := strings.Count(projects, `<ul class="list project__points">`); n != 2 {
+		t.Errorf("projects: want 2 point lists, got %d", n)
+	}
+	if !strings.Contains(projects, `<li><strong>Architecture:</strong>`) {
+		t.Error("projects: points should render **bold** lead-ins")
+	}
 	if !strings.Contains(projects, `<strong>100&#43;</strong> active users`) {
 		t.Error("projects: metric missing")
 	}
