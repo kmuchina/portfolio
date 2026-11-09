@@ -192,6 +192,8 @@ projects:
       kind: "Machine learning mobile app"
       stack: ["Python", "TensorFlow Lite", "CNN"]
       summary: "Trained and deployed a CNN model for on-device apple leaf disease classification, with inference optimised in TensorFlow Lite for real-time mobile performance."
+      links:
+        - { label: "View Source Code", url: "https://github.com/kmuchina/apple-care" } 
       note: "Runs fully on-device"
       screenshot: "img/projects/apple-care.png"
       placeholder: "scanner"
