@@ -198,8 +198,9 @@ projects:
       stack: ["Python", "TensorFlow Lite", "CNN"]
       summary: "An end-to-end computer vision Android application for real-time apple plant disease classification in low connectivity agricultural environments."
       points:   # 3–4; **bold** lead-ins. From the apple-care source (CameraViewModel, AppleDiseaseClassifier).
-        - "Trained a Convolutional Neural Network (CNN) in Python and optimized the model via TensorFlow Lite for lightweight, on-device mobile execution."
+        - "**Architecture:** Trained a Convolutional Neural Network (CNN) in Python and optimized the model via TensorFlow Lite for lightweight, on-device mobile execution."
         - "Achieved zero-latency, offline inference directly on mid-range Android hardware by removing remote server dependencies."
+        - "**Purpose:** Built end to end for real-time apple plant disease classification in low connectivity agricultural environments."
       links:
         - { label: "View Source Code", url: "https://github.com/kmuchina/apple-care" } 
       note: "Runs fully on-device"
