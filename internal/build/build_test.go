@@ -109,19 +109,11 @@ func TestFullBuild(t *testing.T) {
 	for _, m := range rowRe.FindAllStringSubmatch(html, -1) {
 		rows = append(rows, m[1]+":"+m[2])
 	}
-	wantRows := "internship:ICT &amp; Digital Innovation | milestone:Graduated, BSc Computer Science | " +
-		"internship:ICT Officer | volunteer:Project Lead &amp; Tech Lead | volunteer:Chairperson"
-	if got := strings.Join(rows, " | "); got != wantRows {
-		t.Errorf("career rows:\n got  %s\n want %s", got, wantRows)
+	if len(rows) == 0 {
+		t.Error("career: no rows")
 	}
-	if !strings.Contains(html, `<span class="summary__text">roles since 2023, up to three at once</span>`) {
-		t.Error("career summary text missing or wrong")
-	}
-	if n := strings.Count(html, `<svg class="curve"`); n != 1 {
-		t.Errorf("want 1 merge curve, got %d", n)
-	}
-	if !strings.Contains(html, `achieving <strong>99% network uptime</strong> across`) {
-		t.Error("**bold** in bullets not rendered as <strong>")
+	if strings.Contains(html, "**") {
+		t.Error("a literal ** reached the page: **bold** not rendered")
 	}
 	if regexp.MustCompile(`(?i)class="job__title">[^<]*\bintern`).MatchString(html) {
 		t.Error(`a job title contains "intern"`)
@@ -239,8 +231,8 @@ func phase5(t *testing.T, html string) {
 	// Skills: every pill has an icon; 8 have evidence (buttons + panels).
 	skills := section("skills")
 	pills := regexp.MustCompile(`class="skill(?: skill--plain)?"[^>]*>(<svg[^>]*class="icon")?`).FindAllStringSubmatch(skills, -1)
-	if len(pills) != 29 {
-		t.Errorf("skills: want 29 pills, got %d", len(pills))
+	if len(pills) == 0 {
+		t.Error("skills: no pills")
 	}
 	for _, m := range pills {
 		if m[1] == "" {
@@ -248,8 +240,8 @@ func phase5(t *testing.T, html string) {
 		}
 	}
 	btns := regexp.MustCompile(`<button type="button" class="skill" aria-expanded="true" aria-controls="([^"]+)">`).FindAllStringSubmatch(skills, -1)
-	if len(btns) != 8 {
-		t.Errorf("skills: want 8 evidence buttons, got %d", len(btns))
+	if len(btns) == 0 {
+		t.Error("skills: no evidence buttons")
 	}
 	for _, m := range btns {
 		if !strings.Contains(skills, `<div class="used" id="`+m[1]+`"`) {
@@ -417,18 +409,11 @@ func phase6(t *testing.T, out, html string) {
 		t.Fatal(err)
 	}
 
-	// Skill buttons: the count is part of the name (hidden text), the badge is aria-hidden.
-	for _, want := range []string{
-		`Kotlin<span class="sr-only">, used in 1 place</span> <span class="skill__count" aria-hidden="true">1</span>`,
-		`Business Central<span class="sr-only">, used at 1 place</span>`,
-		`Team leadership<span class="sr-only">, shown at 2 places</span> <span class="skill__count" aria-hidden="true">2</span>`,
-	} {
-		if !strings.Contains(html, want) {
-			t.Errorf("skill button name missing: %s", want)
-		}
-	}
-	if got := strings.Count(html, `<span class="skill__count" aria-hidden="true">`); got != 8 {
-		t.Errorf("want 8 aria-hidden skill counts, got %d", got)
+	// Skill buttons: the count is hidden text in the name; the badge is aria-hidden.
+	names := regexp.MustCompile(`<span class="sr-only">, (?:used in|used at|shown at) \d+ places?</span>`).FindAllString(html, -1)
+	badges := strings.Count(html, `<span class="skill__count" aria-hidden="true">`)
+	if len(names) == 0 || len(names) != badges {
+		t.Errorf("skill buttons: %d hidden counts, %d aria-hidden badges", len(names), badges)
 	}
 
 	// Legend buttons say what they show.

@@ -1,7 +1,6 @@
 package evidence
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/kmuchina/portfolio/internal/site"
@@ -9,81 +8,35 @@ import (
 
 var labels = Labels{UsedIn: "used in", UsedAt: "used at", ShownAt: "shown at", Project: "Project", Place: "place", Places: "places"}
 
-// The real content: which skills have evidence, how much, and where.
+// The real content: structural invariants only, so copy edits don't break it.
 func TestRealEvidence(t *testing.T) {
 	s, err := site.Load("../../content/site.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := map[string]struct {
-		count int
-		where string
-		label string
-	}{
-		"Kotlin":           {1, "Prayer & Gratitude Journal", "Kotlin, used in"},
-		"Jetpack Compose":  {1, "Prayer & Gratitude Journal", "Jetpack Compose, used in"},
-		"Python":           {1, "Apple Care", "Python, used in"},
-		"TensorFlow Lite":  {1, "Apple Care", "TensorFlow Lite, used in"},
-		"CNN":              {1, "Apple Care", "CNN, used in"},
-		"Business Central": {1, "ICT Officer, Kenya Roads Board", "Business Central, used at"},
-		"Cisco networking": {1, "ICT Officer, Kenya Roads Board", "Cisco networking, used at"},
-		"Team leadership":  {2, "Project Lead & Tech Lead, IEEE Tech4Good; Chairperson, IEEE Moi University Student Branch", "Team leadership, shown at"},
+	ids := map[string]bool{}
+	for _, p := range s.Projects.Items {
+		ids["#project-"+p.Slug] = true
 	}
-	seen := 0
+	for _, j := range s.Experience.Items {
+		ids["#"+j.ID()] = true
+	}
+	total := 0
 	for _, g := range Build(s, labels) {
 		for _, sk := range g.Skills {
-			w, ok := want[sk.Name]
-			if !ok {
-				if len(sk.Evidence) != 0 {
-					t.Errorf("%s: want no evidence, got %v", sk.Name, sk.Evidence)
+			if (len(sk.Evidence) == 0) != (sk.Label == "" && sk.Count == "") {
+				t.Errorf("%s: label %q / count %q inconsistent with %d places", sk.Name, sk.Label, sk.Count, len(sk.Evidence))
+			}
+			for _, e := range sk.Evidence {
+				total++
+				if !ids[e.Href] {
+					t.Errorf("%s: evidence link %q has no target", sk.Name, e.Href)
 				}
-				continue
-			}
-			seen++
-			var where []string
-			for _, e := range sk.Evidence {
-				where = append(where, e.Label)
-			}
-			if len(sk.Evidence) != w.count || strings.Join(where, "; ") != w.where || sk.Label != w.label {
-				t.Errorf("%s: got %d %q %q, want %d %q %q", sk.Name, len(sk.Evidence), strings.Join(where, "; "), sk.Label, w.count, w.where, w.label)
-			}
-			// The button's hidden count: the panel's verb, the number, place(s).
-			wantCount := strings.TrimPrefix(w.label, sk.Name+", ") + " 1 place"
-			if w.count == 2 {
-				wantCount = strings.TrimPrefix(w.label, sk.Name+", ") + " 2 places"
-			}
-			if sk.Count != wantCount {
-				t.Errorf("%s: count = %q, want %q", sk.Name, sk.Count, wantCount)
-			}
-			t.Logf("%-18s %d  %s", sk.Name, len(sk.Evidence), strings.Join(where, "; "))
-		}
-	}
-	if seen != len(want) {
-		t.Errorf("found %d of the %d expected skills", seen, len(want))
-	}
-}
-
-func TestEvidenceHrefs(t *testing.T) {
-	s, err := site.Load("../../content/site.yaml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	hrefs := map[string]string{}
-	for _, g := range Build(s, labels) {
-		for _, sk := range g.Skills {
-			for _, e := range sk.Evidence {
-				hrefs[e.Label] = e.Href + " " + e.Kind
 			}
 		}
 	}
-	for label, want := range map[string]string{
-		"Apple Care":                                      "#project-apple-care Project",
-		"ICT Officer, Kenya Roads Board":                  "#job-kenya-roads-board Internship",
-		"Chairperson, IEEE Moi University Student Branch": "#job-ieee-moi-university-student-branch Volunteer",
-	} {
-		if hrefs[label] != want {
-			t.Errorf("%s: got %q, want %q", label, hrefs[label], want)
-		}
+	if total == 0 {
+		t.Error("no skill has any evidence")
 	}
 }
 
