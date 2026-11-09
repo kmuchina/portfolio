@@ -203,7 +203,7 @@ projects:
         - "**Purpose:** Built end to end for real-time apple plant disease classification in low connectivity agricultural environments."
       links:
         - { label: "View Source Code", url: "https://github.com/kmuchina/apple-care" } 
-      note: "Runs fully on-device"
+      note: "On device ML"
       screenshot: "img/projects/apple-care.png"
       placeholder: "scanner"
 
